@@ -1,0 +1,16 @@
+# .NET
+Shopfront.API/bin/
+Shopfront.API/obj/
+Shopfront.API/publish/
+Shopfront.API/wwwroot/uploads/
+
+# Angular
+shopfront-client/node_modules/
+shopfront-client/dist/
+
+# Secrets / environment
+appsettings.Development.json
+
+# OS
+.DS_Store
+Thumbs.db
