@@ -46,7 +46,7 @@ public class RidersController : ControllerBase
     }
 
     [HttpDelete("{id}")]
-    public async Task<IActionResult> Delete(int id)
+    public async Task<IActionResult> Delete(Guid id)
     {
         var rider = await _db.Riders.FindAsync(id);
         if (rider is null) return NotFound();

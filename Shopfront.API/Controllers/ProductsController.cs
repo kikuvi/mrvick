@@ -31,7 +31,7 @@ public class ProductsController : ControllerBase
     }
 
     [HttpGet("{id}")]
-    public async Task<IActionResult> GetById(int id)
+    public async Task<IActionResult> GetById(Guid id)
     {
         var product = await _db.Products
             .Include(p => p.Images)
@@ -70,7 +70,7 @@ public class ProductsController : ControllerBase
 
     [Authorize]
     [HttpPut("{id}")]
-    public async Task<IActionResult> Update(int id, UpdateProductDto dto)
+    public async Task<IActionResult> Update(Guid id, UpdateProductDto dto)
     {
         var product = await _db.Products
             .Include(p => p.Images)
@@ -96,7 +96,7 @@ public class ProductsController : ControllerBase
 
     [Authorize]
     [HttpDelete("{id}")]
-    public async Task<IActionResult> Delete(int id)
+    public async Task<IActionResult> Delete(Guid id)
     {
         var product = await _db.Products.FindAsync(id);
         if (product is null) return NotFound();

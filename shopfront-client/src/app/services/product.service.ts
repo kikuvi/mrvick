@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { ApiService } from './api.service';
 
 export interface Product {
-  id: number;
+  id: string;
   title: string;
   description: string;
   price: number;
@@ -24,8 +24,8 @@ export class ProductService {
   constructor(private api: ApiService) {}
 
   getAll() { return this.api.get<Product[]>('/products'); }
-  getById(id: number) { return this.api.get<Product>(`/products/${id}`); }
+  getById(id: string) { return this.api.get<Product>(`/products/${id}`); }
   create(data: CreateProduct) { return this.api.post<Product>('/products', data, true); }
-  update(id: number, data: Partial<CreateProduct>) { return this.api.put<void>(`/products/${id}`, data); }
-  delete(id: number) { return this.api.delete<void>(`/products/${id}`); }
+  update(id: string, data: Partial<CreateProduct>) { return this.api.put<void>(`/products/${id}`, data); }
+  delete(id: string) { return this.api.delete<void>(`/products/${id}`); }
 }

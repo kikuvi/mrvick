@@ -420,7 +420,7 @@ export class AdminProductsComponent implements OnInit {
     }
   }
 
-  delete(id: number) {
+  delete(id: string) {
     if (confirm('Delete this product?')) {
       this.productService.delete(id).subscribe(() => this.load());
     }
