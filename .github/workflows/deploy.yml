@@ -58,42 +58,36 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Copy docker-compose to server
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USER }}
-          key: ${{ secrets.SERVER_SSH_KEY }}
-          source: docker-compose.yml
-          target: /opt/shopfront
+      - name: Set up SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SERVER_SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H "${{ secrets.SERVER_HOST }}" >> ~/.ssh/known_hosts
 
-      - name: Deploy on server
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USER }}
-          key: ${{ secrets.SERVER_SSH_KEY }}
-          script: |
-            cd /opt/shopfront
+      - name: Write .env and copy files to server
+        run: |
+          # Build .env locally — GitHub Actions expands secrets safely here
+          cat > .env << 'ENVEOF'
+          DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+          JWT_KEY=${{ secrets.JWT_KEY }}
+          GMAIL_FROM=${{ secrets.GMAIL_FROM }}
+          GMAIL_APP_PASSWORD=${{ secrets.GMAIL_APP_PASSWORD }}
+          AT_USERNAME=${{ secrets.AT_USERNAME }}
+          AT_API_KEY=${{ secrets.AT_API_KEY }}
+          APP_BASE_URL=${{ secrets.APP_BASE_URL }}
+          ADMIN_PHONE=${{ secrets.ADMIN_PHONE }}
+          ENVEOF
 
-            # Write .env file from secrets
-            cat > .env <<EOF
-            DB_PASSWORD=${{ secrets.DB_PASSWORD }}
-            JWT_KEY=${{ secrets.JWT_KEY }}
-            GMAIL_FROM=${{ secrets.GMAIL_FROM }}
-            GMAIL_APP_PASSWORD=${{ secrets.GMAIL_APP_PASSWORD }}
-            AT_USERNAME=${{ secrets.AT_USERNAME }}
-            AT_API_KEY=${{ secrets.AT_API_KEY }}
-            APP_BASE_URL=${{ secrets.APP_BASE_URL }}
-            ADMIN_PHONE=${{ secrets.ADMIN_PHONE }}
-            EOF
+          ssh -i ~/.ssh/deploy_key ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} "mkdir -p /opt/shopfront"
+          scp -i ~/.ssh/deploy_key docker-compose.yml .env \
+            ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:/opt/shopfront/
 
-            # Log in to GHCR
-            echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-
-            # Pull latest images and restart
-            docker compose pull
-            docker compose up -d --remove-orphans
-
-            # Clean up old images
-            docker image prune -f
+      - name: Deploy
+        run: |
+          ssh -i ~/.ssh/deploy_key ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} \
+            "cd /opt/shopfront \
+             && echo '${{ secrets.GITHUB_TOKEN }}' | docker login ghcr.io -u '${{ github.actor }}' --password-stdin \
+             && docker compose pull \
+             && docker compose up -d --remove-orphans \
+             && docker image prune -f"
