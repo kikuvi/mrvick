@@ -46,7 +46,8 @@
       "WebFetch(domain:www.npmjs.com)",
       "WebFetch(domain:primeng.org)",
       "Bash(npm start:*)",
-      "Bash(tasklist:*)"
+      "Bash(tasklist:*)",
+      "Bash(python:*)"
     ]
   }
 }

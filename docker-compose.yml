@@ -1,0 +1,51 @@
+services:
+
+  db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: "${DB_PASSWORD}"
+      MSSQL_PID: "Express"
+    volumes:
+      - sqldata:/var/opt/mssql
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P \"$$MSSQL_SA_PASSWORD\" -Q 'SELECT 1' -C -b -o /dev/null"]
+      interval: 15s
+      timeout: 10s
+      retries: 10
+      start_period: 30s
+    restart: unless-stopped
+
+  api:
+    image: ghcr.io/kikuvi/shop-api:latest
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      ASPNETCORE_ENVIRONMENT: "Production"
+      ConnectionStrings__DefaultConnection: "Server=db;Database=ShopfrontDb;User Id=sa;Password=${DB_PASSWORD};TrustServerCertificate=True;MultipleActiveResultSets=True"
+      Jwt__Key: "${JWT_KEY}"
+      Jwt__Issuer: "shopfront.co.ke"
+      Jwt__Audience: "shopfront.co.ke"
+      Gmail__FromEmail: "${GMAIL_FROM}"
+      Gmail__FromName: "Shopfront"
+      Gmail__AppPassword: "${GMAIL_APP_PASSWORD}"
+      AfricasTalking__Username: "${AT_USERNAME}"
+      AfricasTalking__ApiKey: "${AT_API_KEY}"
+      App__BaseUrl: "${APP_BASE_URL}"
+      App__AdminPhone: "${ADMIN_PHONE}"
+    volumes:
+      - uploads:/app/wwwroot/uploads
+    restart: unless-stopped
+
+  frontend:
+    image: ghcr.io/kikuvi/shop-frontend:latest
+    ports:
+      - "80:80"
+    depends_on:
+      - api
+    restart: unless-stopped
+
+volumes:
+  sqldata:
+  uploads:
