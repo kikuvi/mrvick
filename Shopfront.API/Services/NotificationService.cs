@@ -19,10 +19,16 @@ public class NotificationService : INotificationService
 
     public async Task SendSmsAsync(string phone, string message)
     {
+        var apiKey = _config["AfricasTalking:ApiKey"];
+        if (string.IsNullOrWhiteSpace(apiKey) || apiKey.StartsWith("REPLACE"))
+        {
+            _logger.LogInformation("SMS skipped (Africa's Talking not configured). To: {Phone} | {Message}", phone, message);
+            return;
+        }
+
         try
         {
             var username = _config["AfricasTalking:Username"];
-            var apiKey = _config["AfricasTalking:ApiKey"];
 
             var request = new HttpRequestMessage(HttpMethod.Post, "https://api.africastalking.com/version1/messaging");
             request.Headers.Add("apiKey", apiKey);
