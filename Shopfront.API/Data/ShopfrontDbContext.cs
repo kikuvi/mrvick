@@ -28,6 +28,7 @@ public class ShopfrontDbContext : IdentityDbContext
         builder.Entity<Order>(e =>
         {
             e.Property(o => o.PriceAtOrder).HasColumnType("decimal(18,2)");
+            e.Property(o => o.BuyingPrice).HasColumnType("decimal(18,2)");
             e.Property(o => o.AdvertisingCost).HasColumnType("decimal(18,2)");
             e.Property(o => o.DeliveryFee).HasColumnType("decimal(18,2)");
             e.Property(o => o.Status).HasConversion<string>();
@@ -46,18 +47,19 @@ public class ShopfrontDbContext : IdentityDbContext
 
         // Seed static pages (content is updated by AdminSeeder on startup)
         builder.Entity<Page>().HasData(
-            new Page { Id = 1, Slug = "home", Title = "Welcome to Shopfront", Content = "<p>Your one-stop shop.</p>", MetaDesc = "Shopfront - Quality products delivered to your door.", UpdatedAt = new DateTime(2026, 1, 1) },
-            new Page { Id = 2, Slug = "about", Title = "About Us", Content = "<p>We are Shopfront, bringing quality products to your doorstep.</p>", MetaDesc = "Learn more about Shopfront.", UpdatedAt = new DateTime(2026, 1, 1) },
-            new Page { Id = 3, Slug = "contact", Title = "Contact Us", Content = "", MetaDesc = "Get in touch with Shopfront.", UpdatedAt = new DateTime(2026, 1, 1) }
+            new Page { Id = new Guid("a0000000-0000-0000-0000-000000000001"), Slug = "home", Title = "Welcome to Shopfront", Content = "<p>Your one-stop shop.</p>", MetaDesc = "Shopfront - Quality products delivered to your door.", UpdatedAt = new DateTime(2026, 1, 1) },
+            new Page { Id = new Guid("a0000000-0000-0000-0000-000000000002"), Slug = "about", Title = "About Us", Content = "<p>We are Shopfront, bringing quality products to your doorstep.</p>", MetaDesc = "Learn more about Shopfront.", UpdatedAt = new DateTime(2026, 1, 1) },
+            new Page { Id = new Guid("a0000000-0000-0000-0000-000000000003"), Slug = "contact", Title = "Contact Us", Content = "", MetaDesc = "Get in touch with Shopfront.", UpdatedAt = new DateTime(2026, 1, 1) },
+            new Page { Id = new Guid("a0000000-0000-0000-0000-000000000004"), Slug = "thank-you", Title = "Thank You for Your Order!", Content = "<p>We've received your order and will be in touch shortly. Delivery is on its way!</p>", MetaDesc = "Order placed successfully.", UpdatedAt = new DateTime(2026, 1, 1) }
         );
 
         // Seed default site settings
         builder.Entity<SiteSetting>().HasData(
-            new SiteSetting { Id = 1, Key = "site_name", Value = "Shopfront", UpdatedAt = new DateTime(2026, 1, 1) },
-            new SiteSetting { Id = 2, Key = "site_email", Value = "info@shopfront.co.ke", UpdatedAt = new DateTime(2026, 1, 1) },
-            new SiteSetting { Id = 3, Key = "site_phone", Value = "+254700000000", UpdatedAt = new DateTime(2026, 1, 1) },
-            new SiteSetting { Id = 4, Key = "site_address", Value = "Nairobi, Kenya", UpdatedAt = new DateTime(2026, 1, 1) },
-            new SiteSetting { Id = 5, Key = "logo_url", Value = "/assets/logo.png", UpdatedAt = new DateTime(2026, 1, 1) }
+            new SiteSetting { Id = new Guid("b0000000-0000-0000-0000-000000000001"), Key = "site_name", Value = "Shopfront", UpdatedAt = new DateTime(2026, 1, 1) },
+            new SiteSetting { Id = new Guid("b0000000-0000-0000-0000-000000000002"), Key = "site_email", Value = "info@shopfront.co.ke", UpdatedAt = new DateTime(2026, 1, 1) },
+            new SiteSetting { Id = new Guid("b0000000-0000-0000-0000-000000000003"), Key = "site_phone", Value = "+254700000000", UpdatedAt = new DateTime(2026, 1, 1) },
+            new SiteSetting { Id = new Guid("b0000000-0000-0000-0000-000000000004"), Key = "site_address", Value = "Nairobi, Kenya", UpdatedAt = new DateTime(2026, 1, 1) },
+            new SiteSetting { Id = new Guid("b0000000-0000-0000-0000-000000000005"), Key = "logo_url", Value = "/assets/logo.png", UpdatedAt = new DateTime(2026, 1, 1) }
         );
     }
 }

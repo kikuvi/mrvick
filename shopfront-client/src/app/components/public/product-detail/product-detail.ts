@@ -87,7 +87,7 @@ const KENYA_COUNTIES = [
 
       <!-- Order form -->
       <div class="lp-container lp-order-wrap">
-        <div class="lp-order" *ngIf="!orderPlaced">
+        <div class="lp-order">
           <h2>Place Your Order</h2>
           <p class="lp-order-sub">Fill in your details below and we'll deliver to you.</p>
           <form (ngSubmit)="placeOrder()" #f="ngForm">
@@ -105,14 +105,6 @@ const KENYA_COUNTIES = [
           </form>
         </div>
 
-        <div class="lp-success" *ngIf="orderPlaced">
-          <div class="lp-success-icon">🎉</div>
-          <h2>Order Placed!</h2>
-          <p>Thank you, {{ order.customerName }}! We'll deliver soon.</p>
-          <p>Your tracking code:</p>
-          <div class="lp-token">{{ trackingToken }}</div>
-          <a [routerLink]="['/track', trackingToken]" class="lp-order-btn" style="display:inline-block;text-align:center;margin-top:1rem">Track Your Order</a>
-        </div>
       </div>
 
     </div>
@@ -126,8 +118,6 @@ export class ProductDetailComponent implements OnInit {
   activeImage = '';
   loading = true;
   submitting = false;
-  orderPlaced = false;
-  trackingToken = '';
   counties = KENYA_COUNTIES;
 
   order = { customerName: '', phone: '', email: '', county: '', deliveryAddress: '' };
@@ -142,7 +132,7 @@ export class ProductDetailComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-    const id = Number(this.route.snapshot.paramMap.get('id'));
+    const id = this.route.snapshot.paramMap.get('id')!;
     this.productService.getById(id).subscribe({
       next: p => {
         this.product = p;
@@ -162,7 +152,10 @@ export class ProductDetailComponent implements OnInit {
     if (!this.product) return;
     this.submitting = true;
     this.orderService.place({ ...this.order, productId: this.product.id }).subscribe({
-      next: res => { this.trackingToken = res.trackingToken; this.orderPlaced = true; this.submitting = false; this.cdr.markForCheck(); },
+      next: res => {
+          this.submitting = false;
+          this.router.navigate(['/order-confirmed', res.trackingToken], { queryParams: { name: this.order.customerName } });
+        },
       error: () => { this.submitting = false; this.cdr.markForCheck(); }
     });
   }

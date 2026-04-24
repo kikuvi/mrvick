@@ -8,7 +8,7 @@ public record CreateRiderDto(
 );
 
 public record RiderDto(
-    int Id,
+    Guid Id,
     string Name,
     string Phone,
     string County,

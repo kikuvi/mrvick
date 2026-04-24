@@ -1,7 +1,7 @@
 namespace Shopfront.API.DTOs;
 
 public record PageDto(
-    int Id,
+    Guid Id,
     string Slug,
     string Title,
     string Content,

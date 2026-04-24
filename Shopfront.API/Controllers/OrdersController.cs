@@ -210,8 +210,8 @@ public class OrdersController : ControllerBase
             .Select(o => new OrderDto(
                 o.Id, o.TrackingToken, o.CustomerName, o.Phone, o.Email,
                 o.County, o.DeliveryAddress, o.PriceAtOrder,
-                o.AdvertisingCost, o.DeliveryFee,
-                o.PriceAtOrder - (o.AdvertisingCost + o.DeliveryFee),
+                o.BuyingPrice, o.AdvertisingCost, o.DeliveryFee,
+                o.PriceAtOrder - (o.BuyingPrice + o.AdvertisingCost + o.DeliveryFee),
                 o.Status.ToString(), o.ProductId, o.Product.Title,
                 o.RiderId, o.Rider != null ? o.Rider.Name : null,
                 o.CreatedAt
@@ -223,7 +223,7 @@ public class OrdersController : ControllerBase
 
     [Authorize]
     [HttpPatch("{id}/status")]
-    public async Task<IActionResult> UpdateStatus(int id, UpdateOrderStatusDto dto)
+    public async Task<IActionResult> UpdateStatus(Guid id, UpdateOrderStatusDto dto)
     {
         var order = await _db.Orders.Include(o => o.Product).FirstOrDefaultAsync(o => o.Id == id);
         if (order is null) return NotFound();
@@ -248,7 +248,7 @@ public class OrdersController : ControllerBase
 
     [Authorize]
     [HttpPatch("{id}/assign")]
-    public async Task<IActionResult> AssignRider(int id, AssignRiderDto dto)
+    public async Task<IActionResult> AssignRider(Guid id, AssignRiderDto dto)
     {
         var order = await _db.Orders.FindAsync(id);
         if (order is null) return NotFound();
@@ -268,11 +268,12 @@ public class OrdersController : ControllerBase
 
     [Authorize]
     [HttpPatch("{id}/expenses")]
-    public async Task<IActionResult> UpdateExpenses(int id, UpdateExpensesDto dto)
+    public async Task<IActionResult> UpdateExpenses(Guid id, UpdateExpensesDto dto)
     {
         var order = await _db.Orders.FindAsync(id);
         if (order is null) return NotFound();
 
+        order.BuyingPrice = dto.BuyingPrice;
         order.AdvertisingCost = dto.AdvertisingCost;
         order.DeliveryFee = dto.DeliveryFee;
         await _db.SaveChangesAsync();

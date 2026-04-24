@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { ApiService } from './api.service';
 
 export interface PlaceOrder {
-  productId: number;
+  productId: string;
   customerName: string;
   phone: string;
   email?: string;
@@ -11,7 +11,7 @@ export interface PlaceOrder {
 }
 
 export interface Order {
-  id: number;
+  id: string;
   trackingToken: string;
   customerName: string;
   phone: string;
@@ -19,13 +19,14 @@ export interface Order {
   county: string;
   deliveryAddress: string;
   priceAtOrder: number;
+  buyingPrice: number;
   advertisingCost: number;
   deliveryFee: number;
   profit: number;
   status: string;
-  productId: number;
+  productId: string;
   productTitle: string;
-  riderId?: number;
+  riderId?: string;
   riderName?: string;
   createdAt: string;
 }
@@ -49,9 +50,9 @@ export class OrderService {
   place(data: PlaceOrder) { return this.api.post<{ trackingToken: string }>('/orders', data); }
   track(token: string) { return this.api.get<TrackOrder>(`/orders/track/${token}`); }
   getAll() { return this.api.get<Order[]>('/orders', true); }
-  updateStatus(id: number, status: string) { return this.api.patch<void>(`/orders/${id}/status`, { status }); }
-  assignRider(id: number, riderId: number) { return this.api.patch<void>(`/orders/${id}/assign`, { riderId }); }
-  updateExpenses(id: number, advertisingCost: number, deliveryFee: number) {
-    return this.api.patch<void>(`/orders/${id}/expenses`, { advertisingCost, deliveryFee });
+  updateStatus(id: string, status: string) { return this.api.patch<void>(`/orders/${id}/status`, { status }); }
+  assignRider(id: string, riderId: string) { return this.api.patch<void>(`/orders/${id}/assign`, { riderId }); }
+  updateExpenses(id: string, buyingPrice: number, advertisingCost: number, deliveryFee: number) {
+    return this.api.patch<void>(`/orders/${id}/expenses`, { buyingPrice, advertisingCost, deliveryFee });
   }
 }

@@ -12,7 +12,7 @@ using Shopfront.API.Data;
 namespace Shopfront.API.Migrations
 {
     [DbContext(typeof(ShopfrontDbContext))]
-    [Migration("20260423110938_InitialCreate")]
+    [Migration("20260424181913_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -225,13 +225,14 @@ namespace Shopfront.API.Migrations
 
             modelBuilder.Entity("Shopfront.API.Models.Order", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<decimal>("AdvertisingCost")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("BuyingPrice")
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("County")
@@ -262,11 +263,11 @@ namespace Shopfront.API.Migrations
                     b.Property<decimal>("PriceAtOrder")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<int>("ProductId")
-                        .HasColumnType("int");
+                    b.Property<Guid>("ProductId")
+                        .HasColumnType("uniqueidentifier");
 
-                    b.Property<int?>("RiderId")
-                        .HasColumnType("int");
+                    b.Property<Guid?>("RiderId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Status")
                         .IsRequired()
@@ -290,11 +291,9 @@ namespace Shopfront.API.Migrations
 
             modelBuilder.Entity("Shopfront.API.Models.Page", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Content")
                         .IsRequired()
@@ -324,7 +323,7 @@ namespace Shopfront.API.Migrations
                     b.HasData(
                         new
                         {
-                            Id = 1,
+                            Id = new Guid("a0000000-0000-0000-0000-000000000001"),
                             Content = "<p>Your one-stop shop.</p>",
                             MetaDesc = "Shopfront - Quality products delivered to your door.",
                             Slug = "home",
@@ -333,7 +332,7 @@ namespace Shopfront.API.Migrations
                         },
                         new
                         {
-                            Id = 2,
+                            Id = new Guid("a0000000-0000-0000-0000-000000000002"),
                             Content = "<p>We are Shopfront, bringing quality products to your doorstep.</p>",
                             MetaDesc = "Learn more about Shopfront.",
                             Slug = "about",
@@ -342,22 +341,29 @@ namespace Shopfront.API.Migrations
                         },
                         new
                         {
-                            Id = 3,
+                            Id = new Guid("a0000000-0000-0000-0000-000000000003"),
                             Content = "",
                             MetaDesc = "Get in touch with Shopfront.",
                             Slug = "contact",
                             Title = "Contact Us",
+                            UpdatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
+                        },
+                        new
+                        {
+                            Id = new Guid("a0000000-0000-0000-0000-000000000004"),
+                            Content = "<p>We've received your order and will be in touch shortly. Delivery is on its way!</p>",
+                            MetaDesc = "Order placed successfully.",
+                            Slug = "thank-you",
+                            Title = "Thank You for Your Order!",
                             UpdatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         });
                 });
 
             modelBuilder.Entity("Shopfront.API.Models.Product", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
@@ -383,18 +389,16 @@ namespace Shopfront.API.Migrations
 
             modelBuilder.Entity("Shopfront.API.Models.ProductImage", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("ImageUrl")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("ProductId")
-                        .HasColumnType("int");
+                    b.Property<Guid>("ProductId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
 
@@ -405,11 +409,9 @@ namespace Shopfront.API.Migrations
 
             modelBuilder.Entity("Shopfront.API.Models.Rider", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("County")
                         .IsRequired()
@@ -437,11 +439,9 @@ namespace Shopfront.API.Migrations
 
             modelBuilder.Entity("Shopfront.API.Models.SiteSetting", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Key")
                         .IsRequired()
@@ -464,35 +464,35 @@ namespace Shopfront.API.Migrations
                     b.HasData(
                         new
                         {
-                            Id = 1,
+                            Id = new Guid("b0000000-0000-0000-0000-000000000001"),
                             Key = "site_name",
                             UpdatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Value = "Shopfront"
                         },
                         new
                         {
-                            Id = 2,
+                            Id = new Guid("b0000000-0000-0000-0000-000000000002"),
                             Key = "site_email",
                             UpdatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Value = "info@shopfront.co.ke"
                         },
                         new
                         {
-                            Id = 3,
+                            Id = new Guid("b0000000-0000-0000-0000-000000000003"),
                             Key = "site_phone",
                             UpdatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Value = "+254700000000"
                         },
                         new
                         {
-                            Id = 4,
+                            Id = new Guid("b0000000-0000-0000-0000-000000000004"),
                             Key = "site_address",
                             UpdatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Value = "Nairobi, Kenya"
                         },
                         new
                         {
-                            Id = 5,
+                            Id = new Guid("b0000000-0000-0000-0000-000000000005"),
                             Key = "logo_url",
                             UpdatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Value = "/assets/logo.png"

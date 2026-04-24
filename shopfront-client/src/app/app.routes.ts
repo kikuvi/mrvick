@@ -7,6 +7,7 @@ export const routes: Routes = [
   { path: 'contact', loadComponent: () => import('./components/public/contact/contact').then(m => m.ContactComponent) },
   { path: 'products/:id', loadComponent: () => import('./components/public/product-detail/product-detail').then(m => m.ProductDetailComponent) },
   { path: 'track/:token', loadComponent: () => import('./components/public/track-order/track-order').then(m => m.TrackOrderComponent) },
+  { path: 'order-confirmed/:token', loadComponent: () => import('./components/public/thank-you/thank-you').then(m => m.ThankYouComponent) },
   { path: 'admin/login', loadComponent: () => import('./components/admin/login/login').then(m => m.AdminLoginComponent) },
   { path: 'admin/forgot-password', loadComponent: () => import('./components/admin/forgot-password/forgot-password').then(m => m.ForgotPasswordComponent) },
   { path: 'admin/reset-password', loadComponent: () => import('./components/admin/reset-password/reset-password').then(m => m.ResetPasswordComponent) },

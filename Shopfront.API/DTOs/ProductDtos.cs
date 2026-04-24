@@ -17,7 +17,7 @@ public record UpdateProductDto(
 );
 
 public record ProductDto(
-    int Id,
+    Guid Id,
     string Title,
     string Description,
     decimal Price,

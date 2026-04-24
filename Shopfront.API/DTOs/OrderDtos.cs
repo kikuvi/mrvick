@@ -3,7 +3,7 @@ using Shopfront.API.Models;
 namespace Shopfront.API.DTOs;
 
 public record PlaceOrderDto(
-    int ProductId,
+    Guid ProductId,
     string CustomerName,
     string Phone,
     string? Email,
@@ -13,12 +13,12 @@ public record PlaceOrderDto(
 
 public record UpdateOrderStatusDto(OrderStatus Status);
 
-public record AssignRiderDto(int RiderId);
+public record AssignRiderDto(Guid RiderId);
 
-public record UpdateExpensesDto(decimal AdvertisingCost, decimal DeliveryFee);
+public record UpdateExpensesDto(decimal BuyingPrice, decimal AdvertisingCost, decimal DeliveryFee);
 
 public record OrderDto(
-    int Id,
+    Guid Id,
     string TrackingToken,
     string CustomerName,
     string Phone,
@@ -26,13 +26,14 @@ public record OrderDto(
     string County,
     string DeliveryAddress,
     decimal PriceAtOrder,
+    decimal BuyingPrice,
     decimal AdvertisingCost,
     decimal DeliveryFee,
     decimal Profit,
     string Status,
-    int ProductId,
+    Guid ProductId,
     string ProductTitle,
-    int? RiderId,
+    Guid? RiderId,
     string? RiderName,
     DateTime CreatedAt
 );

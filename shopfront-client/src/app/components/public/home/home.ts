@@ -65,9 +65,7 @@ import { PageService } from '../../../services/page.service';
       </div>
     </section>
 
-    <div *ngIf="safeContent" class="page-content container" [innerHTML]="safeContent"></div>
-
-    <section class="products-section" id="products">
+    <section class="products-section" id="products" style="padding-bottom:1rem">
       <div class="container">
         <h2>Our Products</h2>
         <div class="products-grid">
@@ -103,6 +101,8 @@ import { PageService } from '../../../services/page.service';
       </div>
     </section>
 
+    <div *ngIf="safeContent" class="page-content container" style="padding-top:1rem" [innerHTML]="safeContent"></div>
+
     <app-footer />
   `
 })
@@ -111,7 +111,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   heroTitle = 'Welcome to Shopfront';
   heroSubtitle = 'Quality products delivered to your door.';
   safeContent: SafeHtml = '';
-  imgIdx: Record<number, number> = {};
+  imgIdx: Record<string, number> = {};
   readonly fallback = 'assets/placeholder.jpg';
 
   private slideInterval?: ReturnType<typeof setInterval>;

@@ -67,7 +67,7 @@ import { RiderService, Rider } from '../../../services/rider.service';
         <thead>
           <tr>
             <th>Token</th><th>Customer</th><th>Product</th><th>County</th>
-            <th>Amount</th><th>Adv.</th><th>Delivery</th><th>Profit</th>
+            <th>Amount</th><th>Buying</th><th>Adv.</th><th>Delivery</th><th>Profit</th>
             <th>Status</th><th>Rider</th><th>Date</th>
           </tr>
         </thead>
@@ -81,6 +81,9 @@ import { RiderService, Rider } from '../../../services/rider.service';
             <td>{{ o.productTitle }}</td>
             <td>{{ o.county }}</td>
             <td>{{ o.priceAtOrder | number:'1.0-0' }}</td>
+            <td>
+              <input type="number" [(ngModel)]="o.buyingPrice" (blur)="saveExpenses(o)" style="width:70px" />
+            </td>
             <td>
               <input type="number" [(ngModel)]="o.advertisingCost" (blur)="saveExpenses(o)" style="width:70px" />
             </td>
@@ -105,7 +108,7 @@ import { RiderService, Rider } from '../../../services/rider.service';
             <td><small>{{ o.createdAt | date:'dd/MM/yy' }}</small></td>
           </tr>
           <tr *ngIf="!filtered.length">
-            <td colspan="11" style="text-align:center;color:#999;padding:2rem">No orders found.</td>
+            <td colspan="12" style="text-align:center;color:#999;padding:2rem">No orders found.</td>
           </tr>
         </tbody>
       </table>
@@ -155,6 +158,16 @@ import { RiderService, Rider } from '../../../services/rider.service';
           <div class="detail-row">
             <span class="detail-label">Amount</span>
             <span class="detail-value">KES {{ selected.priceAtOrder | number:'1.0-0' }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Buying Price</span>
+            <span class="detail-value">KES {{ selected.buyingPrice | number:'1.0-0' }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Profit</span>
+            <span class="detail-value" [style.color]="selected.profit > 0 ? '#15803d' : '#dc2626'">
+              KES {{ selected.profit | number:'1.0-0' }}
+            </span>
           </div>
           <div class="detail-row">
             <span class="detail-label">Tracking</span>
@@ -218,6 +231,6 @@ export class AdminOrdersComponent implements OnInit {
   }
 
   saveExpenses(o: Order) {
-    this.orderService.updateExpenses(o.id, o.advertisingCost, o.deliveryFee).subscribe();
+    this.orderService.updateExpenses(o.id, o.buyingPrice, o.advertisingCost, o.deliveryFee).subscribe();
   }
 }

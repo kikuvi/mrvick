@@ -3,6 +3,15 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RiderService, Rider } from '../../../services/rider.service';
 
+const KENYA_COUNTIES = [
+  'Baringo','Bomet','Bungoma','Busia','Elgeyo-Marakwet','Embu','Garissa','Homa Bay',
+  'Isiolo','Kajiado','Kakamega','Kericho','Kiambu','Kilifi','Kirinyaga','Kisii',
+  'Kisumu','Kitui','Kwale','Laikipia','Lamu','Machakos','Makueni','Mandera',
+  'Marsabit','Meru','Migori','Mombasa','Murang\'a','Nairobi','Nakuru','Nandi',
+  'Narok','Nyamira','Nyandarua','Nyeri','Samburu','Siaya','Taita-Taveta','Tana River',
+  'Tharaka-Nithi','Trans Nzoia','Turkana','Uasin Gishu','Vihiga','Wajir','West Pokot'
+];
+
 @Component({
   selector: 'app-admin-riders',
   standalone: true,
@@ -20,7 +29,10 @@ import { RiderService, Rider } from '../../../services/rider.service';
         <form (ngSubmit)="save()">
           <input type="text" placeholder="Full Name" [(ngModel)]="form.name" name="name" required />
           <input type="tel" placeholder="Phone" [(ngModel)]="form.phone" name="phone" required />
-          <input type="text" placeholder="County" [(ngModel)]="form.county" name="county" required />
+          <select [(ngModel)]="form.county" name="county" required>
+            <option value="">Select County</option>
+            <option *ngFor="let c of counties" [value]="c">{{ c }}</option>
+          </select>
           <input type="text" placeholder="Local Town" [(ngModel)]="form.localTown" name="localTown" required />
           <button type="submit" class="btn btn-primary">Add Rider</button>
         </form>
@@ -48,6 +60,7 @@ export class AdminRidersComponent implements OnInit {
   riders: Rider[] = [];
   showForm = false;
   form = { name: '', phone: '', county: '', localTown: '' };
+  counties = KENYA_COUNTIES;
 
   constructor(private riderService: RiderService, private cdr: ChangeDetectorRef) {}
 
@@ -64,7 +77,7 @@ export class AdminRidersComponent implements OnInit {
     });
   }
 
-  delete(id: number) {
+  delete(id: string) {
     if (confirm('Remove this rider?')) this.riderService.delete(id).subscribe(() => this.load());
   }
 }

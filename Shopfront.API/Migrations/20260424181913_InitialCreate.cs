@@ -56,8 +56,7 @@ namespace Shopfront.API.Migrations
                 name: "Pages",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Slug = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     Title = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Content = table.Column<string>(type: "nvarchar(max)", nullable: false),
@@ -73,8 +72,7 @@ namespace Shopfront.API.Migrations
                 name: "Products",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Title = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Price = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
@@ -90,8 +88,7 @@ namespace Shopfront.API.Migrations
                 name: "Riders",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Phone = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     County = table.Column<string>(type: "nvarchar(max)", nullable: false),
@@ -107,8 +104,7 @@ namespace Shopfront.API.Migrations
                 name: "SiteSettings",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Key = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     Value = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
@@ -228,9 +224,8 @@ namespace Shopfront.API.Migrations
                 name: "ProductImages",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    ProductId = table.Column<int>(type: "int", nullable: false),
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ProductId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     ImageUrl = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
@@ -248,20 +243,20 @@ namespace Shopfront.API.Migrations
                 name: "Orders",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     TrackingToken = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    ProductId = table.Column<int>(type: "int", nullable: false),
+                    ProductId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     CustomerName = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Phone = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Email = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     County = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     DeliveryAddress = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     PriceAtOrder = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    BuyingPrice = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     AdvertisingCost = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     DeliveryFee = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     Status = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    RiderId = table.Column<int>(type: "int", nullable: true),
+                    RiderId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
@@ -285,9 +280,10 @@ namespace Shopfront.API.Migrations
                 columns: new[] { "Id", "Content", "MetaDesc", "Slug", "Title", "UpdatedAt" },
                 values: new object[,]
                 {
-                    { 1, "<p>Your one-stop shop.</p>", "Shopfront - Quality products delivered to your door.", "home", "Welcome to Shopfront", new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) },
-                    { 2, "<p>We are Shopfront, bringing quality products to your doorstep.</p>", "Learn more about Shopfront.", "about", "About Us", new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) },
-                    { 3, "", "Get in touch with Shopfront.", "contact", "Contact Us", new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) }
+                    { new Guid("a0000000-0000-0000-0000-000000000001"), "<p>Your one-stop shop.</p>", "Shopfront - Quality products delivered to your door.", "home", "Welcome to Shopfront", new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) },
+                    { new Guid("a0000000-0000-0000-0000-000000000002"), "<p>We are Shopfront, bringing quality products to your doorstep.</p>", "Learn more about Shopfront.", "about", "About Us", new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) },
+                    { new Guid("a0000000-0000-0000-0000-000000000003"), "", "Get in touch with Shopfront.", "contact", "Contact Us", new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) },
+                    { new Guid("a0000000-0000-0000-0000-000000000004"), "<p>We've received your order and will be in touch shortly. Delivery is on its way!</p>", "Order placed successfully.", "thank-you", "Thank You for Your Order!", new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) }
                 });
 
             migrationBuilder.InsertData(
@@ -295,11 +291,11 @@ namespace Shopfront.API.Migrations
                 columns: new[] { "Id", "Key", "UpdatedAt", "Value" },
                 values: new object[,]
                 {
-                    { 1, "site_name", new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "Shopfront" },
-                    { 2, "site_email", new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "info@shopfront.co.ke" },
-                    { 3, "site_phone", new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "+254700000000" },
-                    { 4, "site_address", new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "Nairobi, Kenya" },
-                    { 5, "logo_url", new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "/assets/logo.png" }
+                    { new Guid("b0000000-0000-0000-0000-000000000001"), "site_name", new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "Shopfront" },
+                    { new Guid("b0000000-0000-0000-0000-000000000002"), "site_email", new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "info@shopfront.co.ke" },
+                    { new Guid("b0000000-0000-0000-0000-000000000003"), "site_phone", new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "+254700000000" },
+                    { new Guid("b0000000-0000-0000-0000-000000000004"), "site_address", new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "Nairobi, Kenya" },
+                    { new Guid("b0000000-0000-0000-0000-000000000005"), "logo_url", new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "/assets/logo.png" }
                 });
 
             migrationBuilder.CreateIndex(
