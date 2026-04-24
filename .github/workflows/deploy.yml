@@ -31,6 +31,11 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
+      - name: Debug API build (full output)
+        run: docker build --progress=plain --no-cache ./Shopfront.API
+        env:
+          DOCKER_BUILDKIT: 1
+
       - name: Build & push API
         uses: docker/build-push-action@v5
         with:
@@ -62,6 +67,7 @@ jobs:
         uses: webfactory/ssh-agent@v0.9.0
         with:
           ssh-private-key: ${{ secrets.SERVER_SSH_KEY }}
+          ssh-passphrase: ${{ secrets.SSH_PASSPHRASE }}
 
       - name: Add server to known hosts
         run: ssh-keyscan -H "${{ secrets.SERVER_HOST }}" >> ~/.ssh/known_hosts
