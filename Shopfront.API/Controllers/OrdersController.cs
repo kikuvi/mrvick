@@ -47,6 +47,9 @@ public class OrdersController : ControllerBase
         var baseUrl = _config["App:BaseUrl"] ?? "https://shopfront.co.ke";
         var trackingUrl = $"{baseUrl}/track/{order.TrackingToken}";
 
+        // Fire notifications in background so they don't block the response
+        _ = Task.Run(async () =>
+        {
         await _notifications.SendSmsAsync(order.Phone,
             $"Hi {order.CustomerName}, your Shopfront order has been placed! Track it here: {trackingUrl}");
 
@@ -172,6 +175,7 @@ public class OrdersController : ControllerBase
             await _notifications.SendSmsAsync(adminPhone,
                 $"New order #{order.TrackingToken} from {order.CustomerName} ({order.County}) for {product.Title}.");
         }
+        });
 
         return CreatedAtAction(nameof(Track), new { token = order.TrackingToken }, new { order.TrackingToken });
     }
