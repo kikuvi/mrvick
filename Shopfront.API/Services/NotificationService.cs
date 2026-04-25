@@ -1,6 +1,5 @@
-using MailKit.Net.Smtp;
-using MailKit.Security;
-using MimeKit;
+using SendGrid;
+using SendGrid.Helpers.Mail;
 
 namespace Shopfront.API.Services;
 
@@ -53,23 +52,30 @@ public class NotificationService : INotificationService
 
     public async Task SendEmailAsync(string to, string subject, string htmlBody)
     {
+        var apiKey = _config["SendGrid:ApiKey"];
+        if (string.IsNullOrWhiteSpace(apiKey))
+        {
+            _logger.LogInformation("Email skipped (SendGrid not configured). To: {To} | {Subject}", to, subject);
+            return;
+        }
+
         try
         {
-            var fromEmail = _config["Gmail:FromEmail"]!;
-            var fromName  = _config["Gmail:FromName"] ?? "Shopfront";
-            var appPassword = _config["Gmail:AppPassword"]!;
+            var fromEmail = _config["SendGrid:FromEmail"]!;
+            var fromName  = _config["SendGrid:FromName"] ?? "Shopfront";
 
-            var message = new MimeMessage();
-            message.From.Add(new MailboxAddress(fromName, fromEmail));
-            message.To.Add(MailboxAddress.Parse(to));
-            message.Subject = subject;
-            message.Body = new BodyBuilder { HtmlBody = htmlBody }.ToMessageBody();
+            var client = new SendGridClient(apiKey);
+            var msg = MailHelper.CreateSingleEmail(
+                new EmailAddress(fromEmail, fromName),
+                new EmailAddress(to),
+                subject,
+                plainTextContent: null,
+                htmlContent: htmlBody
+            );
 
-            using var smtp = new SmtpClient();
-            await smtp.ConnectAsync("smtp.gmail.com", 587, SecureSocketOptions.StartTls);
-            await smtp.AuthenticateAsync(fromEmail, appPassword);
-            await smtp.SendAsync(message);
-            await smtp.DisconnectAsync(true);
+            var response = await client.SendEmailAsync(msg);
+            if (!response.IsSuccessStatusCode)
+                _logger.LogWarning("SendGrid returned {Status} for email to {To}", response.StatusCode, to);
         }
         catch (Exception ex)
         {

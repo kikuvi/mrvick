@@ -72,8 +72,8 @@ jobs:
           cat > .env <<ENVEOF
           DB_PASSWORD=${{ secrets.DB_PASSWORD }}
           JWT_KEY=${{ secrets.JWT_KEY }}
-          GMAIL_FROM=${{ secrets.GMAIL_FROM }}
-          GMAIL_APP_PASSWORD=${{ secrets.GMAIL_APP_PASSWORD }}
+          SENDGRID_API_KEY=${{ secrets.SENDGRID_API_KEY }}
+          SENDGRID_FROM_EMAIL=${{ secrets.SENDGRID_FROM_EMAIL }}
           AT_USERNAME=${{ secrets.AT_USERNAME }}
           AT_API_KEY=${{ secrets.AT_API_KEY }}
           APP_BASE_URL=${{ secrets.APP_BASE_URL }}
