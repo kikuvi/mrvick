@@ -3,6 +3,7 @@ import { ApiService } from './api.service';
 
 export interface PlaceOrder {
   productId: string;
+  productTitle: string;
   customerName: string;
   phone: string;
   email?: string;

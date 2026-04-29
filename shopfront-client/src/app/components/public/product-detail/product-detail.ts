@@ -151,7 +151,7 @@ export class ProductDetailComponent implements OnInit {
   placeOrder() {
     if (!this.product) return;
     this.submitting = true;
-    this.orderService.place({ ...this.order, productId: this.product.id }).subscribe({
+    this.orderService.place({ ...this.order, productId: this.product.id, productTitle: '' }).subscribe({
       next: res => {
           this.submitting = false;
           this.router.navigate(['/order-confirmed', res.trackingToken], { queryParams: { name: this.order.customerName } });
