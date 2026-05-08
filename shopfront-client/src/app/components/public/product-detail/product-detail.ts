@@ -54,7 +54,6 @@ const KENYA_COUNTIES = [
       <!-- Headline + Description -->
       <div class="lp-hero">
         <div class="lp-container">
-          <h1 class="lp-title">{{ product.title }}</h1>
           <div class="lp-desc" [innerHTML]="safeDesc"></div>
           <div class="lp-price-row">
             <span class="lp-old-price">KES {{ product.price | number:'1.0-0' }}</span>
