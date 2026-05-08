@@ -19,6 +19,21 @@ export class PixelService {
     });
   }
 
+  trackInitiateCheckout(value: number) {
+    if (typeof fbq === 'undefined') return;
+    fbq('track', 'InitiateCheckout', { value, currency: 'KES' });
+  }
+
+  trackLead() {
+    if (typeof fbq === 'undefined') return;
+    fbq('track', 'Lead');
+  }
+
+  trackContact() {
+    if (typeof fbq === 'undefined') return;
+    fbq('track', 'Contact');
+  }
+
   trackPurchase(value: number) {
     if (typeof fbq === 'undefined') return;
     fbq('track', 'Purchase', {

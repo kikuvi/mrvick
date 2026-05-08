@@ -6,6 +6,7 @@ import { NavbarComponent } from '../../shared/navbar/navbar';
 import { FooterComponent } from '../../shared/footer/footer';
 import { PageService } from '../../../services/page.service';
 import { SettingsService } from '../../../services/settings.service';
+import { PixelService } from '../../../services/pixel.service';
 
 @Component({
   selector: 'app-contact',
@@ -49,10 +50,12 @@ export class ContactComponent implements OnInit {
     private pageService: PageService,
     private settingsService: SettingsService,
     private sanitizer: DomSanitizer,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private pixel: PixelService
   ) {}
 
   ngOnInit() {
+    this.pixel.trackContact();
     this.settingsService.getAll().subscribe(s => { this.settings = s; this.cdr.markForCheck(); });
     this.pageService.getBySlug('contact').subscribe(page => {
       if (page?.content) {

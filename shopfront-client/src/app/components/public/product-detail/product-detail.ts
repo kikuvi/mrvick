@@ -203,6 +203,8 @@ export class ProductDetailComponent implements OnInit {
   placeOrder() {
     if (!this.product) return;
     this.submitting = true;
+    this.pixel.trackInitiateCheckout(this.product.discountPrice || this.product.price);
+    this.pixel.trackLead();
     this.orderService.place({
       ...this.order,
       productId: this.product.id,
