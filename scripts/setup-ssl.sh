@@ -29,7 +29,7 @@ else
     docker compose stop nginx-proxy 2>/dev/null || true
 
     # ── Obtain certificate using standalone mode ───────────────────────────────
-    info "Obtaining Let's Encrypt certificate for ${DOMAIN} and www.${DOMAIN}..."
+    info "Obtaining Let's Encrypt certificate for ${DOMAIN}..."
     docker run --rm \
         -p 80:80 \
         -v shopfront_letsencrypt:/etc/letsencrypt \
@@ -38,8 +38,7 @@ else
         --email "$EMAIL" \
         --agree-tos \
         --no-eff-email \
-        -d "${DOMAIN}" \
-        -d "www.${DOMAIN}"
+        -d "${DOMAIN}"
 
     info "Certificate obtained successfully."
 fi
