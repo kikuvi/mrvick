@@ -7,6 +7,7 @@ import { NavbarComponent } from '../../shared/navbar/navbar';
 import { FooterComponent } from '../../shared/footer/footer';
 import { ProductService, Product } from '../../../services/product.service';
 import { OrderService } from '../../../services/order.service';
+import { PixelService } from '../../../services/pixel.service';
 
 const KENYA_COUNTIES = [
   'Baringo','Bomet','Bungoma','Busia','Elgeyo-Marakwet','Embu','Garissa','Homa Bay',
@@ -178,16 +179,19 @@ export class ProductDetailComponent implements OnInit {
     private productService: ProductService,
     private orderService: OrderService,
     private sanitizer: DomSanitizer,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private pixel: PixelService
   ) {}
 
   ngOnInit() {
+    this.pixel.init();
     const id = this.route.snapshot.paramMap.get('id')!;
     this.productService.getById(id).subscribe({
       next: p => {
         this.product = p;
         this.safeDesc = this.sanitizer.bypassSecurityTrustHtml(p.description);
         this.loading = false;
+        this.pixel.trackViewContent(p.id, p.title, p.discountPrice || p.price);
         this.cdr.markForCheck();
       },
       error: () => {

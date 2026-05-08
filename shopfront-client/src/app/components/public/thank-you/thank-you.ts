@@ -5,6 +5,8 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { NavbarComponent } from '../../shared/navbar/navbar';
 import { FooterComponent } from '../../shared/footer/footer';
 import { PageService } from '../../../services/page.service';
+import { OrderService } from '../../../services/order.service';
+import { PixelService } from '../../../services/pixel.service';
 
 @Component({
   selector: 'app-thank-you',
@@ -97,11 +99,14 @@ export class ThankYouComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private pageService: PageService,
+    private orderService: OrderService,
     private sanitizer: DomSanitizer,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private pixel: PixelService
   ) {}
 
   ngOnInit() {
+    this.pixel.init();
     this.trackingToken = this.route.snapshot.paramMap.get('token') ?? '';
     this.customerName = this.route.snapshot.queryParamMap.get('name') ?? '';
 
@@ -110,5 +115,11 @@ export class ThankYouComponent implements OnInit {
       if (page?.content) this.safeContent = this.sanitizer.bypassSecurityTrustHtml(page.content);
       this.cdr.markForCheck();
     });
+
+    if (this.trackingToken) {
+      this.orderService.track(this.trackingToken).subscribe(order => {
+        this.pixel.trackPurchase(order.priceAtOrder);
+      });
+    }
   }
 }
