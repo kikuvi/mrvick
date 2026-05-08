@@ -38,6 +38,7 @@ public class OrdersController : ControllerBase
             Email = dto.Email,
             County = dto.County,
             DeliveryAddress = dto.DeliveryAddress,
+            Variation = dto.Variation,
             PriceAtOrder = product.DiscountPrice > 0 ? product.DiscountPrice : product.Price
         };
 
@@ -199,7 +200,8 @@ public class OrdersController : ControllerBase
             order.Status.ToString(),
             order.Product.Title,
             order.Rider?.Name,
-            order.CreatedAt
+            order.CreatedAt,
+            order.Variation
         ));
     }
 
@@ -218,7 +220,7 @@ public class OrdersController : ControllerBase
                 o.PriceAtOrder - (o.BuyingPrice + o.AdvertisingCost + o.DeliveryFee),
                 o.Status.ToString(), o.ProductId, o.Product.Title,
                 o.RiderId, o.Rider != null ? o.Rider.Name : null,
-                o.CreatedAt
+                o.CreatedAt, o.Variation
             ))
             .ToListAsync();
 

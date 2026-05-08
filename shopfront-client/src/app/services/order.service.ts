@@ -9,6 +9,7 @@ export interface PlaceOrder {
   email?: string;
   county: string;
   deliveryAddress: string;
+  variation?: string;
 }
 
 export interface Order {
@@ -30,6 +31,7 @@ export interface Order {
   riderId?: string;
   riderName?: string;
   createdAt: string;
+  variation?: string;
 }
 
 export interface TrackOrder {
@@ -42,6 +44,7 @@ export interface TrackOrder {
   productTitle: string;
   riderName?: string;
   createdAt: string;
+  variation?: string;
 }
 
 @Injectable({ providedIn: 'root' })

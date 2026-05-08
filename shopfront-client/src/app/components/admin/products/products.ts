@@ -105,6 +105,21 @@ import { ApiService } from '../../../services/api.service';
     }
     .add-img-btn:hover { background: #eef2ff; }
 
+    /* ---- Variations ---- */
+    .variation-list { display: flex; flex-direction: column; gap: 0.4rem; }
+    .variation-row { display: grid; grid-template-columns: 1fr 32px; gap: 0.5rem; align-items: center; }
+    .variation-row input {
+      padding: 0.5rem 0.75rem; border: 1px solid #ddd; border-radius: 6px;
+      font-size: .88rem; width: 100%;
+    }
+    .variation-row input:focus { outline: none; border-color: #1d3557; }
+    .add-variation-btn {
+      margin-top: 0.5rem; padding: 0.55rem 1rem; border: 1px dashed #1d3557;
+      background: transparent; color: #1d3557; border-radius: 6px; cursor: pointer;
+      font-size: .88rem; font-weight: 600; width: 100%; transition: background .15s;
+    }
+    .add-variation-btn:hover { background: #eef2ff; }
+
     /* ---- Footer ---- */
     .editor-footer {
       padding: 1rem 1.5rem; border-top: 1px solid #eee;
@@ -224,6 +239,17 @@ import { ApiService } from '../../../services/api.service';
                 </div>
 
                 <div class="field-group">
+                  <span class="field-label">Variations <span style="font-weight:400;text-transform:none;font-size:.78rem;color:#888">(optional — e.g. Grey, Black, Beige)</span></span>
+                  <div class="variation-list">
+                    <div class="variation-row" *ngFor="let v of variationLabels; let i = index">
+                      <input type="text" placeholder="e.g. Grey" [(ngModel)]="variationLabels[i]" [name]="'var_' + i" />
+                      <button type="button" class="remove-img" (click)="removeVariation(i)" title="Remove">×</button>
+                    </div>
+                  </div>
+                  <button type="button" class="add-variation-btn" (click)="addVariation()">+ Add Variation</button>
+                </div>
+
+                <div class="field-group">
                   <span class="field-label">Description</span>
                   <app-rich-editor
                     [value]="form.description"
@@ -308,10 +334,11 @@ export class AdminProductsComponent implements OnInit {
   showForm = false;
   editing: Product | null = null;
   imageUrls: string[] = [''];
+  variationLabels: string[] = [];
   saving = false;
   uploadingIndex = -1;
   private activeUploadIndex = -1;
-  form: CreateProduct = { title: '', description: '', price: 0, discountPrice: 0, imageUrls: [] };
+  form: CreateProduct = { title: '', description: '', price: 0, discountPrice: 0, imageUrls: [], variations: [] };
 
   constructor(
     private productService: ProductService,
@@ -343,17 +370,29 @@ export class AdminProductsComponent implements OnInit {
 
   openNew() {
     this.editing = null;
-    this.form = { title: '', description: '', price: 0, discountPrice: 0, imageUrls: [] };
+    this.form = { title: '', description: '', price: 0, discountPrice: 0, imageUrls: [], variations: [] };
     this.imageUrls = [''];
+    this.variationLabels = [];
     this.showForm = true;
     this.cdr.markForCheck();
   }
 
   edit(p: Product) {
     this.editing = p;
-    this.form = { title: p.title, description: p.description, price: p.price, discountPrice: p.discountPrice, imageUrls: [] };
+    this.form = { title: p.title, description: p.description, price: p.price, discountPrice: p.discountPrice, imageUrls: [], variations: [] };
     this.imageUrls = p.imageUrls.length ? [...p.imageUrls] : [''];
+    this.variationLabels = p.variations?.map(v => v.label) ?? [];
     this.showForm = true;
+    this.cdr.markForCheck();
+  }
+
+  addVariation() {
+    this.variationLabels = [...this.variationLabels, ''];
+    this.cdr.markForCheck();
+  }
+
+  removeVariation(i: number) {
+    this.variationLabels = this.variationLabels.filter((_, idx) => idx !== i);
     this.cdr.markForCheck();
   }
 
@@ -408,6 +447,7 @@ export class AdminProductsComponent implements OnInit {
 
   save() {
     this.form.imageUrls = this.imageUrls.map(u => u.trim()).filter(Boolean);
+    this.form.variations = this.variationLabels.map(v => v.trim()).filter(Boolean);
     this.saving = true;
     this.cdr.markForCheck();
 
@@ -430,8 +470,9 @@ export class AdminProductsComponent implements OnInit {
     this.showForm = false;
     this.editing = null;
     this.saving = false;
-    this.form = { title: '', description: '', price: 0, discountPrice: 0, imageUrls: [] };
+    this.form = { title: '', description: '', price: 0, discountPrice: 0, imageUrls: [], variations: [] };
     this.imageUrls = [''];
+    this.variationLabels = [];
     this.cdr.markForCheck();
   }
 }

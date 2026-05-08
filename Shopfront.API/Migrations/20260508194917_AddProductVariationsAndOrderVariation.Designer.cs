@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Shopfront.API.Data;
 
@@ -11,9 +12,11 @@ using Shopfront.API.Data;
 namespace Shopfront.API.Migrations
 {
     [DbContext(typeof(ShopfrontDbContext))]
-    partial class ShopfrontDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260508194917_AddProductVariationsAndOrderVariation")]
+    partial class AddProductVariationsAndOrderVariation
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

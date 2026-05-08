@@ -66,7 +66,7 @@ import { RiderService, Rider } from '../../../services/rider.service';
       <table class="table">
         <thead>
           <tr>
-            <th>Token</th><th>Customer</th><th>Product</th><th>County</th>
+            <th>Token</th><th>Customer</th><th>Product</th><th>Variation</th><th>County</th>
             <th>Amount</th><th>Buying</th><th>Adv.</th><th>Delivery</th><th>Profit</th>
             <th>Status</th><th>Rider</th><th>Date</th>
           </tr>
@@ -79,6 +79,7 @@ import { RiderService, Rider } from '../../../services/rider.service';
               <small>{{ o.phone }}</small>
             </td>
             <td>{{ o.productTitle }}</td>
+            <td>{{ o.variation || '—' }}</td>
             <td>{{ o.county }}</td>
             <td>{{ o.priceAtOrder | number:'1.0-0' }}</td>
             <td>
@@ -108,7 +109,7 @@ import { RiderService, Rider } from '../../../services/rider.service';
             <td><small>{{ o.createdAt | date:'dd/MM/yy' }}</small></td>
           </tr>
           <tr *ngIf="!filtered.length">
-            <td colspan="12" style="text-align:center;color:#999;padding:2rem">No orders found.</td>
+            <td colspan="13" style="text-align:center;color:#999;padding:2rem">No orders found.</td>
           </tr>
         </tbody>
       </table>
@@ -154,6 +155,10 @@ import { RiderService, Rider } from '../../../services/rider.service';
           <div class="detail-row">
             <span class="detail-label">Product</span>
             <span class="detail-value">{{ selected.productTitle }}</span>
+          </div>
+          <div class="detail-row" *ngIf="selected.variation">
+            <span class="detail-label">Variation</span>
+            <span class="detail-value">{{ selected.variation }}</span>
           </div>
           <div class="detail-row">
             <span class="detail-label">Amount</span>

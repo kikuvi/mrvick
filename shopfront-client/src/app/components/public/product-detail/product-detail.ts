@@ -1,7 +1,7 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { NavbarComponent } from '../../shared/navbar/navbar';
 import { FooterComponent } from '../../shared/footer/footer';
@@ -20,7 +20,28 @@ const KENYA_COUNTIES = [
 @Component({
   selector: 'app-product-detail',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, NavbarComponent, FooterComponent],
+  imports: [CommonModule, FormsModule, NavbarComponent, FooterComponent],
+  styles: [`
+    .lp-field-label { display: flex; flex-direction: column; gap: 0.3rem; font-size: 0.9rem; font-weight: 700; color: #1a1a1a; }
+    .lp-field-label input, .lp-field-label select, .lp-field-label textarea {
+      font-weight: 400; border: 2px solid #1d3557 !important; border-radius: 8px;
+    }
+    .lp-field-label input:focus, .lp-field-label select:focus, .lp-field-label textarea:focus {
+      outline: none; border-color: #e63946 !important; box-shadow: 0 0 0 3px rgba(230,57,70,.15);
+    }
+    .your-order { margin-bottom: 0.75rem; }
+    .your-order-label { font-weight: 700; color: #1d3557; margin-bottom: 0.5rem; font-size: 1rem; }
+    .variation-options { display: flex; flex-direction: row; flex-wrap: wrap; gap: 0.5rem; }
+    .variation-option {
+      display: flex; align-items: center; gap: 0.75rem;
+      padding: 0.75rem 1rem; border: 2px solid #ddd; border-radius: 8px;
+      cursor: pointer; transition: border-color .15s, background .15s;
+    }
+    .variation-option:hover { border-color: #1d3557; background: #f5f8ff; }
+    .variation-option.selected { border-color: #1d3557; background: #eef3ff; }
+    .variation-option input[type="radio"] { accent-color: #1d3557; width: 16px; height: 16px; flex-shrink: 0; }
+    .variation-option span { font-size: 0.95rem; color: #1a1a1a; }
+  `],
   template: `
     <app-navbar />
 
@@ -88,17 +109,46 @@ const KENYA_COUNTIES = [
       <!-- Order form -->
       <div class="lp-container lp-order-wrap">
         <div class="lp-order">
-          <h2>Place Your Order</h2>
-          <p class="lp-order-sub">Fill in your details below and we'll deliver to you.</p>
+          <h2>Fill out the form to place your order</h2>
           <form (ngSubmit)="placeOrder()" #f="ngForm">
-            <input type="text"  placeholder="Full Name"        [(ngModel)]="order.customerName"   name="customerName"   required />
-            <input type="tel"   placeholder="Phone Number"     [(ngModel)]="order.phone"           name="phone"          required />
-            <input type="email" placeholder="Email (optional)" [(ngModel)]="order.email"           name="email" />
-            <select [(ngModel)]="order.county" name="county" required>
-              <option value="">Select Delivery County</option>
-              <option *ngFor="let c of counties" [value]="c">{{ c }}</option>
-            </select>
-            <textarea placeholder="Delivery Address / Landmark" [(ngModel)]="order.deliveryAddress" name="deliveryAddress" rows="3" required></textarea>
+            <label class="lp-field-label">Full Name
+              <input type="text" placeholder="e.g. John Doe" [(ngModel)]="order.customerName" name="customerName" required />
+            </label>
+            <label class="lp-field-label">Phone Number
+              <input type="tel" placeholder="e.g. 0712345678" [(ngModel)]="order.phone" name="phone" required />
+            </label>
+            <label class="lp-field-label">Email <span style="font-weight:400;font-size:.85rem;color:#888">(optional)</span>
+              <input type="email" placeholder="e.g. john@email.com" [(ngModel)]="order.email" name="email" />
+            </label>
+
+            <!-- Your Order — shown only when the product has variations -->
+            <div class="your-order" *ngIf="product.variations?.length">
+              <p class="your-order-label">Your Order</p>
+              <div class="variation-options">
+                <label
+                  *ngFor="let v of product.variations"
+                  class="variation-option"
+                  [class.selected]="selectedVariation === v.label">
+                  <input
+                    type="radio"
+                    [value]="v.label"
+                    [(ngModel)]="selectedVariation"
+                    name="variation"
+                    required />
+                  <span>{{ v.label }} — Ksh{{ product.discountPrice | number:'1.0-0' }}</span>
+                </label>
+              </div>
+            </div>
+
+            <label class="lp-field-label">Delivery County
+              <select [(ngModel)]="order.county" name="county" required>
+                <option value="">Select county</option>
+                <option *ngFor="let c of counties" [value]="c">{{ c }}</option>
+              </select>
+            </label>
+            <label class="lp-field-label">Delivery Address
+              <textarea placeholder="e.g. Tom Mboya Street, near KFC" [(ngModel)]="order.deliveryAddress" name="deliveryAddress" rows="3" required></textarea>
+            </label>
             <button type="submit" class="lp-order-btn" [disabled]="submitting">
               {{ submitting ? 'Placing Order...' : 'Order Now — KES ' + (product.discountPrice | number:'1.0-0') }}
             </button>
@@ -115,10 +165,10 @@ const KENYA_COUNTIES = [
 export class ProductDetailComponent implements OnInit {
   product: Product | null = null;
   safeDesc: SafeHtml = '';
-  activeImage = '';
   loading = true;
   submitting = false;
   counties = KENYA_COUNTIES;
+  selectedVariation = '';
 
   order = { customerName: '', phone: '', email: '', county: '', deliveryAddress: '' };
 
@@ -137,7 +187,6 @@ export class ProductDetailComponent implements OnInit {
       next: p => {
         this.product = p;
         this.safeDesc = this.sanitizer.bypassSecurityTrustHtml(p.description);
-        this.activeImage = p.imageUrls[0] || '';
         this.loading = false;
         this.cdr.markForCheck();
       },
@@ -151,11 +200,16 @@ export class ProductDetailComponent implements OnInit {
   placeOrder() {
     if (!this.product) return;
     this.submitting = true;
-    this.orderService.place({ ...this.order, productId: this.product.id, productTitle: '' }).subscribe({
+    this.orderService.place({
+      ...this.order,
+      productId: this.product.id,
+      productTitle: this.product.title,
+      variation: this.selectedVariation || undefined
+    }).subscribe({
       next: res => {
-          this.submitting = false;
-          this.router.navigate(['/order-confirmed', res.trackingToken], { queryParams: { name: this.order.customerName } });
-        },
+        this.submitting = false;
+        this.router.navigate(['/order-confirmed', res.trackingToken], { queryParams: { name: this.order.customerName } });
+      },
       error: () => { this.submitting = false; this.cdr.markForCheck(); }
     });
   }

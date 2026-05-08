@@ -47,7 +47,14 @@
       "WebFetch(domain:primeng.org)",
       "Bash(npm start:*)",
       "Bash(tasklist:*)",
-      "Bash(python:*)"
+      "Bash(python:*)",
+      "Bash(npx kill-port:*)",
+      "Bash(git add:*)",
+      "Bash(git commit -m ':*)",
+      "Bash(git push:*)",
+      "Bash(cmd.exe:*)",
+      "Bash(powershell.exe:*)",
+      "Bash(kill 3178 2445)"
     ]
   }
 }

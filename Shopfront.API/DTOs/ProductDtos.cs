@@ -1,11 +1,14 @@
 namespace Shopfront.API.DTOs;
 
+public record VariationDto(Guid Id, string Label);
+
 public record CreateProductDto(
     string Title,
     string Description,
     decimal Price,
     decimal DiscountPrice,
-    List<string> ImageUrls
+    List<string> ImageUrls,
+    List<string>? Variations
 );
 
 public record UpdateProductDto(
@@ -13,7 +16,8 @@ public record UpdateProductDto(
     string? Description,
     decimal? Price,
     decimal? DiscountPrice,
-    List<string>? ImageUrls
+    List<string>? ImageUrls,
+    List<string>? Variations
 );
 
 public record ProductDto(
@@ -23,5 +27,6 @@ public record ProductDto(
     decimal Price,
     decimal DiscountPrice,
     DateTime CreatedAt,
-    List<string> ImageUrls
+    List<string> ImageUrls,
+    List<VariationDto> Variations
 );

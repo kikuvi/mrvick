@@ -20,10 +20,12 @@ public class ProductsController : ControllerBase
     {
         var products = await _db.Products
             .Include(p => p.Images)
+            .Include(p => p.Variations)
             .OrderByDescending(p => p.CreatedAt)
             .Select(p => new ProductDto(
                 p.Id, p.Title, p.Description, p.Price, p.DiscountPrice, p.CreatedAt,
-                p.Images.Select(i => i.ImageUrl).ToList()
+                p.Images.Select(i => i.ImageUrl).ToList(),
+                p.Variations.Select(v => new VariationDto(v.Id, v.Label)).ToList()
             ))
             .ToListAsync();
 
@@ -35,6 +37,7 @@ public class ProductsController : ControllerBase
     {
         var product = await _db.Products
             .Include(p => p.Images)
+            .Include(p => p.Variations)
             .FirstOrDefaultAsync(p => p.Id == id);
 
         if (product is null) return NotFound();
@@ -42,7 +45,8 @@ public class ProductsController : ControllerBase
         return Ok(new ProductDto(
             product.Id, product.Title, product.Description,
             product.Price, product.DiscountPrice, product.CreatedAt,
-            product.Images.Select(i => i.ImageUrl).ToList()
+            product.Images.Select(i => i.ImageUrl).ToList(),
+            product.Variations.Select(v => new VariationDto(v.Id, v.Label)).ToList()
         ));
     }
 
@@ -56,7 +60,11 @@ public class ProductsController : ControllerBase
             Description = dto.Description,
             Price = dto.Price,
             DiscountPrice = dto.DiscountPrice,
-            Images = dto.ImageUrls.Select(url => new ProductImage { ImageUrl = url }).ToList()
+            Images = dto.ImageUrls.Select(url => new ProductImage { ImageUrl = url }).ToList(),
+            Variations = (dto.Variations ?? [])
+                .Where(l => !string.IsNullOrWhiteSpace(l))
+                .Select(l => new ProductVariation { Label = l.Trim() })
+                .ToList()
         };
 
         _db.Products.Add(product);
@@ -65,7 +73,8 @@ public class ProductsController : ControllerBase
         return CreatedAtAction(nameof(GetById), new { id = product.Id },
             new ProductDto(product.Id, product.Title, product.Description,
                 product.Price, product.DiscountPrice, product.CreatedAt,
-                product.Images.Select(i => i.ImageUrl).ToList()));
+                product.Images.Select(i => i.ImageUrl).ToList(),
+                product.Variations.Select(v => new VariationDto(v.Id, v.Label)).ToList()));
     }
 
     [Authorize]
@@ -74,6 +83,7 @@ public class ProductsController : ControllerBase
     {
         var product = await _db.Products
             .Include(p => p.Images)
+            .Include(p => p.Variations)
             .FirstOrDefaultAsync(p => p.Id == id);
         if (product is null) return NotFound();
 
@@ -87,6 +97,15 @@ public class ProductsController : ControllerBase
             _db.RemoveRange(product.Images);
             product.Images = dto.ImageUrls
                 .Select(url => new ProductImage { ImageUrl = url })
+                .ToList();
+        }
+
+        if (dto.Variations is not null)
+        {
+            _db.RemoveRange(product.Variations);
+            product.Variations = dto.Variations
+                .Where(l => !string.IsNullOrWhiteSpace(l))
+                .Select(l => new ProductVariation { Label = l.Trim() })
                 .ToList();
         }
 

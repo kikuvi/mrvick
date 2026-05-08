@@ -1,6 +1,11 @@
 import { Injectable } from '@angular/core';
 import { ApiService } from './api.service';
 
+export interface ProductVariation {
+  id: string;
+  label: string;
+}
+
 export interface Product {
   id: string;
   title: string;
@@ -9,6 +14,7 @@ export interface Product {
   discountPrice: number;
   createdAt: string;
   imageUrls: string[];
+  variations: ProductVariation[];
 }
 
 export interface CreateProduct {
@@ -17,6 +23,7 @@ export interface CreateProduct {
   price: number;
   discountPrice: number;
   imageUrls: string[];
+  variations: string[];
 }
 
 @Injectable({ providedIn: 'root' })

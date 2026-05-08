@@ -20,6 +20,7 @@ public class Order
     public string? Email { get; set; }
     public string County { get; set; } = string.Empty;
     public string DeliveryAddress { get; set; } = string.Empty;
+    public string? Variation { get; set; }
 
     public decimal PriceAtOrder { get; set; }
     public decimal BuyingPrice { get; set; }

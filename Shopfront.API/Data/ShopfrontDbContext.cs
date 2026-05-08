@@ -10,6 +10,7 @@ public class ShopfrontDbContext : IdentityDbContext
 
     public DbSet<Product> Products => Set<Product>();
     public DbSet<ProductImage> ProductImages => Set<ProductImage>();
+    public DbSet<ProductVariation> ProductVariations => Set<ProductVariation>();
     public DbSet<Order> Orders => Set<Order>();
     public DbSet<Rider> Riders => Set<Rider>();
     public DbSet<Page> Pages => Set<Page>();
@@ -18,6 +19,14 @@ public class ShopfrontDbContext : IdentityDbContext
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
+
+        builder.Entity<ProductVariation>(e =>
+        {
+            e.HasOne(v => v.Product)
+             .WithMany(p => p.Variations)
+             .HasForeignKey(v => v.ProductId)
+             .OnDelete(DeleteBehavior.Cascade);
+        });
 
         builder.Entity<Product>(e =>
         {

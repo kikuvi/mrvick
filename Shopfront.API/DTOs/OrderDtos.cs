@@ -8,7 +8,8 @@ public record PlaceOrderDto(
     string Phone,
     string? Email,
     string County,
-    string DeliveryAddress
+    string DeliveryAddress,
+    string? Variation
 );
 
 public record UpdateOrderStatusDto(OrderStatus Status);
@@ -35,7 +36,8 @@ public record OrderDto(
     string ProductTitle,
     Guid? RiderId,
     string? RiderName,
-    DateTime CreatedAt
+    DateTime CreatedAt,
+    string? Variation
 );
 
 public record TrackOrderDto(
@@ -47,5 +49,6 @@ public record TrackOrderDto(
     string Status,
     string ProductTitle,
     string? RiderName,
-    DateTime CreatedAt
+    DateTime CreatedAt,
+    string? Variation
 );
