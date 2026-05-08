@@ -54,10 +54,15 @@ else
     warn "Check nginx logs: docker compose logs nginx-proxy"
 fi
 
-# ── Cron: reload nginx nightly to pick up renewed certs ───────────────────────
-info "Installing nightly nginx reload cron..."
-CRON_JOB="0 3 * * * cd ${COMPOSE_DIR} && docker compose exec -T nginx-proxy nginx -s reload >> /var/log/nginx-reload.log 2>&1"
-( crontab -l 2>/dev/null | grep -v "nginx-proxy nginx -s reload"; echo "$CRON_JOB" ) | crontab -
+# ── Cron: renew cert at 2am daily, reload nginx at 2:30am ────────────────────
+info "Installing renewal and reload cron jobs..."
+RENEW_JOB="0 2 * * * docker run --rm -v shopfront_letsencrypt:/etc/letsencrypt certbot/certbot renew --standalone --pre-hook 'docker compose -f ${COMPOSE_DIR}/docker-compose.yml stop nginx-proxy' --post-hook 'docker compose -f ${COMPOSE_DIR}/docker-compose.yml start nginx-proxy' --quiet >> /var/log/certbot-renew.log 2>&1"
+RELOAD_JOB="30 2 * * * cd ${COMPOSE_DIR} && docker compose exec -T nginx-proxy nginx -s reload >> /var/log/nginx-reload.log 2>&1"
+( crontab -l 2>/dev/null \
+    | grep -v "certbot-renew\|nginx-s reload\|nginx reload" \
+  ; echo "$RENEW_JOB" \
+  ; echo "$RELOAD_JOB" \
+) | crontab -
 
 echo ""
 echo -e "${GREEN}============================================================${NC}"
@@ -65,7 +70,8 @@ echo -e "${GREEN} SSL setup complete — https://${DOMAIN}${NC}"
 echo -e "${GREEN}============================================================${NC}"
 echo ""
 echo "Useful commands:"
-echo "  Check cert:    docker compose run --rm certbot certificates"
-echo "  Force renew:   docker compose run --rm -p 80:80 certbot renew --force-renewal"
+echo "  Check cert:    docker run --rm -v shopfront_letsencrypt:/etc/letsencrypt certbot/certbot certificates"
+echo "  Force renew:   docker run --rm -p 80:80 -v shopfront_letsencrypt:/etc/letsencrypt certbot/certbot renew --standalone --force-renewal"
 echo "  nginx logs:    docker compose logs -f nginx-proxy"
 echo "  Reload nginx:  docker compose exec nginx-proxy nginx -s reload"
+echo "  View crons:    crontab -l"
