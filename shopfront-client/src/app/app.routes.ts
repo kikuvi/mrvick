@@ -24,6 +24,7 @@ export const routes: Routes = [
       { path: 'pages', loadComponent: () => import('./components/admin/pages/pages').then(m => m.AdminPagesComponent) },
       { path: 'settings', loadComponent: () => import('./components/admin/settings/settings').then(m => m.AdminSettingsComponent) },
       { path: 'users', loadComponent: () => import('./components/admin/users/users').then(m => m.AdminUsersComponent) },
+      { path: 'vendor-items', loadComponent: () => import('./components/admin/vendor-items/vendor-items').then(m => m.AdminVendorItemsComponent) },
     ]
   },
   { path: '**', redirectTo: '' }

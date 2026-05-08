@@ -15,10 +15,16 @@ public class ShopfrontDbContext : IdentityDbContext
     public DbSet<Rider> Riders => Set<Rider>();
     public DbSet<Page> Pages => Set<Page>();
     public DbSet<SiteSetting> SiteSettings => Set<SiteSetting>();
+    public DbSet<VendorItem> VendorItems => Set<VendorItem>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
+
+        builder.Entity<VendorItem>(e =>
+        {
+            e.Property(v => v.Price).HasColumnType("decimal(18,2)");
+        });
 
         builder.Entity<ProductVariation>(e =>
         {
