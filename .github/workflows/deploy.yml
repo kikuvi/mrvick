@@ -67,6 +67,14 @@ jobs:
       - name: Add server to known hosts
         run: ssh-keyscan -H "${{ secrets.SERVER_HOST }}" >> ~/.ssh/known_hosts
 
+      - name: Install Docker if not present
+        run: |
+          ssh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} \
+            "command -v docker > /dev/null 2>&1 \
+             || (curl -fsSL https://get.docker.com | sh \
+             && sudo usermod -aG docker \$USER \
+             && sudo systemctl enable --now docker)"
+
       - name: Write .env and copy files to server
         run: |
           cat > .env <<ENVEOF
