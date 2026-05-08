@@ -30,7 +30,10 @@ else
 
     # ── Obtain certificate using standalone mode ───────────────────────────────
     info "Obtaining Let's Encrypt certificate for ${DOMAIN} and www.${DOMAIN}..."
-    docker compose run --rm -p 80:80 certbot certonly \
+    docker run --rm \
+        -p 80:80 \
+        -v shopfront_letsencrypt:/etc/letsencrypt \
+        certbot/certbot certonly \
         --standalone \
         --email "$EMAIL" \
         --agree-tos \
