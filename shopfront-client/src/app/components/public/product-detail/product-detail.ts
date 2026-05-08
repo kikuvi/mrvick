@@ -42,6 +42,16 @@ const KENYA_COUNTIES = [
     .variation-option.selected { border-color: #1d3557; background: #eef3ff; }
     .variation-option input[type="radio"] { accent-color: #1d3557; width: 16px; height: 16px; flex-shrink: 0; }
     .variation-option span { font-size: 0.95rem; color: #1a1a1a; }
+    .reviews-section { background: #f9fafb; padding: 2.5rem 1rem; }
+    .reviews-section h3 { text-align: center; font-size: 1.3rem; color: #1a1a1a; margin-bottom: 1.5rem; }
+    .reviews-grid { display: flex; flex-direction: column; gap: 1rem; max-width: 560px; margin: 0 auto; }
+    .review-card { background: #fff; border-radius: 10px; padding: 1.1rem 1.25rem; box-shadow: 0 2px 8px rgba(0,0,0,.06); }
+    .review-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.4rem; }
+    .review-name { font-weight: 700; font-size: 0.95rem; color: #1a1a1a; }
+    .review-badge { font-size: 0.72rem; background: #dcfce7; color: #16a34a; border-radius: 99px; padding: 0.15rem 0.6rem; font-weight: 600; }
+    .review-stars { color: #f59e0b; font-size: 1rem; margin-bottom: 0.4rem; }
+    .review-text { font-size: 0.9rem; color: #4b5563; line-height: 1.5; }
+    .review-date { font-size: 0.75rem; color: #9ca3af; margin-top: 0.4rem; }
   `],
   template: `
     <app-navbar />
@@ -155,6 +165,58 @@ const KENYA_COUNTIES = [
           </form>
         </div>
 
+      </div>
+
+      <!-- Customer Reviews -->
+      <div class="reviews-section">
+        <h3>⭐ What Our Customers Say</h3>
+        <div class="reviews-grid">
+          <div class="review-card">
+            <div class="review-top">
+              <span class="review-name">Grace Wanjiku</span>
+              <span class="review-badge">✔ Verified Buyer</span>
+            </div>
+            <div class="review-stars">★★★★★</div>
+            <p class="review-text">Received my order the same day I placed it. The product is exactly as described and the quality is great. Will definitely order again!</p>
+            <p class="review-date">2 weeks ago</p>
+          </div>
+          <div class="review-card">
+            <div class="review-top">
+              <span class="review-name">Brian Otieno</span>
+              <span class="review-badge">✔ Verified Buyer</span>
+            </div>
+            <div class="review-stars">★★★★★</div>
+            <p class="review-text">Pay on delivery is the best — I was nervous ordering online but everything went smoothly. The rider was polite and on time.</p>
+            <p class="review-date">1 month ago</p>
+          </div>
+          <div class="review-card">
+            <div class="review-top">
+              <span class="review-name">Fatuma Abdi</span>
+              <span class="review-badge">✔ Verified Buyer</span>
+            </div>
+            <div class="review-stars">★★★★★</div>
+            <p class="review-text">Fast delivery to Mombasa, I was not expecting it so quickly. Packaging was neat and the item was in perfect condition.</p>
+            <p class="review-date">3 weeks ago</p>
+          </div>
+          <div class="review-card">
+            <div class="review-top">
+              <span class="review-name">James Kamau</span>
+              <span class="review-badge">✔ Verified Buyer</span>
+            </div>
+            <div class="review-stars">★★★★☆</div>
+            <p class="review-text">Good product and fair price. Delivery took one day to Nakuru which is acceptable. Customer service was responsive when I called.</p>
+            <p class="review-date">1 month ago</p>
+          </div>
+          <div class="review-card">
+            <div class="review-top">
+              <span class="review-name">Mercy Chebet</span>
+              <span class="review-badge">✔ Verified Buyer</span>
+            </div>
+            <div class="review-stars">★★★★★</div>
+            <p class="review-text">Ordered for the second time now. Shopfront never disappoints — genuine products and the free delivery is a big plus for me.</p>
+            <p class="review-date">2 months ago</p>
+          </div>
+        </div>
       </div>
 
     </div>
