@@ -88,9 +88,13 @@ jobs:
           ADMIN_PHONE=${{ secrets.ADMIN_PHONE }}
           ENVEOF
 
-          ssh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} "mkdir -p /opt/shopfront"
+          ssh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} "mkdir -p /opt/shopfront/nginx /opt/shopfront/scripts"
           scp docker-compose.yml .env \
             ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:/opt/shopfront/
+          scp nginx/nginx.conf nginx/nginx-http-only.conf \
+            ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:/opt/shopfront/nginx/
+          scp scripts/setup-ssl.sh \
+            ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:/opt/shopfront/scripts/
 
       - name: Deploy
         run: |
