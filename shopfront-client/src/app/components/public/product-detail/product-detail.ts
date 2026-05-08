@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -42,11 +42,11 @@ const KENYA_COUNTIES = [
     .variation-option.selected { border-color: #1d3557; background: #eef3ff; }
     .variation-option input[type="radio"] { accent-color: #1d3557; width: 16px; height: 16px; flex-shrink: 0; }
     .variation-option span { font-size: 0.95rem; color: #1a1a1a; }
-    .reviews-section { background: #f9fafb; padding: 2.5rem 1rem; }
+    .reviews-section { background: #fff; padding: 2.5rem 1rem; }
     .reviews-section h3 { text-align: center; font-size: 1.3rem; color: #1a1a1a; margin-bottom: 1.5rem; }
     .reviews-carousel { max-width: 560px; margin: 0 auto; }
     .reviews-track-wrap { overflow: hidden; }
-    .reviews-track { display: flex; transition: transform .35s ease; }
+    .reviews-track { display: flex; transition: transform .18s ease; }
     .review-card { min-width: 100%; background: #fff; border-radius: 10px; padding: 1.25rem 1.4rem; box-shadow: 0 2px 8px rgba(0,0,0,.07); box-sizing: border-box; }
     .review-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.4rem; }
     .review-name { font-weight: 700; font-size: 0.95rem; color: #1a1a1a; }
@@ -245,7 +245,7 @@ const KENYA_COUNTIES = [
     <app-footer />
   `
 })
-export class ProductDetailComponent implements OnInit {
+export class ProductDetailComponent implements OnInit, OnDestroy {
   product: Product | null = null;
   safeDesc: SafeHtml = '';
   loading = true;
@@ -257,9 +257,26 @@ export class ProductDetailComponent implements OnInit {
 
   reviews = [0, 1, 2, 3, 4];
   reviewIndex = 0;
+  private reviewTimer: ReturnType<typeof setInterval> | null = null;
 
-  prevReview() { this.reviewIndex = this.reviewIndex === 0 ? this.reviews.length - 1 : this.reviewIndex - 1; }
-  nextReview() { this.reviewIndex = this.reviewIndex === this.reviews.length - 1 ? 0 : this.reviewIndex + 1; }
+  prevReview() { this.reviewIndex = this.reviewIndex === 0 ? this.reviews.length - 1 : this.reviewIndex - 1; this.resetTimer(); }
+  nextReview() { this.reviewIndex = this.reviewIndex === this.reviews.length - 1 ? 0 : this.reviewIndex + 1; this.resetTimer(); }
+
+  private startTimer() {
+    this.reviewTimer = setInterval(() => {
+      this.reviewIndex = this.reviewIndex === this.reviews.length - 1 ? 0 : this.reviewIndex + 1;
+      this.cdr.markForCheck();
+    }, 3000);
+  }
+
+  private resetTimer() {
+    if (this.reviewTimer) clearInterval(this.reviewTimer);
+    this.startTimer();
+  }
+
+  ngOnDestroy() {
+    if (this.reviewTimer) clearInterval(this.reviewTimer);
+  }
 
   constructor(
     private route: ActivatedRoute,
@@ -273,6 +290,7 @@ export class ProductDetailComponent implements OnInit {
 
   ngOnInit() {
     this.pixel.init();
+    this.startTimer();
     const id = this.route.snapshot.paramMap.get('id')!;
     this.productService.getById(id).subscribe({
       next: p => {
