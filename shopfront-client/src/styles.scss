@@ -162,6 +162,10 @@ img { max-width: 100%; display: block; }
 .value-card h3 { font-size: 1rem; margin-bottom: 0.5rem; color: #1d3557; }
 .value-card p { font-size: .9rem; color: #555; line-height: 1.6; }
 
+/* ---- Contact page layout ---- */
+app-contact { display: flex; flex-direction: column; min-height: 100vh; }
+app-contact .page-content { flex: 1; }
+
 /* ---- Contact intro ---- */
 .contact-intro { background: #f0f4ff; border-radius: 10px; padding: 2rem; margin-bottom: 2.5rem; }
 .contact-intro h2 { font-size: 1.6rem; margin-bottom: 0.75rem; color: #1d3557; }

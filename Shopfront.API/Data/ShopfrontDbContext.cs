@@ -57,7 +57,7 @@ public class ShopfrontDbContext : IdentityDbContext
         builder.Entity<SiteSetting>().HasData(
             new SiteSetting { Id = new Guid("b0000000-0000-0000-0000-000000000001"), Key = "site_name", Value = "Shopfront", UpdatedAt = new DateTime(2026, 1, 1) },
             new SiteSetting { Id = new Guid("b0000000-0000-0000-0000-000000000002"), Key = "site_email", Value = "info@shopfront.co.ke", UpdatedAt = new DateTime(2026, 1, 1) },
-            new SiteSetting { Id = new Guid("b0000000-0000-0000-0000-000000000003"), Key = "site_phone", Value = "+254700000000", UpdatedAt = new DateTime(2026, 1, 1) },
+            new SiteSetting { Id = new Guid("b0000000-0000-0000-0000-000000000003"), Key = "site_phone", Value = "+254712637250", UpdatedAt = new DateTime(2026, 1, 1) },
             new SiteSetting { Id = new Guid("b0000000-0000-0000-0000-000000000004"), Key = "site_address", Value = "Nairobi, Kenya", UpdatedAt = new DateTime(2026, 1, 1) },
             new SiteSetting { Id = new Guid("b0000000-0000-0000-0000-000000000005"), Key = "logo_url", Value = "/assets/logo.png", UpdatedAt = new DateTime(2026, 1, 1) }
         );
