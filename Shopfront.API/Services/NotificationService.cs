@@ -72,6 +72,7 @@ public class NotificationService : INotificationService
                 plainTextContent: null,
                 htmlContent: htmlBody
             );
+            msg.SetReplyTo(new EmailAddress(fromEmail, fromName));
 
             var response = await client.SendEmailAsync(msg);
             if (!response.IsSuccessStatusCode)
