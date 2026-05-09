@@ -54,13 +54,17 @@ import { UserService, AdminUser, CreateUser, UpdateUser } from '../../../service
             <td>{{ u.email }}</td>
             <td>{{ u.phoneNumber || '—' }}</td>
             <td>
-              <span *ngIf="u.mustChangePassword" class="must-change">Must change password</span>
-              <span *ngIf="!u.mustChangePassword" style="color:#16a34a;font-size:.85rem">Active</span>
+              <span *ngIf="!u.isActive" style="color:#e63946;font-size:.85rem;font-weight:600">Inactive</span>
+              <span *ngIf="u.isActive && u.mustChangePassword" class="must-change">Must change password</span>
+              <span *ngIf="u.isActive && !u.mustChangePassword" style="color:#16a34a;font-size:.85rem">Active</span>
             </td>
             <td>
               <div style="display:flex;gap:.4rem;flex-wrap:wrap">
                 <button class="btn-sm" (click)="openEdit(u)">Edit</button>
                 <button class="btn-sm" (click)="openPassword(u)">Change Password</button>
+                <button class="btn-sm" [class.danger]="u.isActive" (click)="toggleActive(u)">
+                  {{ u.isActive ? 'Deactivate' : 'Activate' }}
+                </button>
                 <button class="btn-sm danger" (click)="delete(u)">Delete</button>
               </div>
             </td>
@@ -235,6 +239,13 @@ export class AdminUsersComponent implements OnInit {
         this.saving = false;
         this.cdr.markForCheck();
       }
+    });
+  }
+
+  toggleActive(u: AdminUser) {
+    this.userService.toggleActive(u.id).subscribe({
+      next: updated => { u.isActive = updated.isActive; this.cdr.markForCheck(); },
+      error: err => alert(err.error?.error ?? 'Failed to update user.')
     });
   }
 

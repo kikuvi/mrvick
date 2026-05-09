@@ -22,7 +22,7 @@ public class UsersController : ControllerBase
     {
         var users = await _userManager.Users
             .OrderBy(u => u.Email)
-            .Select(u => new UserDto(u.Id, u.Email!, u.FullName, u.PhoneNumber, u.EmailConfirmed, u.MustChangePassword))
+            .Select(u => new UserDto(u.Id, u.Email!, u.FullName, u.PhoneNumber, u.EmailConfirmed, u.MustChangePassword, u.IsActive))
             .ToListAsync();
 
         return Ok(users);
@@ -52,7 +52,7 @@ public class UsersController : ControllerBase
             return BadRequest(new { error = errors });
         }
 
-        return Ok(new UserDto(user.Id, user.Email, user.FullName, user.PhoneNumber, user.EmailConfirmed, user.MustChangePassword));
+        return Ok(new UserDto(user.Id, user.Email!, user.FullName, user.PhoneNumber, user.EmailConfirmed, user.MustChangePassword, user.IsActive));
     }
 
     [HttpPut("{id}")]
@@ -83,7 +83,7 @@ public class UsersController : ControllerBase
             return BadRequest(new { error = errors });
         }
 
-        return Ok(new UserDto(user.Id, user.Email!, user.FullName, user.PhoneNumber, user.EmailConfirmed, user.MustChangePassword));
+        return Ok(new UserDto(user.Id, user.Email!, user.FullName, user.PhoneNumber, user.EmailConfirmed, user.MustChangePassword, user.IsActive));
     }
 
     [HttpPut("{id}/password")]
@@ -106,6 +106,21 @@ public class UsersController : ControllerBase
         await _userManager.UpdateAsync(user);
 
         return NoContent();
+    }
+
+    [HttpPatch("{id}/toggle-active")]
+    public async Task<IActionResult> ToggleActive(string id)
+    {
+        var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (id == currentUserId)
+            return BadRequest(new { error = "You cannot deactivate your own account." });
+
+        var user = await _userManager.FindByIdAsync(id);
+        if (user is null) return NotFound();
+
+        user.IsActive = !user.IsActive;
+        await _userManager.UpdateAsync(user);
+        return Ok(new UserDto(user.Id, user.Email!, user.FullName, user.PhoneNumber, user.EmailConfirmed, user.MustChangePassword, user.IsActive));
     }
 
     [HttpDelete("{id}")]

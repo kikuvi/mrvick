@@ -32,6 +32,8 @@ public class AuthController : ControllerBase
         var user = await _userManager.FindByEmailAsync(dto.Email);
         if (user is null || !await _userManager.CheckPasswordAsync(user, dto.Password))
             return Unauthorized("Invalid email or password.");
+        if (!user.IsActive)
+            return Unauthorized("This account has been deactivated.");
 
         var token = GenerateJwtToken(user);
         return Ok(new AuthResponseDto(token, user.Email!, user.FullName, user.MustChangePassword));

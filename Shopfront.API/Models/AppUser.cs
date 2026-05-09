@@ -6,4 +6,5 @@ public class AppUser : IdentityUser
 {
     public string FullName { get; set; } = string.Empty;
     public bool MustChangePassword { get; set; } = false;
+    public bool IsActive { get; set; } = true;
 }
