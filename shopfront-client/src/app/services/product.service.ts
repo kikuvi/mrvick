@@ -18,6 +18,7 @@ export interface Product {
   ratingsEnabled: boolean;
   averageRating: number;
   ratingCount: number;
+  isActive: boolean;
 }
 
 export interface CreateProduct {
@@ -35,6 +36,8 @@ export class ProductService {
   constructor(private api: ApiService) {}
 
   getAll() { return this.api.get<Product[]>('/products'); }
+  getAllAdmin() { return this.api.get<Product[]>('/products/all', true); }
+  toggleActive(id: string) { return this.api.patch<{ isActive: boolean }>(`/products/${id}/toggle-active`, {}); }
   getById(id: string) { return this.api.get<Product>(`/products/${id}`); }
   create(data: CreateProduct) { return this.api.post<Product>('/products', data, true); }
   update(id: string, data: Partial<CreateProduct>) { return this.api.put<void>(`/products/${id}`, data); }

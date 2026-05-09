@@ -9,6 +9,7 @@ public class Product
     public decimal DiscountPrice { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
+    public bool IsActive { get; set; } = true;
     public bool RatingsEnabled { get; set; } = false;
 
     public ICollection<ProductImage> Images { get; set; } = new List<ProductImage>();

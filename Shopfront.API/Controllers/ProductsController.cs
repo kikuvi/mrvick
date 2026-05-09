@@ -15,6 +15,7 @@ public class ProductsController : ControllerBase
 
     public ProductsController(ShopfrontDbContext db) => _db = db;
 
+    // Public: active products only
     [HttpGet]
     public async Task<IActionResult> GetAll()
     {
@@ -22,15 +23,25 @@ public class ProductsController : ControllerBase
             .Include(p => p.Images)
             .Include(p => p.Variations)
             .Include(p => p.Ratings)
+            .Where(p => p.IsActive)
             .OrderByDescending(p => p.CreatedAt)
-            .Select(p => new ProductDto(
-                p.Id, p.Title, p.Description, p.Price, p.DiscountPrice, p.CreatedAt,
-                p.Images.Select(i => i.ImageUrl).ToList(),
-                p.Variations.Select(v => new VariationDto(v.Id, v.Label)).ToList(),
-                p.RatingsEnabled,
-                p.Ratings.Any(r => r.IsApproved) ? p.Ratings.Where(r => r.IsApproved).Average(r => r.Rating) : 0,
-                p.Ratings.Count(r => r.IsApproved)
-            ))
+            .Select(p => ToDto(p))
+            .ToListAsync();
+
+        return Ok(products);
+    }
+
+    // Admin: all products including inactive
+    [Authorize]
+    [HttpGet("all")]
+    public async Task<IActionResult> GetAllAdmin()
+    {
+        var products = await _db.Products
+            .Include(p => p.Images)
+            .Include(p => p.Variations)
+            .Include(p => p.Ratings)
+            .OrderByDescending(p => p.CreatedAt)
+            .Select(p => ToDto(p))
             .ToListAsync();
 
         return Ok(products);
@@ -55,7 +66,8 @@ public class ProductsController : ControllerBase
             product.Variations.Select(v => new VariationDto(v.Id, v.Label)).ToList(),
             product.RatingsEnabled,
             approvedRatings.Any() ? approvedRatings.Average(r => r.Rating) : 0,
-            approvedRatings.Count
+            approvedRatings.Count,
+            product.IsActive
         ));
     }
 
@@ -70,6 +82,7 @@ public class ProductsController : ControllerBase
             Price = dto.Price,
             DiscountPrice = dto.DiscountPrice,
             RatingsEnabled = dto.RatingsEnabled,
+            IsActive = true,
             Images = dto.ImageUrls.Select(url => new ProductImage { ImageUrl = url }).ToList(),
             Variations = (dto.Variations ?? [])
                 .Where(l => !string.IsNullOrWhiteSpace(l))
@@ -85,7 +98,7 @@ public class ProductsController : ControllerBase
                 product.Price, product.DiscountPrice, product.CreatedAt,
                 product.Images.Select(i => i.ImageUrl).ToList(),
                 product.Variations.Select(v => new VariationDto(v.Id, v.Label)).ToList(),
-                product.RatingsEnabled, 0, 0));
+                product.RatingsEnabled, 0, 0, product.IsActive));
     }
 
     [Authorize]
@@ -126,6 +139,19 @@ public class ProductsController : ControllerBase
         return NoContent();
     }
 
+    // Toggle active/inactive
+    [Authorize]
+    [HttpPatch("{id}/toggle-active")]
+    public async Task<IActionResult> ToggleActive(Guid id)
+    {
+        var product = await _db.Products.FindAsync(id);
+        if (product is null) return NotFound();
+
+        product.IsActive = !product.IsActive;
+        await _db.SaveChangesAsync();
+        return Ok(new { isActive = product.IsActive });
+    }
+
     [Authorize]
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(Guid id)
@@ -137,4 +163,14 @@ public class ProductsController : ControllerBase
         await _db.SaveChangesAsync();
         return NoContent();
     }
+
+    private static ProductDto ToDto(Product p) => new(
+        p.Id, p.Title, p.Description, p.Price, p.DiscountPrice, p.CreatedAt,
+        p.Images.Select(i => i.ImageUrl).ToList(),
+        p.Variations.Select(v => new VariationDto(v.Id, v.Label)).ToList(),
+        p.RatingsEnabled,
+        p.Ratings.Any(r => r.IsApproved) ? p.Ratings.Where(r => r.IsApproved).Average(r => r.Rating) : 0,
+        p.Ratings.Count(r => r.IsApproved),
+        p.IsActive
+    );
 }

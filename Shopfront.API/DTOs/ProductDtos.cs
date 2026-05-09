@@ -33,5 +33,6 @@ public record ProductDto(
     List<VariationDto> Variations,
     bool RatingsEnabled,
     double AverageRating,
-    int RatingCount
+    int RatingCount,
+    bool IsActive
 );

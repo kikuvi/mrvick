@@ -12,6 +12,14 @@ import { ApiService } from '../../../services/api.service';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CommonModule, FormsModule, RouterLink, RichEditorComponent],
   styles: [`
+    .toggle-btn {
+      padding: .3rem .75rem; border-radius: 20px; border: none; cursor: pointer;
+      font-size: .78rem; font-weight: 700; transition: background .15s, color .15s;
+      background: #e5e7eb; color: #6b7280;
+    }
+    .toggle-btn.on { background: #dcfce7; color: #16a34a; }
+    .toggle-btn:hover { filter: brightness(.95); }
+
     /* ---- Modal overlay ---- */
     .editor-overlay {
       position: fixed; inset: 0; background: rgba(0,0,0,.5);
@@ -305,6 +313,7 @@ import { ApiService } from '../../../services/api.service';
       <table class="table">
         <thead>
           <tr>
+            <th>Status</th>
             <th>Title</th>
             <th>Original</th>
             <th>Sale Price</th>
@@ -313,7 +322,12 @@ import { ApiService } from '../../../services/api.service';
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let p of products">
+          <tr *ngFor="let p of products" [style.opacity]="p.isActive ? '1' : '.5'">
+            <td>
+              <button class="toggle-btn" [class.on]="p.isActive" (click)="toggleActive(p)" [title]="p.isActive ? 'Click to deactivate' : 'Click to activate'">
+                {{ p.isActive ? 'Active' : 'Inactive' }}
+              </button>
+            </td>
             <td>{{ p.title }}</td>
             <td>KES {{ p.price | number:'1.0-0' }}</td>
             <td>KES {{ p.discountPrice | number:'1.0-0' }}</td>
@@ -327,7 +341,7 @@ import { ApiService } from '../../../services/api.service';
             </td>
           </tr>
           <tr *ngIf="!products.length">
-            <td colspan="5" class="empty">No products yet. Add one above.</td>
+            <td colspan="6" class="empty">No products yet. Add one above.</td>
           </tr>
         </tbody>
       </table>
@@ -354,8 +368,15 @@ export class AdminProductsComponent implements OnInit {
   ngOnInit() { this.load(); }
 
   load() {
-    this.productService.getAll().subscribe(p => {
+    this.productService.getAllAdmin().subscribe(p => {
       this.products = p;
+      this.cdr.markForCheck();
+    });
+  }
+
+  toggleActive(p: Product) {
+    this.productService.toggleActive(p.id).subscribe(res => {
+      p.isActive = res.isActive;
       this.cdr.markForCheck();
     });
   }
