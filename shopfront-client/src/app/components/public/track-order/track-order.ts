@@ -45,7 +45,6 @@ const STATUS_STEPS = ['New', 'Assigned', 'InTransit', 'Delivered'];
 
       <p class="error" *ngIf="error">Order not found. Please check your tracking code.</p>
     </div>
-    </div>
     <app-footer />
     </div>
   `
