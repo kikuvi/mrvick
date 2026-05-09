@@ -13,7 +13,8 @@ const STATUS_STEPS = ['New', 'Assigned', 'InTransit', 'Delivered'];
   imports: [CommonModule, NavbarComponent, FooterComponent],
   template: `
     <app-navbar />
-    <div class="container page-content">
+    <div style="min-height:calc(100vh - 64px);display:flex;flex-direction:column;">
+    <div class="container page-content" style="flex:1;">
       <h1>Track Order</h1>
 
       <div class="track-card" *ngIf="order">
@@ -44,7 +45,9 @@ const STATUS_STEPS = ['New', 'Assigned', 'InTransit', 'Delivered'];
 
       <p class="error" *ngIf="error">Order not found. Please check your tracking code.</p>
     </div>
+    </div>
     <app-footer />
+    </div>
   `
 })
 export class TrackOrderComponent implements OnInit {
