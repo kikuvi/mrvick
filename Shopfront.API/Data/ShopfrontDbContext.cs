@@ -17,6 +17,7 @@ public class ShopfrontDbContext : IdentityDbContext<AppUser>
     public DbSet<SiteSetting> SiteSettings => Set<SiteSetting>();
     public DbSet<VendorItem> VendorItems => Set<VendorItem>();
     public DbSet<ProductRating> ProductRatings => Set<ProductRating>();
+    public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {

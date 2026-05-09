@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -15,12 +16,14 @@ public class OrdersController : ControllerBase
     private readonly ShopfrontDbContext _db;
     private readonly INotificationService _notifications;
     private readonly IConfiguration _config;
+    private readonly AuditService _audit;
 
-    public OrdersController(ShopfrontDbContext db, INotificationService notifications, IConfiguration config)
+    public OrdersController(ShopfrontDbContext db, INotificationService notifications, IConfiguration config, AuditService audit)
     {
         _db = db;
         _notifications = notifications;
         _config = config;
+        _audit = audit;
     }
 
     [HttpPost]
@@ -231,6 +234,8 @@ public class OrdersController : ControllerBase
         if (order is null) return NotFound();
         order.IsArchived = !order.IsArchived;
         await _db.SaveChangesAsync();
+        var actorEmail = User.FindFirstValue(System.Security.Claims.ClaimTypes.Email);
+        await _audit.LogAsync(order.IsArchived ? "OrderArchived" : "OrderUnarchived", actorEmail, "Order", id.ToString(), order.TrackingToken);
         return NoContent();
     }
 
@@ -256,6 +261,8 @@ public class OrdersController : ControllerBase
         if (message is not null)
             await _notifications.SendSmsAsync(order.Phone, message);
 
+        var actorEmail = User.FindFirstValue(System.Security.Claims.ClaimTypes.Email);
+        await _audit.LogAsync("OrderStatusChanged", actorEmail, "Order", id.ToString(), $"{order.TrackingToken} → {dto.Status}");
         return NoContent();
     }
 

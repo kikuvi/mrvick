@@ -20,6 +20,7 @@ import { AuthService } from '../../../services/auth.service';
           <a routerLink="/admin/vendor-items" routerLinkActive="active">Vendors</a>
           <a routerLink="/admin/reviews" routerLinkActive="active">Reviews</a>
           <a routerLink="/admin/users" routerLinkActive="active">Users</a>
+          <a routerLink="/admin/audit-logs" routerLinkActive="active">Audit Logs</a>
           <a routerLink="/admin/settings" routerLinkActive="active">Settings</a>
         </nav>
         <button class="logout-btn" (click)="logout()">Logout</button>

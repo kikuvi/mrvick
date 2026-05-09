@@ -18,12 +18,14 @@ public class AuthController : ControllerBase
     private readonly UserManager<AppUser> _userManager;
     private readonly IConfiguration _config;
     private readonly INotificationService _notifications;
+    private readonly AuditService _audit;
 
-    public AuthController(UserManager<AppUser> userManager, IConfiguration config, INotificationService notifications)
+    public AuthController(UserManager<AppUser> userManager, IConfiguration config, INotificationService notifications, AuditService audit)
     {
         _userManager = userManager;
         _config = config;
         _notifications = notifications;
+        _audit = audit;
     }
 
     [HttpPost("login")]
@@ -36,6 +38,7 @@ public class AuthController : ControllerBase
             return Unauthorized("This account has been deactivated.");
 
         var token = GenerateJwtToken(user);
+        await _audit.LogAsync("Login", user.Email, "User", user.Id);
         return Ok(new AuthResponseDto(token, user.Email!, user.FullName, user.MustChangePassword));
     }
 

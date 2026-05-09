@@ -1,9 +1,11 @@
+using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Shopfront.API.Data;
 using Shopfront.API.DTOs;
 using Shopfront.API.Models;
+using Shopfront.API.Services;
 
 namespace Shopfront.API.Controllers;
 
@@ -12,8 +14,13 @@ namespace Shopfront.API.Controllers;
 public class ProductsController : ControllerBase
 {
     private readonly ShopfrontDbContext _db;
+    private readonly AuditService _audit;
 
-    public ProductsController(ShopfrontDbContext db) => _db = db;
+    public ProductsController(ShopfrontDbContext db, AuditService audit)
+    {
+        _db = db;
+        _audit = audit;
+    }
 
     // Public: active products only
     [HttpGet]
@@ -93,6 +100,9 @@ public class ProductsController : ControllerBase
         _db.Products.Add(product);
         await _db.SaveChangesAsync();
 
+        var actorEmail = User.FindFirstValue(System.Security.Claims.ClaimTypes.Email);
+        await _audit.LogAsync("ProductCreated", actorEmail, "Product", product.Id.ToString(), product.Title);
+
         return CreatedAtAction(nameof(GetById), new { id = product.Id },
             new ProductDto(product.Id, product.Title, product.Description,
                 product.Price, product.DiscountPrice, product.CreatedAt,
@@ -136,6 +146,8 @@ public class ProductsController : ControllerBase
         if (dto.RatingsEnabled is not null) product.RatingsEnabled = dto.RatingsEnabled.Value;
 
         await _db.SaveChangesAsync();
+        var actorEmail = User.FindFirstValue(System.Security.Claims.ClaimTypes.Email);
+        await _audit.LogAsync("ProductUpdated", actorEmail, "Product", id.ToString(), product.Title);
         return NoContent();
     }
 
@@ -149,6 +161,8 @@ public class ProductsController : ControllerBase
 
         product.IsActive = !product.IsActive;
         await _db.SaveChangesAsync();
+        var actorEmail = User.FindFirstValue(System.Security.Claims.ClaimTypes.Email);
+        await _audit.LogAsync(product.IsActive ? "ProductActivated" : "ProductDeactivated", actorEmail, "Product", id.ToString(), product.Title);
         return Ok(new { isActive = product.IsActive });
     }
 
@@ -159,8 +173,11 @@ public class ProductsController : ControllerBase
         var product = await _db.Products.FindAsync(id);
         if (product is null) return NotFound();
 
+        var title = product.Title;
         _db.Products.Remove(product);
         await _db.SaveChangesAsync();
+        var actorEmail = User.FindFirstValue(System.Security.Claims.ClaimTypes.Email);
+        await _audit.LogAsync("ProductDeleted", actorEmail, "Product", id.ToString(), title);
         return NoContent();
     }
 

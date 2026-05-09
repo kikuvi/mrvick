@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Shopfront.API.DTOs;
 using Shopfront.API.Models;
+using Shopfront.API.Services;
 
 namespace Shopfront.API.Controllers;
 
@@ -14,8 +15,13 @@ namespace Shopfront.API.Controllers;
 public class UsersController : ControllerBase
 {
     private readonly UserManager<AppUser> _userManager;
+    private readonly AuditService _audit;
 
-    public UsersController(UserManager<AppUser> userManager) => _userManager = userManager;
+    public UsersController(UserManager<AppUser> userManager, AuditService audit)
+    {
+        _userManager = userManager;
+        _audit = audit;
+    }
 
     [HttpGet]
     public async Task<IActionResult> GetAll()
@@ -52,6 +58,8 @@ public class UsersController : ControllerBase
             return BadRequest(new { error = errors });
         }
 
+        var actorEmail = User.FindFirstValue(ClaimTypes.Email);
+        await _audit.LogAsync("UserCreated", actorEmail, "User", user.Id, user.Email);
         return Ok(new UserDto(user.Id, user.Email!, user.FullName, user.PhoneNumber, user.EmailConfirmed, user.MustChangePassword, user.IsActive));
     }
 
@@ -83,6 +91,8 @@ public class UsersController : ControllerBase
             return BadRequest(new { error = errors });
         }
 
+        var actorEmail = User.FindFirstValue(ClaimTypes.Email);
+        await _audit.LogAsync("UserUpdated", actorEmail, "User", user.Id, user.Email);
         return Ok(new UserDto(user.Id, user.Email!, user.FullName, user.PhoneNumber, user.EmailConfirmed, user.MustChangePassword, user.IsActive));
     }
 
@@ -105,6 +115,8 @@ public class UsersController : ControllerBase
         user.MustChangePassword = true;
         await _userManager.UpdateAsync(user);
 
+        var actorEmail = User.FindFirstValue(ClaimTypes.Email);
+        await _audit.LogAsync("PasswordReset", actorEmail, "User", id, user.Email);
         return NoContent();
     }
 
@@ -120,6 +132,8 @@ public class UsersController : ControllerBase
 
         user.IsActive = !user.IsActive;
         await _userManager.UpdateAsync(user);
+        var actorEmail = User.FindFirstValue(ClaimTypes.Email);
+        await _audit.LogAsync(user.IsActive ? "UserActivated" : "UserDeactivated", actorEmail, "User", user.Id, user.Email);
         return Ok(new UserDto(user.Id, user.Email!, user.FullName, user.PhoneNumber, user.EmailConfirmed, user.MustChangePassword, user.IsActive));
     }
 
