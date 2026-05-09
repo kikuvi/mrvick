@@ -1,7 +1,7 @@
 import { Component, OnInit, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { UserService, AdminUser, CreateUser } from '../../../services/user.service';
+import { UserService, AdminUser, CreateUser, UpdateUser } from '../../../services/user.service';
 
 @Component({
   selector: 'app-admin-users',
@@ -59,6 +59,7 @@ import { UserService, AdminUser, CreateUser } from '../../../services/user.servi
             </td>
             <td>
               <div style="display:flex;gap:.4rem;flex-wrap:wrap">
+                <button class="btn-sm" (click)="openEdit(u)">Edit</button>
                 <button class="btn-sm" (click)="openPassword(u)">Change Password</button>
                 <button class="btn-sm danger" (click)="delete(u)">Delete</button>
               </div>
@@ -103,6 +104,34 @@ import { UserService, AdminUser, CreateUser } from '../../../services/user.servi
       </div>
     </div>
 
+    <!-- Edit User Modal -->
+    <div class="modal-overlay" *ngIf="editUser" (click)="onOverlay($event, 'edit')">
+      <div class="modal" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h3>Edit User</h3>
+          <button class="modal-close" (click)="editUser = null">×</button>
+        </div>
+        <div class="modal-body">
+          <label>Full Name
+            <input type="text" [(ngModel)]="editForm.fullName" name="editFullName" />
+          </label>
+          <label>Phone Number
+            <input type="tel" [(ngModel)]="editForm.phoneNumber" name="editPhone" />
+          </label>
+          <label>Email
+            <input type="email" [(ngModel)]="editForm.email" name="editEmail" />
+          </label>
+          <span class="error-msg" *ngIf="editError">{{ editError }}</span>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" style="font-size:.85rem;padding:.5rem 1.25rem" (click)="editUser = null">Cancel</button>
+          <button class="btn btn-primary" style="font-size:.85rem;padding:.5rem 1.25rem" [disabled]="saving" (click)="saveEdit()">
+            {{ saving ? 'Saving…' : 'Save Changes' }}
+          </button>
+        </div>
+      </div>
+    </div>
+
     <!-- Change Password Modal -->
     <div class="modal-overlay" *ngIf="pwUser" (click)="onOverlay($event, 'pw')">
       <div class="modal" (click)="$event.stopPropagation()">
@@ -136,6 +165,9 @@ export class AdminUsersComponent implements OnInit {
   pwUser: AdminUser | null = null;
   newPw = '';
   pwError = '';
+  editUser: AdminUser | null = null;
+  editForm: UpdateUser = { fullName: '', phoneNumber: '', email: '' };
+  editError = '';
   saving = false;
 
   constructor(private userService: UserService, private cdr: ChangeDetectorRef) {}
@@ -150,6 +182,27 @@ export class AdminUsersComponent implements OnInit {
     this.newUser = { fullName: '', phoneNumber: '', email: '', password: '' };
     this.createError = '';
     this.showCreate = true;
+  }
+
+  openEdit(u: AdminUser) {
+    this.editUser = u;
+    this.editForm = { fullName: u.fullName, phoneNumber: u.phoneNumber ?? '', email: u.email };
+    this.editError = '';
+  }
+
+  saveEdit() {
+    if (!this.editUser) return;
+    this.editError = '';
+    this.saving = true;
+    this.cdr.markForCheck();
+    this.userService.update(this.editUser.id, this.editForm).subscribe({
+      next: () => { this.editUser = null; this.saving = false; this.load(); },
+      error: err => {
+        this.editError = err.error?.error ?? 'Failed to update user.';
+        this.saving = false;
+        this.cdr.markForCheck();
+      }
+    });
   }
 
   openPassword(u: AdminUser) {
@@ -196,6 +249,7 @@ export class AdminUsersComponent implements OnInit {
   onOverlay(e: MouseEvent, modal: string) {
     if ((e.target as HTMLElement).classList.contains('modal-overlay')) {
       if (modal === 'create') this.showCreate = false;
+      if (modal === 'edit') this.editUser = null;
       if (modal === 'pw') this.pwUser = null;
     }
   }

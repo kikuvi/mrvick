@@ -6,4 +6,6 @@ public record CreateUserDto(string Email, string Password, string FullName, stri
 
 public record UpdatePasswordDto(string NewPassword);
 
+public record UpdateUserDto(string FullName, string? PhoneNumber, string Email);
+
 public record ChangeOwnPasswordDto(string CurrentPassword, string NewPassword);

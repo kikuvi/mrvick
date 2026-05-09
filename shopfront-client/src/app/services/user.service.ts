@@ -17,12 +17,19 @@ export interface CreateUser {
   phoneNumber: string;
 }
 
+export interface UpdateUser {
+  fullName: string;
+  phoneNumber: string;
+  email: string;
+}
+
 @Injectable({ providedIn: 'root' })
 export class UserService {
   constructor(private api: ApiService) {}
 
   getAll() { return this.api.get<AdminUser[]>('/users', true); }
   create(data: CreateUser) { return this.api.post<AdminUser>('/users', data, true); }
+  update(id: string, data: UpdateUser) { return this.api.put<AdminUser>(`/users/${id}`, data); }
   updatePassword(id: string, newPassword: string) { return this.api.put<void>(`/users/${id}/password`, { newPassword }); }
   delete(id: string) { return this.api.delete<void>(`/users/${id}`); }
 }

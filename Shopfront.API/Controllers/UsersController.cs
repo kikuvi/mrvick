@@ -55,6 +55,37 @@ public class UsersController : ControllerBase
         return Ok(new UserDto(user.Id, user.Email, user.FullName, user.PhoneNumber, user.EmailConfirmed, user.MustChangePassword));
     }
 
+    [HttpPut("{id}")]
+    public async Task<IActionResult> Update(string id, UpdateUserDto dto)
+    {
+        var user = await _userManager.FindByIdAsync(id);
+        if (user is null) return NotFound();
+
+        // Check email not taken by another user
+        if (!string.Equals(user.Email, dto.Email, StringComparison.OrdinalIgnoreCase))
+        {
+            var existing = await _userManager.FindByEmailAsync(dto.Email);
+            if (existing is not null)
+                return BadRequest(new { error = "That email is already in use." });
+            user.UserName = dto.Email;
+            user.Email = dto.Email;
+            user.NormalizedEmail = dto.Email.ToUpperInvariant();
+            user.NormalizedUserName = dto.Email.ToUpperInvariant();
+        }
+
+        user.FullName = dto.FullName.Trim();
+        user.PhoneNumber = dto.PhoneNumber?.Trim();
+
+        var result = await _userManager.UpdateAsync(user);
+        if (!result.Succeeded)
+        {
+            var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+            return BadRequest(new { error = errors });
+        }
+
+        return Ok(new UserDto(user.Id, user.Email!, user.FullName, user.PhoneNumber, user.EmailConfirmed, user.MustChangePassword));
+    }
+
     [HttpPut("{id}/password")]
     public async Task<IActionResult> UpdatePassword(string id, UpdatePasswordDto dto)
     {
