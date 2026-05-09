@@ -65,7 +65,6 @@ import { UserService, AdminUser, CreateUser, UpdateUser } from '../../../service
                 <button class="btn-sm" [class.danger]="u.isActive" (click)="toggleActive(u)">
                   {{ u.isActive ? 'Deactivate' : 'Activate' }}
                 </button>
-                <button class="btn-sm danger" (click)="delete(u)">Delete</button>
               </div>
             </td>
           </tr>
