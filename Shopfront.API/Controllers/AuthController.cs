@@ -1,10 +1,12 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using Shopfront.API.DTOs;
+using Shopfront.API.Models;
 using Shopfront.API.Services;
 
 namespace Shopfront.API.Controllers;
@@ -13,11 +15,11 @@ namespace Shopfront.API.Controllers;
 [Route("api/[controller]")]
 public class AuthController : ControllerBase
 {
-    private readonly UserManager<IdentityUser> _userManager;
+    private readonly UserManager<AppUser> _userManager;
     private readonly IConfiguration _config;
     private readonly INotificationService _notifications;
 
-    public AuthController(UserManager<IdentityUser> userManager, IConfiguration config, INotificationService notifications)
+    public AuthController(UserManager<AppUser> userManager, IConfiguration config, INotificationService notifications)
     {
         _userManager = userManager;
         _config = config;
@@ -32,15 +34,35 @@ public class AuthController : ControllerBase
             return Unauthorized("Invalid email or password.");
 
         var token = GenerateJwtToken(user);
-        return Ok(new AuthResponseDto(token, user.Email!));
+        return Ok(new AuthResponseDto(token, user.Email!, user.FullName, user.MustChangePassword));
+    }
+
+    [Authorize]
+    [HttpPost("change-password")]
+    public async Task<IActionResult> ChangePassword(ChangeOwnPasswordDto dto)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+        var user = await _userManager.FindByIdAsync(userId);
+        if (user is null) return NotFound();
+
+        var result = await _userManager.ChangePasswordAsync(user, dto.CurrentPassword, dto.NewPassword);
+        if (!result.Succeeded)
+        {
+            var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+            return BadRequest(new { error = errors });
+        }
+
+        user.MustChangePassword = false;
+        await _userManager.UpdateAsync(user);
+
+        var newToken = GenerateJwtToken(user);
+        return Ok(new AuthResponseDto(newToken, user.Email!, user.FullName, false));
     }
 
     [HttpPost("forgot-password")]
     public async Task<IActionResult> ForgotPassword(ForgotPasswordDto dto)
     {
         var user = await _userManager.FindByEmailAsync(dto.Email);
-
-        // Always return OK to avoid email enumeration
         if (user is null) return Ok(new { message = "If that email exists, a reset link has been sent." });
 
         var token = await _userManager.GeneratePasswordResetTokenAsync(user);
@@ -78,7 +100,7 @@ public class AuthController : ControllerBase
         return Ok(new { message = "Password reset successfully." });
     }
 
-    private string GenerateJwtToken(IdentityUser user)
+    private string GenerateJwtToken(AppUser user)
     {
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]!));
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);

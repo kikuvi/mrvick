@@ -9,6 +9,7 @@ export const routes: Routes = [
   { path: 'track/:token', loadComponent: () => import('./components/public/track-order/track-order').then(m => m.TrackOrderComponent) },
   { path: 'order-confirmed/:token', loadComponent: () => import('./components/public/thank-you/thank-you').then(m => m.ThankYouComponent) },
   { path: 'admin/login', loadComponent: () => import('./components/admin/login/login').then(m => m.AdminLoginComponent) },
+  { path: 'admin/change-password', loadComponent: () => import('./components/admin/change-password/change-password').then(m => m.ChangePasswordComponent) },
   { path: 'admin/forgot-password', loadComponent: () => import('./components/admin/forgot-password/forgot-password').then(m => m.ForgotPasswordComponent) },
   { path: 'admin/reset-password', loadComponent: () => import('./components/admin/reset-password/reset-password').then(m => m.ResetPasswordComponent) },
   {

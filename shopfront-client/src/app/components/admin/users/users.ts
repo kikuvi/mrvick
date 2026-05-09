@@ -1,7 +1,7 @@
 import { Component, OnInit, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { UserService, AdminUser } from '../../../services/user.service';
+import { UserService, AdminUser, CreateUser } from '../../../services/user.service';
 
 @Component({
   selector: 'app-admin-users',
@@ -15,7 +15,7 @@ import { UserService, AdminUser } from '../../../services/user.service';
       z-index: 300; padding: 1rem;
     }
     .modal {
-      background: #fff; border-radius: 12px; width: 100%; max-width: 420px;
+      background: #fff; border-radius: 12px; width: 100%; max-width: 440px;
       box-shadow: 0 12px 48px rgba(0,0,0,.22); overflow: hidden;
     }
     .modal-header {
@@ -35,6 +35,7 @@ import { UserService, AdminUser } from '../../../services/user.service';
     .modal-body input:focus { outline: none; border-color: #1d3557; box-shadow: 0 0 0 3px rgba(29,53,87,.1); }
     .modal-footer { padding: .9rem 1.4rem; border-top: 1px solid #eee; display: flex; justify-content: flex-end; gap: .6rem; }
     .error-msg { color: #e63946; font-size: .85rem; }
+    .must-change { font-size: .75rem; background: #fef3c7; color: #92400e; border-radius: 99px; padding: .15rem .6rem; font-weight: 600; }
   `],
   template: `
     <div class="admin-section">
@@ -45,12 +46,17 @@ import { UserService, AdminUser } from '../../../services/user.service';
 
       <table class="table">
         <thead>
-          <tr><th>Email</th><th>Confirmed</th><th>Actions</th></tr>
+          <tr><th>Name</th><th>Email</th><th>Phone</th><th>Status</th><th>Actions</th></tr>
         </thead>
         <tbody>
           <tr *ngFor="let u of users">
+            <td>{{ u.fullName || '—' }}</td>
             <td>{{ u.email }}</td>
-            <td>{{ u.emailConfirmed ? 'Yes' : 'No' }}</td>
+            <td>{{ u.phoneNumber || '—' }}</td>
+            <td>
+              <span *ngIf="u.mustChangePassword" class="must-change">Must change password</span>
+              <span *ngIf="!u.mustChangePassword" style="color:#16a34a;font-size:.85rem">Active</span>
+            </td>
             <td>
               <div style="display:flex;gap:.4rem;flex-wrap:wrap">
                 <button class="btn-sm" (click)="openPassword(u)">Change Password</button>
@@ -59,7 +65,7 @@ import { UserService, AdminUser } from '../../../services/user.service';
             </td>
           </tr>
           <tr *ngIf="!users.length">
-            <td colspan="3" class="empty">No users found.</td>
+            <td colspan="5" class="empty">No users found.</td>
           </tr>
         </tbody>
       </table>
@@ -73,12 +79,19 @@ import { UserService, AdminUser } from '../../../services/user.service';
           <button class="modal-close" (click)="showCreate = false">×</button>
         </div>
         <div class="modal-body">
+          <label>Full Name
+            <input type="text" placeholder="e.g. Jane Wanjiru" [(ngModel)]="newUser.fullName" name="newFullName" />
+          </label>
+          <label>Phone Number
+            <input type="tel" placeholder="e.g. 0712345678" [(ngModel)]="newUser.phoneNumber" name="newPhone" />
+          </label>
           <label>Email
-            <input type="email" placeholder="user@example.com" [(ngModel)]="newEmail" name="newEmail" />
+            <input type="email" placeholder="user@example.com" [(ngModel)]="newUser.email" name="newEmail" />
           </label>
-          <label>Password
-            <input type="password" placeholder="Min 8 characters" [(ngModel)]="newPassword" name="newPassword" />
+          <label>Temporary Password
+            <input type="password" placeholder="Min 8 characters" [(ngModel)]="newUser.password" name="newPassword" />
           </label>
+          <p style="margin:0;font-size:.8rem;color:#888">User will be required to change this password on first login.</p>
           <span class="error-msg" *ngIf="createError">{{ createError }}</span>
         </div>
         <div class="modal-footer">
@@ -94,20 +107,21 @@ import { UserService, AdminUser } from '../../../services/user.service';
     <div class="modal-overlay" *ngIf="pwUser" (click)="onOverlay($event, 'pw')">
       <div class="modal" (click)="$event.stopPropagation()">
         <div class="modal-header">
-          <h3>Change Password</h3>
+          <h3>Reset Password</h3>
           <button class="modal-close" (click)="pwUser = null">×</button>
         </div>
         <div class="modal-body">
-          <p style="margin:0;color:#555;font-size:.9rem">{{ pwUser.email }}</p>
+          <p style="margin:0;color:#555;font-size:.9rem">{{ pwUser.fullName || pwUser.email }}</p>
           <label>New Password
             <input type="password" placeholder="Min 8 characters" [(ngModel)]="newPw" name="newPw" />
           </label>
+          <p style="margin:0;font-size:.8rem;color:#888">User will be required to change this password on next login.</p>
           <span class="error-msg" *ngIf="pwError">{{ pwError }}</span>
         </div>
         <div class="modal-footer">
           <button class="btn btn-secondary" style="font-size:.85rem;padding:.5rem 1.25rem" (click)="pwUser = null">Cancel</button>
           <button class="btn btn-primary" style="font-size:.85rem;padding:.5rem 1.25rem" [disabled]="saving" (click)="changePassword()">
-            {{ saving ? 'Saving…' : 'Save Password' }}
+            {{ saving ? 'Saving…' : 'Reset Password' }}
           </button>
         </div>
       </div>
@@ -117,8 +131,7 @@ import { UserService, AdminUser } from '../../../services/user.service';
 export class AdminUsersComponent implements OnInit {
   users: AdminUser[] = [];
   showCreate = false;
-  newEmail = '';
-  newPassword = '';
+  newUser: CreateUser = { fullName: '', phoneNumber: '', email: '', password: '' };
   createError = '';
   pwUser: AdminUser | null = null;
   newPw = '';
@@ -134,7 +147,8 @@ export class AdminUsersComponent implements OnInit {
   }
 
   openCreate() {
-    this.newEmail = ''; this.newPassword = ''; this.createError = '';
+    this.newUser = { fullName: '', phoneNumber: '', email: '', password: '' };
+    this.createError = '';
     this.showCreate = true;
   }
 
@@ -146,7 +160,7 @@ export class AdminUsersComponent implements OnInit {
     this.createError = '';
     this.saving = true;
     this.cdr.markForCheck();
-    this.userService.create(this.newEmail, this.newPassword).subscribe({
+    this.userService.create(this.newUser).subscribe({
       next: () => { this.showCreate = false; this.saving = false; this.load(); },
       error: err => {
         this.createError = err.error?.error ?? 'Failed to create user.';
@@ -162,7 +176,7 @@ export class AdminUsersComponent implements OnInit {
     this.saving = true;
     this.cdr.markForCheck();
     this.userService.updatePassword(this.pwUser.id, this.newPw).subscribe({
-      next: () => { this.pwUser = null; this.saving = false; this.cdr.markForCheck(); },
+      next: () => { this.pwUser = null; this.saving = false; this.load(); },
       error: err => {
         this.pwError = err.error?.error ?? 'Failed to update password.';
         this.saving = false;
@@ -172,7 +186,7 @@ export class AdminUsersComponent implements OnInit {
   }
 
   delete(u: AdminUser) {
-    if (!confirm(`Delete user ${u.email}? This cannot be undone.`)) return;
+    if (!confirm(`Delete user ${u.fullName || u.email}? This cannot be undone.`)) return;
     this.userService.delete(u.id).subscribe({
       next: () => this.load(),
       error: err => alert(err.error?.error ?? 'Failed to delete user.')

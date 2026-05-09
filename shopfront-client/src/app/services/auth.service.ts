@@ -8,18 +8,39 @@ export class AuthService {
   constructor(private api: ApiService, private router: Router) {}
 
   login(email: string, password: string) {
-    return this.api.post<{ token: string; email: string }>('/auth/login', { email, password }).pipe(
-      tap(res => localStorage.setItem('token', res.token))
+    return this.api.post<{ token: string; email: string; fullName: string; mustChangePassword: boolean }>(
+      '/auth/login', { email, password }
+    ).pipe(
+      tap(res => {
+        localStorage.setItem('token', res.token);
+        localStorage.setItem('fullName', res.fullName);
+      })
+    );
+  }
+
+  changePassword(currentPassword: string, newPassword: string) {
+    return this.api.post<{ token: string; email: string; fullName: string; mustChangePassword: boolean }>(
+      '/auth/change-password', { currentPassword, newPassword }, true
+    ).pipe(
+      tap(res => {
+        localStorage.setItem('token', res.token);
+        localStorage.setItem('fullName', res.fullName);
+      })
     );
   }
 
   logout() {
     localStorage.removeItem('token');
+    localStorage.removeItem('fullName');
     this.router.navigate(['/admin/login']);
   }
 
   isLoggedIn(): boolean {
     return !!localStorage.getItem('token');
+  }
+
+  getFullName(): string {
+    return localStorage.getItem('fullName') ?? '';
   }
 
   forgotPassword(email: string) {

@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Shopfront.API.DTOs;
+using Shopfront.API.Models;
 
 namespace Shopfront.API.Controllers;
 
@@ -12,16 +13,16 @@ namespace Shopfront.API.Controllers;
 [Authorize]
 public class UsersController : ControllerBase
 {
-    private readonly UserManager<IdentityUser> _userManager;
+    private readonly UserManager<AppUser> _userManager;
 
-    public UsersController(UserManager<IdentityUser> userManager) => _userManager = userManager;
+    public UsersController(UserManager<AppUser> userManager) => _userManager = userManager;
 
     [HttpGet]
     public async Task<IActionResult> GetAll()
     {
         var users = await _userManager.Users
             .OrderBy(u => u.Email)
-            .Select(u => new UserDto(u.Id, u.Email!, u.EmailConfirmed))
+            .Select(u => new UserDto(u.Id, u.Email!, u.FullName, u.PhoneNumber, u.EmailConfirmed, u.MustChangePassword))
             .ToListAsync();
 
         return Ok(users);
@@ -34,16 +35,24 @@ public class UsersController : ControllerBase
         if (existing is not null)
             return BadRequest(new { error = "A user with that email already exists." });
 
-        var user = new IdentityUser { UserName = dto.Email, Email = dto.Email, EmailConfirmed = true };
-        var result = await _userManager.CreateAsync(user, dto.Password);
+        var user = new AppUser
+        {
+            UserName = dto.Email,
+            Email = dto.Email,
+            EmailConfirmed = true,
+            FullName = dto.FullName.Trim(),
+            PhoneNumber = dto.PhoneNumber?.Trim(),
+            MustChangePassword = true
+        };
 
+        var result = await _userManager.CreateAsync(user, dto.Password);
         if (!result.Succeeded)
         {
             var errors = string.Join(", ", result.Errors.Select(e => e.Description));
             return BadRequest(new { error = errors });
         }
 
-        return Ok(new UserDto(user.Id, user.Email, user.EmailConfirmed));
+        return Ok(new UserDto(user.Id, user.Email, user.FullName, user.PhoneNumber, user.EmailConfirmed, user.MustChangePassword));
     }
 
     [HttpPut("{id}/password")]
@@ -60,6 +69,10 @@ public class UsersController : ControllerBase
             var errors = string.Join(", ", result.Errors.Select(e => e.Description));
             return BadRequest(new { error = errors });
         }
+
+        // Admin-reset password: mark user must change on next login
+        user.MustChangePassword = true;
+        await _userManager.UpdateAsync(user);
 
         return NoContent();
     }

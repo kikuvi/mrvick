@@ -4,7 +4,7 @@ using Shopfront.API.Models;
 
 namespace Shopfront.API.Data;
 
-public class ShopfrontDbContext : IdentityDbContext
+public class ShopfrontDbContext : IdentityDbContext<AppUser>
 {
     public ShopfrontDbContext(DbContextOptions<ShopfrontDbContext> options) : base(options) { }
 

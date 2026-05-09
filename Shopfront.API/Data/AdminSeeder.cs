@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Shopfront.API.Models;
 
 namespace Shopfront.API.Data;
 
@@ -7,24 +8,62 @@ public static class AdminSeeder
 {
     public static async Task SeedAsync(IServiceProvider services)
     {
-        var userManager = services.GetRequiredService<UserManager<IdentityUser>>();
+        var userManager = services.GetRequiredService<UserManager<AppUser>>();
         var db = services.GetRequiredService<ShopfrontDbContext>();
 
         // --- Admin user ---
-        const string email = "admin@shopfront.co.ke";
-        const string password = "Admin@1234";
+        const string email    = "joneskikuvi@gmail.com";
+        const string password = "Muthioni123!@#";
 
         var existing = await userManager.FindByEmailAsync(email);
         if (existing is null)
         {
-            var user = new IdentityUser { UserName = email, Email = email, EmailConfirmed = true };
+            var user = new AppUser
+            {
+                UserName = email,
+                Email = email,
+                EmailConfirmed = true,
+                FullName = "John Kikuvi",
+                PhoneNumber = "0712523444",
+                MustChangePassword = false
+            };
             var result = await userManager.CreateAsync(user, password);
             if (!result.Succeeded)
             {
                 var errors = string.Join(", ", result.Errors.Select(e => e.Description));
                 throw new Exception($"Failed to seed admin user: {errors}");
             }
-            Console.WriteLine("Admin user created: admin@shopfront.co.ke / Admin@1234");
+            Console.WriteLine($"Admin user created: {email}");
+        }
+        else
+        {
+            // Update existing admin details if needed
+            existing.FullName = "John Kikuvi";
+            existing.PhoneNumber = "0712523444";
+            existing.MustChangePassword = false;
+            await userManager.UpdateAsync(existing);
+
+            // Update email/username if old admin still exists
+            if (existing.Email != email)
+            {
+                existing.Email = email;
+                existing.UserName = email;
+                existing.NormalizedEmail = email.ToUpperInvariant();
+                existing.NormalizedUserName = email.ToUpperInvariant();
+                await userManager.UpdateAsync(existing);
+            }
+
+            // Ensure password is set to new one
+            var token = await userManager.GeneratePasswordResetTokenAsync(existing);
+            await userManager.ResetPasswordAsync(existing, token, password);
+        }
+
+        // Also remove old admin account if it still exists
+        var oldAdmin = await userManager.FindByEmailAsync("admin@shopfront.co.ke");
+        if (oldAdmin is not null && oldAdmin.Email != email)
+        {
+            await userManager.DeleteAsync(oldAdmin);
+            Console.WriteLine("Removed old admin@shopfront.co.ke account.");
         }
 
         // --- Page content ---

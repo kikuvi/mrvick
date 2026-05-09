@@ -39,7 +39,13 @@ export class AdminLoginComponent {
     this.loading = true;
     this.error = '';
     this.auth.login(this.email, this.password).subscribe({
-      next: () => this.router.navigate(['/admin/dashboard']),
+      next: res => {
+        if (res.mustChangePassword) {
+          this.router.navigate(['/admin/change-password']);
+        } else {
+          this.router.navigate(['/admin/dashboard']);
+        }
+      },
       error: () => { this.error = 'Invalid email or password.'; this.loading = false; this.cdr.markForCheck(); }
     });
   }
