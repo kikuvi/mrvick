@@ -378,6 +378,9 @@ namespace Shopfront.API.Migrations
                     b.Property<decimal>("Price")
                         .HasColumnType("decimal(18,2)");
 
+                    b.Property<bool>("RatingsEnabled")
+                        .HasColumnType("bit");
+
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -405,6 +408,39 @@ namespace Shopfront.API.Migrations
                     b.HasIndex("ProductId");
 
                     b.ToTable("ProductImages");
+                });
+
+            modelBuilder.Entity("Shopfront.API.Models.ProductRating", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Comment")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CustomerName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsApproved")
+                        .HasColumnType("bit");
+
+                    b.Property<Guid>("ProductId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("Rating")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductId");
+
+                    b.ToTable("ProductRatings");
                 });
 
             modelBuilder.Entity("Shopfront.API.Models.ProductVariation", b =>
@@ -631,6 +667,17 @@ namespace Shopfront.API.Migrations
                     b.Navigation("Product");
                 });
 
+            modelBuilder.Entity("Shopfront.API.Models.ProductRating", b =>
+                {
+                    b.HasOne("Shopfront.API.Models.Product", "Product")
+                        .WithMany("Ratings")
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Product");
+                });
+
             modelBuilder.Entity("Shopfront.API.Models.ProductVariation", b =>
                 {
                     b.HasOne("Shopfront.API.Models.Product", "Product")
@@ -647,6 +694,8 @@ namespace Shopfront.API.Migrations
                     b.Navigation("Images");
 
                     b.Navigation("Orders");
+
+                    b.Navigation("Ratings");
 
                     b.Navigation("Variations");
                 });
