@@ -8,6 +8,7 @@ import { FooterComponent } from '../../shared/footer/footer';
 import { ProductService, Product } from '../../../services/product.service';
 import { OrderService } from '../../../services/order.service';
 import { PixelService } from '../../../services/pixel.service';
+import { RatingService, Rating, SubmitRating } from '../../../services/rating.service';
 
 const KENYA_COUNTIES = [
   'Baringo','Bomet','Bungoma','Busia','Elgeyo-Marakwet','Embu','Garissa','Homa Bay',
@@ -42,6 +43,18 @@ const KENYA_COUNTIES = [
     .variation-option.selected { border-color: #1d3557; background: #eef3ff; }
     .variation-option input[type="radio"] { accent-color: #1d3557; width: 16px; height: 16px; flex-shrink: 0; }
     .variation-option span { font-size: 0.95rem; color: #1a1a1a; }
+    .rating-section { background: #f9fafb; padding: 2rem 1rem; }
+    .rating-section h3 { text-align: center; font-size: 1.1rem; color: #1a1a1a; margin-bottom: 1.25rem; }
+    .rating-form { max-width: 560px; margin: 0 auto; background: #fff; border-radius: 10px; padding: 1.25rem 1.4rem; box-shadow: 0 2px 8px rgba(0,0,0,.07); display: flex; flex-direction: column; gap: 0.85rem; }
+    .star-row { display: flex; gap: 0.3rem; }
+    .star-btn { background: none; border: none; font-size: 1.8rem; cursor: pointer; color: #d1d5db; transition: color .1s; line-height: 1; padding: 0; }
+    .star-btn.filled { color: #f59e0b; }
+    .rating-input { padding: 0.6rem 0.8rem; border: 1.5px solid #d1d5db; border-radius: 7px; font-size: .9rem; width: 100%; box-sizing: border-box; }
+    .rating-input:focus { outline: none; border-color: #1d3557; }
+    .rating-submit { background: #1d3557; color: #fff; border: none; border-radius: 7px; padding: .65rem 1.5rem; font-size: .95rem; font-weight: 600; cursor: pointer; transition: background .15s; }
+    .rating-submit:hover { background: #16304f; }
+    .rating-submit:disabled { opacity: .6; cursor: not-allowed; }
+    .rating-success { text-align: center; color: #16a34a; font-size: .9rem; font-weight: 600; }
     .reviews-section { background: #fff; padding: 2.5rem 1rem; }
     .reviews-section h3 { text-align: center; font-size: 1.3rem; color: #1a1a1a; margin-bottom: 1.5rem; }
     .reviews-carousel { max-width: 560px; margin: 0 auto; }
@@ -175,65 +188,48 @@ const KENYA_COUNTIES = [
 
       </div>
 
+      <!-- Rate this product -->
+      <div class="rating-section" *ngIf="product.ratingsEnabled">
+        <h3>Leave a Review</h3>
+        <div class="rating-form" *ngIf="!ratingSubmitted">
+          <div class="star-row">
+            <button type="button" class="star-btn" *ngFor="let s of [1,2,3,4,5]"
+              [class.filled]="s <= (ratingHover || ratingForm.rating)"
+              (mouseenter)="ratingHover = s" (mouseleave)="ratingHover = 0"
+              (click)="ratingForm.rating = s">★</button>
+          </div>
+          <input class="rating-input" type="text" placeholder="Your name" [(ngModel)]="ratingForm.customerName" name="rName" />
+          <textarea class="rating-input" rows="3" placeholder="Share your experience..." [(ngModel)]="ratingForm.comment" name="rComment"></textarea>
+          <button class="rating-submit" [disabled]="ratingSubmitting || !ratingForm.rating || !ratingForm.customerName" (click)="submitRating()">
+            {{ ratingSubmitting ? 'Submitting...' : 'Submit Review' }}
+          </button>
+        </div>
+        <p class="rating-success" *ngIf="ratingSubmitted">✔ Thank you! Your review will appear after approval.</p>
+      </div>
+
       <!-- Customer Reviews Carousel -->
-      <div class="reviews-section">
+      <div class="reviews-section" *ngIf="carouselReviews.length > 0">
         <h3>⭐ What Our Customers Say</h3>
         <div class="reviews-carousel">
           <div class="reviews-track-wrap">
             <div class="reviews-track" [style.transform]="'translateX(-' + reviewIndex * 100 + '%)'">
-              <div class="review-card">
+              <div class="review-card" *ngFor="let r of carouselReviews">
                 <div class="review-top">
-                  <span class="review-name">Grace Wanjiku</span>
+                  <span class="review-name">{{ r.customerName }}</span>
                   <span class="review-badge">✔ Verified Buyer</span>
                 </div>
-                <div class="review-stars">★★★★★</div>
-                <p class="review-text">Received my order the same day I placed it. The product is exactly as described and the quality is great. Will definitely order again!</p>
-                <p class="review-date">2 weeks ago</p>
-              </div>
-              <div class="review-card">
-                <div class="review-top">
-                  <span class="review-name">Brian Otieno</span>
-                  <span class="review-badge">✔ Verified Buyer</span>
-                </div>
-                <div class="review-stars">★★★★★</div>
-                <p class="review-text">Pay on delivery is the best — I was nervous ordering online but everything went smoothly. The rider was polite and on time.</p>
-                <p class="review-date">1 month ago</p>
-              </div>
-              <div class="review-card">
-                <div class="review-top">
-                  <span class="review-name">Fatuma Abdi</span>
-                  <span class="review-badge">✔ Verified Buyer</span>
-                </div>
-                <div class="review-stars">★★★★★</div>
-                <p class="review-text">Fast delivery to Mombasa, I was not expecting it so quickly. Packaging was neat and the item was in perfect condition.</p>
-                <p class="review-date">3 weeks ago</p>
-              </div>
-              <div class="review-card">
-                <div class="review-top">
-                  <span class="review-name">James Kamau</span>
-                  <span class="review-badge">✔ Verified Buyer</span>
-                </div>
-                <div class="review-stars">★★★★☆</div>
-                <p class="review-text">Good product and fair price. Delivery took one day to Nakuru which is acceptable. Customer service was responsive when I called.</p>
-                <p class="review-date">1 month ago</p>
-              </div>
-              <div class="review-card">
-                <div class="review-top">
-                  <span class="review-name">Mercy Chebet</span>
-                  <span class="review-badge">✔ Verified Buyer</span>
-                </div>
-                <div class="review-stars">★★★★★</div>
-                <p class="review-text">Ordered for the second time now. Shopfront never disappoints — genuine products and the free delivery is a big plus for me.</p>
-                <p class="review-date">2 months ago</p>
+                <div class="review-stars">{{ starsFor(r.rating) }}</div>
+                <p class="review-text">{{ r.comment }}</p>
+                <p class="review-date">{{ r.createdAt | date:'mediumDate' }}</p>
               </div>
             </div>
           </div>
-          <div class="reviews-controls">
+          <div class="reviews-controls" *ngIf="carouselReviews.length > 1">
             <button class="reviews-arrow" (click)="prevReview()">&#8592;</button>
             <div class="reviews-dots">
-              <div *ngFor="let r of reviews; let i = index"
+              <div *ngFor="let r of carouselReviews; let i = index"
                    class="reviews-dot" [class.active]="i === reviewIndex"
-                   (click)="reviewIndex = i"></div>
+                   (click)="reviewIndex = i; resetTimer()"></div>
             </div>
             <button class="reviews-arrow" (click)="nextReview()">&#8594;</button>
           </div>
@@ -255,21 +251,31 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
 
   order = { customerName: '', phone: '', email: '', county: '', deliveryAddress: '' };
 
-  reviews = [0, 1, 2, 3, 4];
+  // Ratings
+  carouselReviews: Rating[] = [];
+  ratingForm: SubmitRating = { customerName: '', rating: 0, comment: '' };
+  ratingHover = 0;
+  ratingSubmitting = false;
+  ratingSubmitted = false;
+
+  // Carousel
   reviewIndex = 0;
   private reviewTimer: ReturnType<typeof setInterval> | null = null;
 
-  prevReview() { this.reviewIndex = this.reviewIndex === 0 ? this.reviews.length - 1 : this.reviewIndex - 1; this.resetTimer(); }
-  nextReview() { this.reviewIndex = this.reviewIndex === this.reviews.length - 1 ? 0 : this.reviewIndex + 1; this.resetTimer(); }
+  starsFor(n: number): string { return '★'.repeat(n) + '☆'.repeat(5 - n); }
 
-  private startTimer() {
+  prevReview() { this.reviewIndex = this.reviewIndex === 0 ? this.carouselReviews.length - 1 : this.reviewIndex - 1; this.resetTimer(); }
+  nextReview() { this.reviewIndex = this.reviewIndex === this.carouselReviews.length - 1 ? 0 : this.reviewIndex + 1; this.resetTimer(); }
+
+  startTimer() {
+    if (this.carouselReviews.length <= 1) return;
     this.reviewTimer = setInterval(() => {
-      this.reviewIndex = this.reviewIndex === this.reviews.length - 1 ? 0 : this.reviewIndex + 1;
+      this.reviewIndex = this.reviewIndex === this.carouselReviews.length - 1 ? 0 : this.reviewIndex + 1;
       this.cdr.markForCheck();
     }, 3000);
   }
 
-  private resetTimer() {
+  resetTimer() {
     if (this.reviewTimer) clearInterval(this.reviewTimer);
     this.startTimer();
   }
@@ -278,11 +284,21 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
     if (this.reviewTimer) clearInterval(this.reviewTimer);
   }
 
+  submitRating() {
+    if (!this.product || !this.ratingForm.rating || !this.ratingForm.customerName) return;
+    this.ratingSubmitting = true;
+    this.ratingService.submit(this.product.id, this.ratingForm).subscribe({
+      next: () => { this.ratingSubmitting = false; this.ratingSubmitted = true; this.cdr.markForCheck(); },
+      error: () => { this.ratingSubmitting = false; this.cdr.markForCheck(); }
+    });
+  }
+
   constructor(
     private route: ActivatedRoute,
     private router: Router,
     private productService: ProductService,
     private orderService: OrderService,
+    private ratingService: RatingService,
     private sanitizer: DomSanitizer,
     private cdr: ChangeDetectorRef,
     private pixel: PixelService
@@ -290,7 +306,6 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.pixel.init();
-    this.startTimer();
     const id = this.route.snapshot.paramMap.get('id')!;
     this.productService.getById(id).subscribe({
       next: p => {
@@ -298,6 +313,11 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
         this.safeDesc = this.sanitizer.bypassSecurityTrustHtml(p.description);
         this.loading = false;
         this.pixel.trackViewContent(p.id, p.title, p.discountPrice || p.price);
+        this.ratingService.getForProduct(p.id).subscribe(ratings => {
+          this.carouselReviews = ratings;
+          this.startTimer();
+          this.cdr.markForCheck();
+        });
         this.cdr.markForCheck();
       },
       error: () => {

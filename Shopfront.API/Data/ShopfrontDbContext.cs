@@ -16,6 +16,7 @@ public class ShopfrontDbContext : IdentityDbContext
     public DbSet<Page> Pages => Set<Page>();
     public DbSet<SiteSetting> SiteSettings => Set<SiteSetting>();
     public DbSet<VendorItem> VendorItems => Set<VendorItem>();
+    public DbSet<ProductRating> ProductRatings => Set<ProductRating>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -31,6 +32,14 @@ public class ShopfrontDbContext : IdentityDbContext
             e.HasOne(v => v.Product)
              .WithMany(p => p.Variations)
              .HasForeignKey(v => v.ProductId)
+             .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        builder.Entity<ProductRating>(e =>
+        {
+            e.HasOne(r => r.Product)
+             .WithMany(p => p.Ratings)
+             .HasForeignKey(r => r.ProductId)
              .OnDelete(DeleteBehavior.Cascade);
         });
 

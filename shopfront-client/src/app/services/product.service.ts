@@ -15,6 +15,9 @@ export interface Product {
   createdAt: string;
   imageUrls: string[];
   variations: ProductVariation[];
+  ratingsEnabled: boolean;
+  averageRating: number;
+  ratingCount: number;
 }
 
 export interface CreateProduct {
@@ -24,6 +27,7 @@ export interface CreateProduct {
   discountPrice: number;
   imageUrls: string[];
   variations: string[];
+  ratingsEnabled: boolean;
 }
 
 @Injectable({ providedIn: 'root' })

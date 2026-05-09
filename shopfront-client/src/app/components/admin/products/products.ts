@@ -249,6 +249,11 @@ import { ApiService } from '../../../services/api.service';
                   <button type="button" class="add-variation-btn" (click)="addVariation()">+ Add Variation</button>
                 </div>
 
+                <div class="field-group" style="flex-direction:row;align-items:center;gap:.6rem">
+                  <input type="checkbox" id="ratingsEnabled" [(ngModel)]="form.ratingsEnabled" name="ratingsEnabled" style="width:16px;height:16px;cursor:pointer" />
+                  <label for="ratingsEnabled" class="field-label" style="margin:0;cursor:pointer;text-transform:none;font-size:.9rem">Enable customer ratings &amp; reviews for this product</label>
+                </div>
+
                 <div class="field-group">
                   <span class="field-label">Description</span>
                   <app-rich-editor
@@ -338,7 +343,7 @@ export class AdminProductsComponent implements OnInit {
   saving = false;
   uploadingIndex = -1;
   private activeUploadIndex = -1;
-  form: CreateProduct = { title: '', description: '', price: 0, discountPrice: 0, imageUrls: [], variations: [] };
+  form: CreateProduct = { title: '', description: '', price: 0, discountPrice: 0, imageUrls: [], variations: [], ratingsEnabled: false };
 
   constructor(
     private productService: ProductService,
@@ -370,7 +375,7 @@ export class AdminProductsComponent implements OnInit {
 
   openNew() {
     this.editing = null;
-    this.form = { title: '', description: '', price: 0, discountPrice: 0, imageUrls: [], variations: [] };
+    this.form = { title: '', description: '', price: 0, discountPrice: 0, imageUrls: [], variations: [], ratingsEnabled: false };
     this.imageUrls = [''];
     this.variationLabels = [];
     this.showForm = true;
@@ -379,7 +384,7 @@ export class AdminProductsComponent implements OnInit {
 
   edit(p: Product) {
     this.editing = p;
-    this.form = { title: p.title, description: p.description, price: p.price, discountPrice: p.discountPrice, imageUrls: [], variations: [] };
+    this.form = { title: p.title, description: p.description, price: p.price, discountPrice: p.discountPrice, imageUrls: [], variations: [], ratingsEnabled: p.ratingsEnabled };
     this.imageUrls = p.imageUrls.length ? [...p.imageUrls] : [''];
     this.variationLabels = p.variations?.map(v => v.label) ?? [];
     this.showForm = true;
@@ -470,7 +475,7 @@ export class AdminProductsComponent implements OnInit {
     this.showForm = false;
     this.editing = null;
     this.saving = false;
-    this.form = { title: '', description: '', price: 0, discountPrice: 0, imageUrls: [], variations: [] };
+    this.form = { title: '', description: '', price: 0, discountPrice: 0, imageUrls: [], variations: [], ratingsEnabled: false };
     this.imageUrls = [''];
     this.variationLabels = [];
     this.cdr.markForCheck();

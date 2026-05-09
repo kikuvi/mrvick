@@ -8,7 +8,8 @@ public record CreateProductDto(
     decimal Price,
     decimal DiscountPrice,
     List<string> ImageUrls,
-    List<string>? Variations
+    List<string>? Variations,
+    bool RatingsEnabled = false
 );
 
 public record UpdateProductDto(
@@ -17,7 +18,8 @@ public record UpdateProductDto(
     decimal? Price,
     decimal? DiscountPrice,
     List<string>? ImageUrls,
-    List<string>? Variations
+    List<string>? Variations,
+    bool? RatingsEnabled = null
 );
 
 public record ProductDto(
@@ -28,5 +30,8 @@ public record ProductDto(
     decimal DiscountPrice,
     DateTime CreatedAt,
     List<string> ImageUrls,
-    List<VariationDto> Variations
+    List<VariationDto> Variations,
+    bool RatingsEnabled,
+    double AverageRating,
+    int RatingCount
 );

@@ -21,11 +21,15 @@ public class ProductsController : ControllerBase
         var products = await _db.Products
             .Include(p => p.Images)
             .Include(p => p.Variations)
+            .Include(p => p.Ratings)
             .OrderByDescending(p => p.CreatedAt)
             .Select(p => new ProductDto(
                 p.Id, p.Title, p.Description, p.Price, p.DiscountPrice, p.CreatedAt,
                 p.Images.Select(i => i.ImageUrl).ToList(),
-                p.Variations.Select(v => new VariationDto(v.Id, v.Label)).ToList()
+                p.Variations.Select(v => new VariationDto(v.Id, v.Label)).ToList(),
+                p.RatingsEnabled,
+                p.Ratings.Any(r => r.IsApproved) ? p.Ratings.Where(r => r.IsApproved).Average(r => r.Rating) : 0,
+                p.Ratings.Count(r => r.IsApproved)
             ))
             .ToListAsync();
 
@@ -38,15 +42,20 @@ public class ProductsController : ControllerBase
         var product = await _db.Products
             .Include(p => p.Images)
             .Include(p => p.Variations)
+            .Include(p => p.Ratings)
             .FirstOrDefaultAsync(p => p.Id == id);
 
         if (product is null) return NotFound();
 
+        var approvedRatings = product.Ratings.Where(r => r.IsApproved).ToList();
         return Ok(new ProductDto(
             product.Id, product.Title, product.Description,
             product.Price, product.DiscountPrice, product.CreatedAt,
             product.Images.Select(i => i.ImageUrl).ToList(),
-            product.Variations.Select(v => new VariationDto(v.Id, v.Label)).ToList()
+            product.Variations.Select(v => new VariationDto(v.Id, v.Label)).ToList(),
+            product.RatingsEnabled,
+            approvedRatings.Any() ? approvedRatings.Average(r => r.Rating) : 0,
+            approvedRatings.Count
         ));
     }
 
@@ -60,6 +69,7 @@ public class ProductsController : ControllerBase
             Description = dto.Description,
             Price = dto.Price,
             DiscountPrice = dto.DiscountPrice,
+            RatingsEnabled = dto.RatingsEnabled,
             Images = dto.ImageUrls.Select(url => new ProductImage { ImageUrl = url }).ToList(),
             Variations = (dto.Variations ?? [])
                 .Where(l => !string.IsNullOrWhiteSpace(l))
@@ -74,7 +84,8 @@ public class ProductsController : ControllerBase
             new ProductDto(product.Id, product.Title, product.Description,
                 product.Price, product.DiscountPrice, product.CreatedAt,
                 product.Images.Select(i => i.ImageUrl).ToList(),
-                product.Variations.Select(v => new VariationDto(v.Id, v.Label)).ToList()));
+                product.Variations.Select(v => new VariationDto(v.Id, v.Label)).ToList(),
+                product.RatingsEnabled, 0, 0));
     }
 
     [Authorize]
@@ -108,6 +119,8 @@ public class ProductsController : ControllerBase
                 .Select(l => new ProductVariation { Label = l.Trim() })
                 .ToList();
         }
+
+        if (dto.RatingsEnabled is not null) product.RatingsEnabled = dto.RatingsEnabled.Value;
 
         await _db.SaveChangesAsync();
         return NoContent();
