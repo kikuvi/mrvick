@@ -5,25 +5,18 @@
 namespace Shopfront.API.Migrations
 {
     /// <inheritdoc />
-    public partial class AddProductIsActive : Migration
+    public partial class ActivateExistingProducts : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<bool>(
-                name: "IsActive",
-                table: "Products",
-                type: "bit",
-                nullable: false,
-                defaultValue: true);
+            migrationBuilder.Sql("UPDATE Products SET IsActive = 1");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropColumn(
-                name: "IsActive",
-                table: "Products");
+
         }
     }
 }

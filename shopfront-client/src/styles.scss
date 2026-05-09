@@ -6,6 +6,16 @@ body { font-family: 'Segoe UI', sans-serif; color: #1a1a1a; background: #fff; }
 a { color: inherit; text-decoration: none; }
 img { max-width: 100%; display: block; }
 
+/* ---- Global form fixes ---- */
+/* Explicit placeholder colour — prevents black placeholders in dark/power-saving modes */
+::placeholder { color: #9ca3af; opacity: 1; }
+:-ms-input-placeholder { color: #9ca3af; }
+/* iOS Safari auto-zooms when input font-size < 16px — force minimum on mobile */
+@media (max-width: 768px) {
+  input, select, textarea { font-size: 16px !important; min-height: 44px; }
+  button, .btn, .lp-order-btn { min-height: 44px; }
+}
+
 /* ---- Container ---- */
 .container { max-width: 1200px; margin: 0 auto; padding: 0 1.5rem; }
 

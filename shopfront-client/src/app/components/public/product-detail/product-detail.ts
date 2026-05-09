@@ -38,10 +38,22 @@ const KENYA_COUNTIES = [
       display: flex; align-items: center; gap: 0.75rem;
       padding: 0.75rem 1rem; border: 2px solid #ddd; border-radius: 8px;
       cursor: pointer; transition: border-color .15s, background .15s;
+      background: #fff;
     }
     .variation-option:hover { border-color: #1d3557; background: #f5f8ff; }
     .variation-option.selected { border-color: #1d3557; background: #eef3ff; }
-    .variation-option input[type="radio"] { accent-color: #1d3557; width: 16px; height: 16px; flex-shrink: 0; }
+    /* Hide native radio — the label click still drives ngModel */
+    .variation-option input[type="radio"] { position: absolute; opacity: 0; width: 0; height: 0; pointer-events: none; }
+    /* Custom radio dot */
+    .radio-dot {
+      width: 18px; height: 18px; border-radius: 50%; flex-shrink: 0;
+      border: 2px solid #bbb; background: #fff;
+      transition: border-color .15s, background .15s, box-shadow .15s;
+    }
+    .variation-option.selected .radio-dot {
+      border-color: #1d3557; background: #1d3557;
+      box-shadow: inset 0 0 0 4px #fff;
+    }
     .variation-option span { font-size: 0.95rem; color: #1a1a1a; }
     .rating-section { background: #f9fafb; padding: 2rem 1rem; }
     .rating-section h3 { text-align: center; font-size: 1.1rem; color: #1a1a1a; margin-bottom: 1.25rem; }
@@ -166,6 +178,7 @@ const KENYA_COUNTIES = [
                     [(ngModel)]="selectedVariation"
                     name="variation"
                     required />
+                  <span class="radio-dot"></span>
                   <span>{{ v.label }} — Ksh{{ product.discountPrice | number:'1.0-0' }}</span>
                 </label>
               </div>
