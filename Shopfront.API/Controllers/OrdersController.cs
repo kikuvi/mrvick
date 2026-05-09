@@ -141,11 +141,6 @@ public class OrdersController : ControllerBase
               </tr>
             </table>
 
-            <p style='margin:0;font-size:13px;color:#888;text-align:center;line-height:1.6;'>
-              You can also copy your tracking code and paste it at<br>
-              <a href='{_config["App:BaseUrl"]}/track' style='color:#1d3557;'>{_config["App:BaseUrl"]}/track</a>
-            </p>
-
           </td>
         </tr>
 
