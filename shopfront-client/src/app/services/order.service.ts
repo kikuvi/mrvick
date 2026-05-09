@@ -32,6 +32,7 @@ export interface Order {
   riderName?: string;
   createdAt: string;
   variation?: string;
+  isArchived: boolean;
 }
 
 export interface TrackOrder {
@@ -54,6 +55,8 @@ export class OrderService {
   place(data: PlaceOrder) { return this.api.post<{ trackingToken: string }>('/orders', data); }
   track(token: string) { return this.api.get<TrackOrder>(`/orders/track/${token}`); }
   getAll() { return this.api.get<Order[]>('/orders', true); }
+  getArchived() { return this.api.get<Order[]>('/orders?archived=true', true); }
+  archive(id: string) { return this.api.patch<void>(`/orders/${id}/archive`, {}); }
   updateStatus(id: string, status: string) { return this.api.patch<void>(`/orders/${id}/status`, { status }); }
   assignRider(id: string, riderId: string) { return this.api.patch<void>(`/orders/${id}/assign`, { riderId }); }
   updateExpenses(id: string, buyingPrice: number, advertisingCost: number, deliveryFee: number) {

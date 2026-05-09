@@ -28,6 +28,7 @@ public class Order
     public decimal DeliveryFee { get; set; }
 
     public OrderStatus Status { get; set; } = OrderStatus.New;
+    public bool IsArchived { get; set; } = false;
     public Guid? RiderId { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 

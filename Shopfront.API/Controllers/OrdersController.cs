@@ -202,11 +202,12 @@ public class OrdersController : ControllerBase
 
     [Authorize]
     [HttpGet]
-    public async Task<IActionResult> GetAll()
+    public async Task<IActionResult> GetAll([FromQuery] bool archived = false)
     {
         var orders = await _db.Orders
             .Include(o => o.Product)
             .Include(o => o.Rider)
+            .Where(o => o.IsArchived == archived)
             .OrderByDescending(o => o.CreatedAt)
             .Select(o => new OrderDto(
                 o.Id, o.TrackingToken, o.CustomerName, o.Phone, o.Email,
@@ -215,11 +216,22 @@ public class OrdersController : ControllerBase
                 o.PriceAtOrder - (o.BuyingPrice + o.AdvertisingCost + o.DeliveryFee),
                 o.Status.ToString(), o.ProductId, o.Product.Title,
                 o.RiderId, o.Rider != null ? o.Rider.Name : null,
-                o.CreatedAt, o.Variation
+                o.CreatedAt, o.Variation, o.IsArchived
             ))
             .ToListAsync();
 
         return Ok(orders);
+    }
+
+    [Authorize]
+    [HttpPatch("{id}/archive")]
+    public async Task<IActionResult> Archive(Guid id)
+    {
+        var order = await _db.Orders.FindAsync(id);
+        if (order is null) return NotFound();
+        order.IsArchived = !order.IsArchived;
+        await _db.SaveChangesAsync();
+        return NoContent();
     }
 
     [Authorize]

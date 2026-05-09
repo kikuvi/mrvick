@@ -37,7 +37,8 @@ public record OrderDto(
     Guid? RiderId,
     string? RiderName,
     DateTime CreatedAt,
-    string? Variation
+    string? Variation,
+    bool IsArchived
 );
 
 public record TrackOrderDto(

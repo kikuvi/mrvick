@@ -56,10 +56,11 @@ import { RiderService, Rider } from '../../../services/rider.service';
       <h1>Orders</h1>
 
       <div class="filters">
-        <select [(ngModel)]="statusFilter" name="filter">
-          <option value="">All Statuses</option>
+        <select [(ngModel)]="statusFilter" (change)="onFilterChange()" name="filter">
+          <option value="">All Active</option>
           <option>New</option><option>Assigned</option>
           <option>InTransit</option><option>Delivered</option><option>Rejected</option>
+          <option value="Archived">Archived</option>
         </select>
       </div>
 
@@ -68,7 +69,7 @@ import { RiderService, Rider } from '../../../services/rider.service';
           <tr>
             <th>Token</th><th>Customer</th><th>Product</th><th>Variation</th><th>County</th>
             <th>Amount</th><th>Buying</th><th>Adv.</th><th>Delivery</th><th>Profit</th>
-            <th>Status</th><th>Rider</th><th>Date</th>
+            <th>Status</th><th>Rider</th><th>Date</th><th></th>
           </tr>
         </thead>
         <tbody>
@@ -107,9 +108,15 @@ import { RiderService, Rider } from '../../../services/rider.service';
               </select>
             </td>
             <td><small>{{ o.createdAt | date:'dd/MM/yy' }}</small></td>
+            <td>
+              <button class="btn-sm" [class.danger]="!o.isArchived" (click)="toggleArchive(o)"
+                [title]="o.isArchived ? 'Unarchive' : 'Archive'">
+                {{ o.isArchived ? 'Unarchive' : 'Archive' }}
+              </button>
+            </td>
           </tr>
           <tr *ngIf="!filtered.length">
-            <td colspan="13" style="text-align:center;color:#999;padding:2rem">No orders found.</td>
+            <td colspan="14" style="text-align:center;color:#999;padding:2rem">No orders found.</td>
           </tr>
         </tbody>
       </table>
@@ -217,14 +224,27 @@ export class AdminOrdersComponent implements OnInit {
   }
 
   get filtered() {
-    return this.statusFilter ? this.orders.filter(o => o.status === this.statusFilter) : this.orders;
+    if (this.statusFilter && this.statusFilter !== 'Archived')
+      return this.orders.filter(o => o.status === this.statusFilter);
+    return this.orders;
   }
 
   constructor(private orderService: OrderService, private riderService: RiderService, private cdr: ChangeDetectorRef) {}
 
   ngOnInit() {
-    this.orderService.getAll().subscribe(o => { this.orders = o; this.cdr.markForCheck(); });
+    this.load();
     this.riderService.getAll().subscribe(r => { this.riders = r; this.cdr.markForCheck(); });
+  }
+
+  load() {
+    const call = this.statusFilter === 'Archived'
+      ? this.orderService.getArchived()
+      : this.orderService.getAll();
+    call.subscribe(o => { this.orders = o; this.cdr.markForCheck(); });
+  }
+
+  onFilterChange() {
+    this.load();
   }
 
   updateStatus(o: Order) {
@@ -237,5 +257,9 @@ export class AdminOrdersComponent implements OnInit {
 
   saveExpenses(o: Order) {
     this.orderService.updateExpenses(o.id, o.buyingPrice, o.advertisingCost, o.deliveryFee).subscribe();
+  }
+
+  toggleArchive(o: Order) {
+    this.orderService.archive(o.id).subscribe(() => this.load());
   }
 }
