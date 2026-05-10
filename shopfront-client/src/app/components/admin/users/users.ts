@@ -92,10 +92,7 @@ import { UserService, AdminUser, CreateUser, UpdateUser } from '../../../service
           <label>Email
             <input type="email" placeholder="user@example.com" [(ngModel)]="newUser.email" name="newEmail" />
           </label>
-          <label>Temporary Password
-            <input type="password" placeholder="Min 8 characters" [(ngModel)]="newUser.password" name="newPassword" />
-          </label>
-          <p style="margin:0;font-size:.8rem;color:#888">User will be required to change this password on first login.</p>
+          <p style="margin:0;font-size:.8rem;color:#888">A temporary password will be generated and emailed to the user. They will be required to change it on first login.</p>
           <span class="error-msg" *ngIf="createError">{{ createError }}</span>
         </div>
         <div class="modal-footer">
@@ -163,7 +160,7 @@ import { UserService, AdminUser, CreateUser, UpdateUser } from '../../../service
 export class AdminUsersComponent implements OnInit {
   users: AdminUser[] = [];
   showCreate = false;
-  newUser: CreateUser = { fullName: '', phoneNumber: '', email: '', password: '' };
+  newUser: CreateUser = { fullName: '', phoneNumber: '', email: '' };
   createError = '';
   pwUser: AdminUser | null = null;
   newPw = '';
@@ -182,7 +179,7 @@ export class AdminUsersComponent implements OnInit {
   }
 
   openCreate() {
-    this.newUser = { fullName: '', phoneNumber: '', email: '', password: '' };
+    this.newUser = { fullName: '', phoneNumber: '', email: '' };
     this.createError = '';
     this.showCreate = true;
   }

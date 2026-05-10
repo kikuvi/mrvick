@@ -13,7 +13,6 @@ export interface AdminUser {
 
 export interface CreateUser {
   email: string;
-  password: string;
   fullName: string;
   phoneNumber: string;
 }
