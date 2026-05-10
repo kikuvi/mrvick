@@ -276,7 +276,7 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
   ];
 
   get displayReviews(): Rating[] {
-    return this.carouselReviews.length > 0 ? this.carouselReviews : this.fallbackReviews;
+    return [...this.carouselReviews, ...this.fallbackReviews];
   }
   ratingForm: SubmitRating = { customerName: '', rating: 0, comment: '' };
   ratingHover = 0;
@@ -338,7 +338,7 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
         this.safeDesc = this.sanitizer.bypassSecurityTrustHtml(p.description);
         this.loading = false;
         this.pixel.trackViewContent(p.id, p.title, p.discountPrice || p.price);
-        this.ratingService.getForProduct(p.id).subscribe(ratings => {
+        this.ratingService.getAll(true).subscribe(ratings => {
           this.carouselReviews = ratings;
           this.startTimer();
           this.cdr.markForCheck();

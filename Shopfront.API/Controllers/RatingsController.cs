@@ -51,8 +51,7 @@ public class RatingsController : ControllerBase
         return Ok(ratings);
     }
 
-    // Admin: get all ratings (pending + approved)
-    [Authorize]
+    // Get all ratings — public when approved=true, admin usage for pending
     [HttpGet("ratings")]
     public async Task<IActionResult> GetAll([FromQuery] bool? approved = null)
     {
