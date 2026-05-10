@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { OrderService, Order, OrderNote } from '../../../services/order.service';
 import { RiderService, Rider } from '../../../services/rider.service';
+import { UserService, AdminUser } from '../../../services/user.service';
 
 @Component({
   selector: 'app-admin-orders',
@@ -64,6 +65,26 @@ import { RiderService, Rider } from '../../../services/rider.service';
     .note-add textarea:focus { outline: none; border-color: #1d3557; box-shadow: 0 0 0 3px rgba(29,53,87,.1); }
     .btn-note { background: #1d3557; color: #fff; border: none; border-radius: 6px; padding: .55rem 1.25rem; font-size: .85rem; font-weight: 700; cursor: pointer; align-self: flex-end; }
     .btn-note:disabled { opacity: .5; cursor: not-allowed; }
+    .mention-wrap { position: relative; }
+    .mention-dropdown {
+      position: absolute; bottom: calc(100% + 4px); left: 0; right: 0;
+      background: #fff; border: 1px solid #e5e7eb; border-radius: 8px;
+      box-shadow: 0 4px 16px rgba(0,0,0,.12); z-index: 500; overflow: hidden;
+      max-height: 220px; overflow-y: auto;
+    }
+    .mention-item {
+      display: flex; align-items: center; gap: .65rem;
+      padding: .55rem .85rem; cursor: pointer; transition: background .1s;
+    }
+    .mention-item:hover, .mention-item.active { background: #eff6ff; }
+    .mention-av {
+      width: 30px; height: 30px; border-radius: 50%; flex-shrink: 0;
+      background: #1d3557; color: #fff;
+      display: flex; align-items: center; justify-content: center;
+      font-size: .7rem; font-weight: 800;
+    }
+    .mention-name { font-size: .85rem; font-weight: 700; color: #1a1a1a; }
+    .mention-email { font-size: .75rem; color: #888; }
   `],
   template: `
     <div class="admin-section">
@@ -252,7 +273,27 @@ import { RiderService, Rider } from '../../../services/rider.service';
           <div class="notes-empty" *ngIf="notesLoading">Loading…</div>
 
           <div class="note-add">
-            <textarea placeholder="Add a note…" [(ngModel)]="newNote" name="newNote"></textarea>
+            <div class="mention-wrap">
+              <div class="mention-dropdown" *ngIf="showMentions && filteredMentions.length">
+                <div class="mention-item"
+                  *ngFor="let u of filteredMentions; let i = index"
+                  [class.active]="i === mentionIndex"
+                  (mousedown)="insertMention(u)">
+                  <div class="mention-av">{{ initials(u.fullName || u.email) }}</div>
+                  <div>
+                    <div class="mention-name">{{ u.fullName || u.email }}</div>
+                    <div class="mention-email">{{ u.email }}</div>
+                  </div>
+                </div>
+              </div>
+              <textarea
+                placeholder="Add a note… type @ to mention someone"
+                [(ngModel)]="newNote"
+                name="newNote"
+                (input)="onNoteInput($event)"
+                (keydown)="onNoteKeydown($event)">
+              </textarea>
+            </div>
             <button class="btn-note" [disabled]="!newNote.trim() || savingNote" (click)="saveNote()">
               {{ savingNote ? 'Saving…' : 'Add Note' }}
             </button>
@@ -276,6 +317,24 @@ export class AdminOrdersComponent implements OnInit {
   notesLoading = false;
   savingNote = false;
 
+  // @mention
+  allUsers: AdminUser[] = [];
+  showMentions = false;
+  mentionQuery = '';
+  mentionStart = 0;
+  mentionIndex = 0;
+
+  get filteredMentions() {
+    const q = this.mentionQuery.toLowerCase();
+    return this.allUsers
+      .filter(u => !q || (u.fullName || '').toLowerCase().includes(q) || u.email.toLowerCase().includes(q))
+      .slice(0, 6);
+  }
+
+  initials(name: string) {
+    return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+  }
+
   onOverlayClick(e: MouseEvent) {
     if ((e.target as HTMLElement).classList.contains('modal-overlay')) this.selected = null;
   }
@@ -288,12 +347,52 @@ export class AdminOrdersComponent implements OnInit {
     this.notesOrder = o;
     this.notes = [];
     this.newNote = '';
+    this.showMentions = false;
     this.notesLoading = true;
     this.cdr.markForCheck();
     this.orderService.getNotes(o.id).subscribe({
       next: n => { this.notes = n; this.notesLoading = false; this.cdr.markForCheck(); },
       error: () => { this.notesLoading = false; this.cdr.markForCheck(); }
     });
+    if (!this.allUsers.length) {
+      this.userService.getAll().subscribe(u => { this.allUsers = u; this.cdr.markForCheck(); });
+    }
+  }
+
+  onNoteInput(e: Event) {
+    const ta = e.target as HTMLTextAreaElement;
+    const pos = ta.selectionStart ?? ta.value.length;
+    const before = ta.value.slice(0, pos);
+    const match = before.match(/@([^\s@]*)$/);
+    if (match) {
+      this.mentionQuery = match[1].toLowerCase();
+      this.mentionStart = pos - match[0].length;
+      this.mentionIndex = 0;
+      this.showMentions = true;
+    } else {
+      this.showMentions = false;
+    }
+    this.cdr.markForCheck();
+  }
+
+  onNoteKeydown(e: KeyboardEvent) {
+    if (!this.showMentions) return;
+    const len = this.filteredMentions.length;
+    if (e.key === 'ArrowDown') { e.preventDefault(); this.mentionIndex = (this.mentionIndex + 1) % len; this.cdr.markForCheck(); }
+    else if (e.key === 'ArrowUp') { e.preventDefault(); this.mentionIndex = (this.mentionIndex - 1 + len) % len; this.cdr.markForCheck(); }
+    else if (e.key === 'Enter' && this.filteredMentions[this.mentionIndex]) { e.preventDefault(); this.insertMention(this.filteredMentions[this.mentionIndex]); }
+    else if (e.key === 'Escape') { this.showMentions = false; this.cdr.markForCheck(); }
+  }
+
+  insertMention(u: AdminUser) {
+    const ta = document.querySelector('textarea[name="newNote"]') as HTMLTextAreaElement;
+    const pos = ta?.selectionStart ?? this.newNote.length;
+    const before = this.newNote.slice(0, this.mentionStart);
+    const after = this.newNote.slice(pos);
+    this.newNote = `${before}@${u.fullName || u.email} ${after}`;
+    this.showMentions = false;
+    this.cdr.markForCheck();
+    setTimeout(() => { ta?.focus(); const end = this.mentionStart + (u.fullName || u.email).length + 2; ta?.setSelectionRange(end, end); });
   }
 
   saveNote() {
@@ -317,7 +416,12 @@ export class AdminOrdersComponent implements OnInit {
     return this.orders;
   }
 
-  constructor(private orderService: OrderService, private riderService: RiderService, private cdr: ChangeDetectorRef) {}
+  constructor(
+    private orderService: OrderService,
+    private riderService: RiderService,
+    private userService: UserService,
+    private cdr: ChangeDetectorRef
+  ) {}
 
   ngOnInit() {
     this.load();

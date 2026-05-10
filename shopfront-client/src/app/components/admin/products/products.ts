@@ -336,7 +336,6 @@ import { ApiService } from '../../../services/api.service';
               <div style="display:flex;gap:.4rem;flex-wrap:wrap">
                 <a class="btn-sm" [routerLink]="['/products', p.id]" target="_blank">View</a>
                 <button class="btn-sm" (click)="edit(p)">Edit</button>
-                <button class="btn-sm danger" (click)="delete(p.id)">Delete</button>
               </div>
             </td>
           </tr>

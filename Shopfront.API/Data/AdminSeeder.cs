@@ -41,6 +41,7 @@ public static class AdminSeeder
             existing.FullName = "John Kikuvi";
             existing.PhoneNumber = "0712523444";
             existing.MustChangePassword = false;
+            existing.IsActive = true;
             await userManager.UpdateAsync(existing);
 
             // Update email/username if old admin still exists

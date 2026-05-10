@@ -14,6 +14,7 @@ export class AuthService {
       tap(res => {
         localStorage.setItem('token', res.token);
         localStorage.setItem('fullName', res.fullName);
+        localStorage.setItem('email', res.email);
       })
     );
   }
@@ -25,6 +26,7 @@ export class AuthService {
       tap(res => {
         localStorage.setItem('token', res.token);
         localStorage.setItem('fullName', res.fullName);
+        localStorage.setItem('email', res.email);
       })
     );
   }
@@ -32,6 +34,7 @@ export class AuthService {
   logout() {
     localStorage.removeItem('token');
     localStorage.removeItem('fullName');
+    localStorage.removeItem('email');
     this.router.navigate(['/admin/login']);
   }
 
@@ -39,9 +42,8 @@ export class AuthService {
     return !!localStorage.getItem('token');
   }
 
-  getFullName(): string {
-    return localStorage.getItem('fullName') ?? '';
-  }
+  getFullName(): string { return localStorage.getItem('fullName') ?? ''; }
+  getEmail(): string { return localStorage.getItem('email') ?? ''; }
 
   forgotPassword(email: string) {
     return this.api.post<{ message: string }>('/auth/forgot-password', { email });
