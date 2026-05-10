@@ -287,6 +287,40 @@ public class OrdersController : ControllerBase
     }
 
     [Authorize]
+    [HttpGet("{id}/notes")]
+    public async Task<IActionResult> GetNotes(Guid id)
+    {
+        var notes = await _db.OrderNotes
+            .Where(n => n.OrderId == id)
+            .OrderBy(n => n.CreatedAt)
+            .Select(n => new OrderNoteDto(n.Id, n.Content, n.CreatedBy, n.CreatedAt))
+            .ToListAsync();
+
+        return Ok(notes);
+    }
+
+    [Authorize]
+    [HttpPost("{id}/notes")]
+    public async Task<IActionResult> AddNote(Guid id, AddNoteDto dto)
+    {
+        var order = await _db.Orders.FindAsync(id);
+        if (order is null) return NotFound();
+
+        var note = new OrderNote
+        {
+            OrderId = id,
+            Content = dto.Content.Trim(),
+            CreatedBy = User.FindFirstValue(ClaimTypes.Email),
+            CreatedAt = DateTime.UtcNow
+        };
+
+        _db.OrderNotes.Add(note);
+        await _db.SaveChangesAsync();
+
+        return Ok(new OrderNoteDto(note.Id, note.Content, note.CreatedBy, note.CreatedAt));
+    }
+
+    [Authorize]
     [HttpPatch("{id}/expenses")]
     public async Task<IActionResult> UpdateExpenses(Guid id, UpdateExpensesDto dto)
     {

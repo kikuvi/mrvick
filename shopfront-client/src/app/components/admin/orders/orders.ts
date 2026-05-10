@@ -1,7 +1,7 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { OrderService, Order } from '../../../services/order.service';
+import { OrderService, Order, OrderNote } from '../../../services/order.service';
 import { RiderService, Rider } from '../../../services/rider.service';
 
 @Component({
@@ -50,6 +50,20 @@ import { RiderService, Rider } from '../../../services/rider.service';
     .pill-Delivered { background:#d4edda; color:#155724; }
     .pill-Rejected  { background:#f8d7da; color:#721c24; }
     .modal-footer { padding: .9rem 1.4rem; border-top: 1px solid #eee; text-align: right; }
+
+    /* ---- Notes modal ---- */
+    .notes-modal { max-width: 540px; }
+    .notes-list { display: flex; flex-direction: column; gap: .75rem; max-height: 340px; overflow-y: auto; padding-right: .25rem; }
+    .note-item { background: #f8f9fb; border-radius: 8px; padding: .75rem 1rem; border-left: 3px solid #1d3557; }
+    .note-meta { font-size: .75rem; color: #888; margin-bottom: .3rem; display: flex; gap: .5rem; flex-wrap: wrap; }
+    .note-meta strong { color: #555; }
+    .note-content { font-size: .9rem; color: #1a1a1a; white-space: pre-wrap; line-height: 1.5; }
+    .notes-empty { color: #aaa; font-size: .9rem; text-align: center; padding: 1rem 0; }
+    .note-add { display: flex; flex-direction: column; gap: .6rem; margin-top: .5rem; padding-top: .75rem; border-top: 1px solid #eee; }
+    .note-add textarea { padding: .65rem .9rem; border: 1px solid #ddd; border-radius: 6px; font-size: .9rem; resize: vertical; min-height: 80px; font-family: inherit; }
+    .note-add textarea:focus { outline: none; border-color: #1d3557; box-shadow: 0 0 0 3px rgba(29,53,87,.1); }
+    .btn-note { background: #1d3557; color: #fff; border: none; border-radius: 6px; padding: .55rem 1.25rem; font-size: .85rem; font-weight: 700; cursor: pointer; align-self: flex-end; }
+    .btn-note:disabled { opacity: .5; cursor: not-allowed; }
   `],
   template: `
     <div class="admin-section">
@@ -109,10 +123,13 @@ import { RiderService, Rider } from '../../../services/rider.service';
             </td>
             <td><small>{{ o.createdAt | date:'dd/MM/yy' }}</small></td>
             <td>
-              <button class="btn-sm" [class.danger]="!o.isArchived" (click)="toggleArchive(o)"
-                [title]="o.isArchived ? 'Unarchive' : 'Archive'">
-                {{ o.isArchived ? 'Unarchive' : 'Archive' }}
-              </button>
+              <div style="display:flex;gap:.35rem;flex-direction:column">
+                <button class="btn-sm" (click)="openNotes(o)">Notes</button>
+                <button class="btn-sm" [class.danger]="!o.isArchived" (click)="toggleArchive(o)"
+                  [title]="o.isArchived ? 'Unarchive' : 'Archive'">
+                  {{ o.isArchived ? 'Unarchive' : 'Archive' }}
+                </button>
+              </div>
             </td>
           </tr>
           <tr *ngIf="!filtered.length">
@@ -211,6 +228,39 @@ import { RiderService, Rider } from '../../../services/rider.service';
 
       </div>
     </div>
+
+    <!-- ── Notes Modal ── -->
+    <div class="modal-overlay" *ngIf="notesOrder" (click)="onNotesOverlayClick($event)">
+      <div class="modal notes-modal" (click)="$event.stopPropagation()">
+
+        <div class="modal-header">
+          <h3>Notes — {{ notesOrder.trackingToken }}</h3>
+          <button class="modal-close" (click)="notesOrder = null">×</button>
+        </div>
+
+        <div class="modal-body">
+          <div class="notes-list" *ngIf="notes.length">
+            <div class="note-item" *ngFor="let n of notes">
+              <div class="note-meta">
+                <span>{{ n.createdAt | date:'dd MMM yyyy, HH:mm' }}</span>
+                <strong *ngIf="n.createdBy">{{ n.createdBy }}</strong>
+              </div>
+              <div class="note-content">{{ n.content }}</div>
+            </div>
+          </div>
+          <div class="notes-empty" *ngIf="!notes.length && !notesLoading">No notes yet.</div>
+          <div class="notes-empty" *ngIf="notesLoading">Loading…</div>
+
+          <div class="note-add">
+            <textarea placeholder="Add a note…" [(ngModel)]="newNote" name="newNote"></textarea>
+            <button class="btn-note" [disabled]="!newNote.trim() || savingNote" (click)="saveNote()">
+              {{ savingNote ? 'Saving…' : 'Add Note' }}
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
   `
 })
 export class AdminOrdersComponent implements OnInit {
@@ -219,8 +269,46 @@ export class AdminOrdersComponent implements OnInit {
   statusFilter = '';
   selected: Order | null = null;
 
+  // Notes
+  notesOrder: Order | null = null;
+  notes: OrderNote[] = [];
+  newNote = '';
+  notesLoading = false;
+  savingNote = false;
+
   onOverlayClick(e: MouseEvent) {
     if ((e.target as HTMLElement).classList.contains('modal-overlay')) this.selected = null;
+  }
+
+  onNotesOverlayClick(e: MouseEvent) {
+    if ((e.target as HTMLElement).classList.contains('modal-overlay')) this.notesOrder = null;
+  }
+
+  openNotes(o: Order) {
+    this.notesOrder = o;
+    this.notes = [];
+    this.newNote = '';
+    this.notesLoading = true;
+    this.cdr.markForCheck();
+    this.orderService.getNotes(o.id).subscribe({
+      next: n => { this.notes = n; this.notesLoading = false; this.cdr.markForCheck(); },
+      error: () => { this.notesLoading = false; this.cdr.markForCheck(); }
+    });
+  }
+
+  saveNote() {
+    if (!this.notesOrder || !this.newNote.trim()) return;
+    this.savingNote = true;
+    this.cdr.markForCheck();
+    this.orderService.addNote(this.notesOrder.id, this.newNote.trim()).subscribe({
+      next: note => {
+        this.notes = [...this.notes, note];
+        this.newNote = '';
+        this.savingNote = false;
+        this.cdr.markForCheck();
+      },
+      error: () => { this.savingNote = false; this.cdr.markForCheck(); }
+    });
   }
 
   get filtered() {

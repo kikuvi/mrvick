@@ -35,6 +35,13 @@ export interface Order {
   isArchived: boolean;
 }
 
+export interface OrderNote {
+  id: string;
+  content: string;
+  createdBy: string | null;
+  createdAt: string;
+}
+
 export interface TrackOrder {
   trackingToken: string;
   customerName: string;
@@ -62,4 +69,6 @@ export class OrderService {
   updateExpenses(id: string, buyingPrice: number, advertisingCost: number, deliveryFee: number) {
     return this.api.patch<void>(`/orders/${id}/expenses`, { buyingPrice, advertisingCost, deliveryFee });
   }
+  getNotes(id: string) { return this.api.get<OrderNote[]>(`/orders/${id}/notes`, true); }
+  addNote(id: string, content: string) { return this.api.post<OrderNote>(`/orders/${id}/notes`, { content }, true); }
 }

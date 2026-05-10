@@ -18,6 +18,7 @@ public class ShopfrontDbContext : IdentityDbContext<AppUser>
     public DbSet<VendorItem> VendorItems => Set<VendorItem>();
     public DbSet<ProductRating> ProductRatings => Set<ProductRating>();
     public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
+    public DbSet<OrderNote> OrderNotes => Set<OrderNote>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {

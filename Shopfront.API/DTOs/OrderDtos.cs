@@ -41,6 +41,10 @@ public record OrderDto(
     bool IsArchived
 );
 
+public record AddNoteDto(string Content);
+
+public record OrderNoteDto(Guid Id, string Content, string? CreatedBy, DateTime CreatedAt);
+
 public record TrackOrderDto(
     string TrackingToken,
     string CustomerName,
