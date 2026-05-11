@@ -55,6 +55,7 @@ const KENYA_COUNTIES = [
       box-shadow: inset 0 0 0 4px #fff;
     }
     .variation-option span { font-size: 0.95rem; color: #1a1a1a; }
+    .field-error { font-size: 0.8rem; font-weight: 400; color: #e63946; margin-top: -0.1rem; }
     .rating-section { background: #f9fafb; padding: 2rem 1rem; }
     .rating-section h3 { text-align: center; font-size: 1.1rem; color: #1a1a1a; margin-bottom: 1.25rem; }
     .rating-form { max-width: 560px; margin: 0 auto; background: #fff; border-radius: 10px; padding: 1.25rem 1.4rem; box-shadow: 0 2px 8px rgba(0,0,0,.07); display: flex; flex-direction: column; gap: 0.85rem; }
@@ -158,10 +159,16 @@ const KENYA_COUNTIES = [
               <input type="text" placeholder="e.g. John Doe" [(ngModel)]="order.customerName" name="customerName" required />
             </label>
             <label class="lp-field-label">Phone Number
-              <input type="tel" placeholder="e.g. 0712345678" [(ngModel)]="order.phone" name="phone" required />
+              <input type="tel" placeholder="e.g. 0712345678" [(ngModel)]="order.phone" name="phone" required pattern="[0-9]{10}|[0-9]{12}" #phoneField="ngModel" />
+              <span class="field-error" *ngIf="phoneField.invalid && phoneField.touched">
+                {{ phoneField.errors?.['required'] ? 'Phone number is required' : 'Enter a valid 10 or 12-digit phone number' }}
+              </span>
             </label>
             <label class="lp-field-label">Email
-              <input type="email" placeholder="e.g. john@email.com" [(ngModel)]="order.email" name="email" required />
+              <input type="email" placeholder="e.g. john@email.com" [(ngModel)]="order.email" name="email" required email #emailField="ngModel" />
+              <span class="field-error" *ngIf="emailField.invalid && emailField.touched">
+                {{ emailField.errors?.['required'] ? 'Email is required' : 'Enter a valid email address' }}
+              </span>
             </label>
 
             <!-- Your Order — shown only when the product has variations -->
