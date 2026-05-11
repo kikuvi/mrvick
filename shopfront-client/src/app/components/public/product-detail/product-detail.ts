@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, NgForm } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -157,7 +157,7 @@ const KENYA_COUNTIES = [
       <div class="lp-container lp-order-wrap">
         <div class="lp-order">
           <h2>Fill out the form to place your order</h2>
-          <form (ngSubmit)="placeOrder(f)" #f="ngForm">
+          <form (ngSubmit)="placeOrder()" #orderForm="ngForm">
             <label class="lp-field-label">Full Name
               <input type="text" placeholder="e.g. John Doe" [(ngModel)]="order.customerName" name="customerName" required #nameField="ngModel" />
               <span class="field-error" *ngIf="nameField.invalid && nameField.touched">Full name is required</span>
@@ -268,6 +268,8 @@ const KENYA_COUNTIES = [
   `
 })
 export class ProductDetailComponent implements OnInit, OnDestroy {
+  @ViewChild('orderForm') orderForm!: NgForm;
+
   product: Product | null = null;
   safeDesc: SafeHtml = '';
   loading = true;
@@ -365,13 +367,11 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
     });
   }
 
-  placeOrder(f: NgForm) {
+  placeOrder() {
     if (!this.product) return;
-    if (!f.valid) {
-      Object.values(f.controls).forEach(c => c.markAsTouched());
-      this.cdr.markForCheck();
-      return;
-    }
+    this.orderForm.form.markAllAsTouched();
+    this.cdr.markForCheck();
+    if (!this.orderForm.valid) return;
     this.submitting = true;
     this.pixel.trackInitiateCheckout(this.product.discountPrice || this.product.price);
     this.pixel.trackLead();
