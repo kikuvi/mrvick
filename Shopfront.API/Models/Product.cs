@@ -11,6 +11,7 @@ public class Product
 
     public bool IsActive { get; set; } = true;
     public bool RatingsEnabled { get; set; } = false;
+    public int Views { get; set; } = 0;
 
     public ICollection<ProductImage> Images { get; set; } = new List<ProductImage>();
     public ICollection<ProductVariation> Variations { get; set; } = new List<ProductVariation>();
