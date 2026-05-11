@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, NgForm } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { NavbarComponent } from '../../shared/navbar/navbar';
@@ -153,7 +153,7 @@ const KENYA_COUNTIES = [
       <div class="lp-container lp-order-wrap">
         <div class="lp-order">
           <h2>Fill out the form to place your order</h2>
-          <form (ngSubmit)="placeOrder()" #f="ngForm">
+          <form (ngSubmit)="placeOrder(f)" #f="ngForm">
             <label class="lp-field-label">Full Name
               <input type="text" placeholder="e.g. John Doe" [(ngModel)]="order.customerName" name="customerName" required />
             </label>
@@ -352,8 +352,13 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
     });
   }
 
-  placeOrder() {
+  placeOrder(f: NgForm) {
     if (!this.product) return;
+    if (!f.valid) {
+      Object.values(f.controls).forEach(c => c.markAsTouched());
+      this.cdr.markForCheck();
+      return;
+    }
     this.submitting = true;
     this.pixel.trackInitiateCheckout(this.product.discountPrice || this.product.price);
     this.pixel.trackLead();
