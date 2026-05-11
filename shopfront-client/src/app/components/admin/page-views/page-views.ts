@@ -29,6 +29,11 @@ interface PathTotal { path: string; total: number; isProduct: boolean; }
     td { font-size: .85rem; }
     .bar-wrap { display: flex; align-items: center; gap: .5rem; }
     .bar { height: 8px; background: #1d3557; border-radius: 4px; min-width: 2px; }
+    .pagination { display: flex; align-items: center; gap: .5rem; margin-top: .75rem; font-size: .85rem; }
+    .pagination button { padding: .3rem .75rem; border: 1px solid #d1d5db; border-radius: 6px; background: #fff; cursor: pointer; font-size: .85rem; }
+    .pagination button:hover:not(:disabled) { background: #f3f4f6; }
+    .pagination button:disabled { opacity: .4; cursor: not-allowed; }
+    .pagination span { color: #555; }
   `],
   template: `
     <div class="admin-section">
@@ -104,7 +109,7 @@ interface PathTotal { path: string; total: number; isProduct: boolean; }
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let p of byPath">
+          <tr *ngFor="let p of pagedByPath">
             <td>
               {{ p.path }}
               <span class="product-badge" *ngIf="p.isProduct">product</span>
@@ -116,6 +121,11 @@ interface PathTotal { path: string; total: number; isProduct: boolean; }
           </tr>
         </tbody>
       </table>
+      <div class="pagination" *ngIf="pathTotalPages > 1">
+        <button (click)="pathPage = pathPage - 1" [disabled]="pathPage === 1">&#8592; Prev</button>
+        <span>Page {{ pathPage }} of {{ pathTotalPages }}</span>
+        <button (click)="pathPage = pathPage + 1" [disabled]="pathPage === pathTotalPages">Next &#8594;</button>
+      </div>
     </div>
   `
 })
@@ -123,6 +133,8 @@ export class AdminPageViewsComponent implements OnInit {
   days = 30;
   loading = false;
   rows: PageViewRow[] = [];
+  pathPage = 1;
+  readonly pathPageSize = 10;
 
   get totalVisits(): number { return this.rows.reduce((s, r) => s + r.count, 0); }
   get productVisits(): number { return this.rows.filter(r => r.path.startsWith('/products/')).reduce((s, r) => s + r.count, 0); }
@@ -147,6 +159,12 @@ export class AdminPageViewsComponent implements OnInit {
       .sort((a, b) => b.total - a.total);
   }
 
+  get pathTotalPages(): number { return Math.ceil(this.byPath.length / this.pathPageSize) || 1; }
+  get pagedByPath(): PathTotal[] {
+    const start = (this.pathPage - 1) * this.pathPageSize;
+    return this.byPath.slice(start, start + this.pathPageSize);
+  }
+
   private get maxDay(): number {
     return this.byDay.reduce((m, d) => Math.max(m, d.total), 1);
   }
@@ -160,6 +178,7 @@ export class AdminPageViewsComponent implements OnInit {
   ngOnInit() { this.load(); }
 
   load() {
+    this.pathPage = 1;
     this.loading = true;
     this.cdr.markForCheck();
     this.svc.getReport(this.days).subscribe({
