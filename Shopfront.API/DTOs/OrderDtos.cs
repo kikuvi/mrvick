@@ -11,7 +11,8 @@ public record PlaceOrderDto(
     string DeliveryAddress,
     string? Variation,
     string? LeadEventId,
-    string? PurchaseEventId
+    string? PurchaseEventId,
+    string? EventSourceUrl
 );
 
 public record UpdateOrderStatusDto(OrderStatus Status);

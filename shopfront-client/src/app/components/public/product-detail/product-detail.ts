@@ -392,7 +392,8 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
       productTitle: this.product.title,
       variation: this.selectedVariation || undefined,
       leadEventId,
-      purchaseEventId
+      purchaseEventId,
+      eventSourceUrl: window.location.href
     }).subscribe({
       next: res => {
         this.submitting = false;

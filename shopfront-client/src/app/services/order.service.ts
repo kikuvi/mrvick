@@ -12,6 +12,7 @@ export interface PlaceOrder {
   variation?: string;
   leadEventId?: string;
   purchaseEventId?: string;
+  eventSourceUrl?: string;
 }
 
 export interface Order {

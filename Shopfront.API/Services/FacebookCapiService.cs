@@ -25,16 +25,16 @@ public class FacebookCapiService
         _logger = logger;
     }
 
-    public async Task SendPurchaseAsync(Guid orderId, string email, string phone, decimal value, string? eventId = null)
-        => await SendAsync("Purchase", eventId ?? $"purchase_{orderId}", email, phone, value, orderId);
+    public async Task SendPurchaseAsync(Guid orderId, string email, string phone, decimal value, string? eventId = null, string? sourceUrl = null)
+        => await SendAsync("Purchase", eventId ?? $"purchase_{orderId}", email, phone, value, orderId, sourceUrl);
 
-    public async Task SendLeadAsync(Guid orderId, string email, string phone, decimal value, string? eventId = null)
-        => await SendAsync("Lead", eventId ?? $"lead_{orderId}", email, phone, value, orderId);
+    public async Task SendLeadAsync(Guid orderId, string email, string phone, decimal value, string? eventId = null, string? sourceUrl = null)
+        => await SendAsync("Lead", eventId ?? $"lead_{orderId}", email, phone, value, orderId, sourceUrl);
 
     private async Task SendAsync(
         string eventName, string eventId,
         string email, string phone,
-        decimal value, Guid? orderId)
+        decimal value, Guid? orderId, string? sourceUrl = null)
     {
         var token   = _config["Facebook:AccessToken"];
         var pixelId = _config["Facebook:PixelId"];
@@ -51,10 +51,11 @@ public class FacebookCapiService
             {
                 new
                 {
-                    event_name    = eventName,
-                    event_time    = DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
-                    event_id      = eventId,
-                    action_source = "website",
+                    event_name       = eventName,
+                    event_time       = DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
+                    event_id         = eventId,
+                    action_source    = "website",
+                    event_source_url = sourceUrl,
                     user_data = new
                     {
                         em = Hash(email.ToLowerInvariant().Trim()),
