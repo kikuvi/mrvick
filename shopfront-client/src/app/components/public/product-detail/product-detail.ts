@@ -160,8 +160,8 @@ const KENYA_COUNTIES = [
             <label class="lp-field-label">Phone Number
               <input type="tel" placeholder="e.g. 0712345678" [(ngModel)]="order.phone" name="phone" required />
             </label>
-            <label class="lp-field-label">Email <span style="font-weight:400;font-size:.85rem;color:#888">(optional)</span>
-              <input type="email" placeholder="e.g. john@email.com" [(ngModel)]="order.email" name="email" />
+            <label class="lp-field-label">Email
+              <input type="email" placeholder="e.g. john@email.com" [(ngModel)]="order.email" name="email" required />
             </label>
 
             <!-- Your Order — shown only when the product has variations -->

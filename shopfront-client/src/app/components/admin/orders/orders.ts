@@ -180,10 +180,11 @@ import { UserService, AdminUser } from '../../../services/user.service';
               <a href="tel:{{ selected.phone }}">{{ selected.phone }}</a>
             </span>
           </div>
-          <div class="detail-row" *ngIf="selected.email">
+          <div class="detail-row">
             <span class="detail-label">Email</span>
             <span class="detail-value">
-              <a href="mailto:{{ selected.email }}">{{ selected.email }}</a>
+              <a *ngIf="selected.email" href="mailto:{{ selected.email }}">{{ selected.email }}</a>
+              <span *ngIf="!selected.email" style="color:#bbb">—</span>
             </span>
           </div>
           <div class="detail-row">
