@@ -31,6 +31,9 @@ const KENYA_COUNTIES = [
     .lp-field-label input:focus, .lp-field-label select:focus, .lp-field-label textarea:focus {
       outline: none; border-color: #e63946 !important; box-shadow: 0 0 0 3px rgba(230,57,70,.15);
     }
+    .lp-field-label input.ng-invalid.ng-touched,
+    .lp-field-label select.ng-invalid.ng-touched,
+    .lp-field-label textarea.ng-invalid.ng-touched { border-color: #e63946 !important; }
     .your-order { margin-bottom: 0.75rem; }
     .your-order-label { font-weight: 700; color: #1d3557; margin-bottom: 0.5rem; font-size: 1rem; }
     .variation-options { display: flex; flex-direction: row; flex-wrap: wrap; gap: 0.5rem; }
@@ -156,7 +159,8 @@ const KENYA_COUNTIES = [
           <h2>Fill out the form to place your order</h2>
           <form (ngSubmit)="placeOrder(f)" #f="ngForm">
             <label class="lp-field-label">Full Name
-              <input type="text" placeholder="e.g. John Doe" [(ngModel)]="order.customerName" name="customerName" required />
+              <input type="text" placeholder="e.g. John Doe" [(ngModel)]="order.customerName" name="customerName" required #nameField="ngModel" />
+              <span class="field-error" *ngIf="nameField.invalid && nameField.touched">Full name is required</span>
             </label>
             <label class="lp-field-label">Phone Number
               <input type="tel" placeholder="e.g. 0712345678" [(ngModel)]="order.phone" name="phone" required pattern="[0-9]{10}|[0-9]{12}" #phoneField="ngModel" />
@@ -192,13 +196,15 @@ const KENYA_COUNTIES = [
             </div>
 
             <label class="lp-field-label">Delivery County
-              <select [(ngModel)]="order.county" name="county" required>
+              <select [(ngModel)]="order.county" name="county" required #countyField="ngModel">
                 <option value="">Select county</option>
                 <option *ngFor="let c of counties" [value]="c">{{ c }}</option>
               </select>
+              <span class="field-error" *ngIf="countyField.invalid && countyField.touched">Please select a county</span>
             </label>
             <label class="lp-field-label">Delivery Address
-              <textarea placeholder="e.g. Tom Mboya Street, near KFC" [(ngModel)]="order.deliveryAddress" name="deliveryAddress" rows="3" required></textarea>
+              <textarea placeholder="e.g. Tom Mboya Street, near KFC" [(ngModel)]="order.deliveryAddress" name="deliveryAddress" rows="3" required #addressField="ngModel"></textarea>
+              <span class="field-error" *ngIf="addressField.invalid && addressField.touched">Delivery address is required</span>
             </label>
             <button type="submit" class="lp-order-btn" [disabled]="submitting">
               {{ submitting ? 'Placing Order...' : 'Order Now — KES ' + (product.discountPrice | number:'1.0-0') }}
