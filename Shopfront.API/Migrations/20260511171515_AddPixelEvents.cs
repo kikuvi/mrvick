@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
@@ -28,17 +28,13 @@ namespace Shopfront.API.Migrations
                 {
                     table.PrimaryKey("PK_PixelEvents", x => x.Id);
                 });
-
-            migrationBuilder.CreateIndex(
-                name: "IX_PixelEvents_CreatedAt",
-                table: "PixelEvents",
-                column: "CreatedAt");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropTable(name: "PixelEvents");
+            migrationBuilder.DropTable(
+                name: "PixelEvents");
         }
     }
 }
