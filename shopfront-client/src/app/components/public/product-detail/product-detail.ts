@@ -58,6 +58,7 @@ const KENYA_COUNTIES = [
       box-shadow: inset 0 0 0 4px #fff;
     }
     .variation-option span { font-size: 0.95rem; color: #1a1a1a; }
+    .variation-options.invalid { border: 2px solid #e63946; border-radius: 10px; padding: 0.4rem; }
     .field-error { font-size: 0.8rem; font-weight: 400; color: #e63946; margin-top: -0.1rem; }
     .rating-section { background: #f9fafb; padding: 2rem 1rem; }
     .rating-section h3 { text-align: center; font-size: 1.1rem; color: #1a1a1a; margin-bottom: 1.25rem; }
@@ -178,7 +179,8 @@ const KENYA_COUNTIES = [
             <!-- Your Order — shown only when the product has variations -->
             <div class="your-order" *ngIf="product.variations?.length">
               <p class="your-order-label">Your Order</p>
-              <div class="variation-options">
+              <div class="variation-options"
+                [class.invalid]="orderForm.controls['variation']?.invalid && orderForm.controls['variation']?.touched">
                 <label
                   *ngFor="let v of product.variations"
                   class="variation-option"
@@ -193,6 +195,9 @@ const KENYA_COUNTIES = [
                   <span>{{ v.label }} — Ksh{{ product.discountPrice | number:'1.0-0' }}</span>
                 </label>
               </div>
+              <span class="field-error" *ngIf="orderForm.controls['variation']?.invalid && orderForm.controls['variation']?.touched">
+                Please select a variation
+              </span>
             </div>
 
             <label class="lp-field-label">Delivery County
