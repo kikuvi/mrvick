@@ -34,5 +34,6 @@ public record ProductDto(
     bool RatingsEnabled,
     double AverageRating,
     int RatingCount,
-    bool IsActive
+    bool IsActive,
+    int Views
 );

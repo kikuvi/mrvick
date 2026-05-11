@@ -65,6 +65,10 @@ public class ProductsController : ControllerBase
 
         if (product is null) return NotFound();
 
+        await _db.Products
+            .Where(p => p.Id == id)
+            .ExecuteUpdateAsync(s => s.SetProperty(x => x.Views, x => x.Views + 1));
+
         var approvedRatings = product.Ratings.Where(r => r.IsApproved).ToList();
         return Ok(new ProductDto(
             product.Id, product.Title, product.Description,
@@ -74,7 +78,8 @@ public class ProductsController : ControllerBase
             product.RatingsEnabled,
             approvedRatings.Any() ? approvedRatings.Average(r => r.Rating) : 0,
             approvedRatings.Count,
-            product.IsActive
+            product.IsActive,
+            product.Views + 1
         ));
     }
 
@@ -108,7 +113,7 @@ public class ProductsController : ControllerBase
                 product.Price, product.DiscountPrice, product.CreatedAt,
                 product.Images.Select(i => i.ImageUrl).ToList(),
                 product.Variations.Select(v => new VariationDto(v.Id, v.Label)).ToList(),
-                product.RatingsEnabled, 0, 0, product.IsActive));
+                product.RatingsEnabled, 0, 0, product.IsActive, 0));
     }
 
     [Authorize]
@@ -188,6 +193,7 @@ public class ProductsController : ControllerBase
         p.RatingsEnabled,
         p.Ratings.Any(r => r.IsApproved) ? p.Ratings.Where(r => r.IsApproved).Average(r => r.Rating) : 0,
         p.Ratings.Count(r => r.IsApproved),
-        p.IsActive
+        p.IsActive,
+        p.Views
     );
 }
