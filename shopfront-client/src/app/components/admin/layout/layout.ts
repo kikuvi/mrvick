@@ -15,6 +15,7 @@ const PAGE_TITLES: Record<string, string> = {
   reviews: 'Reviews',
   users: 'Users',
   'audit-logs': 'Audit Logs',
+  'page-views': 'Page Views',
   settings: 'Settings',
 };
 
@@ -102,6 +103,13 @@ const PAGE_TITLES: Record<string, string> = {
               <line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
             </svg>
             Audit Logs
+          </a>
+          <a routerLink="/admin/page-views" routerLinkActive="active">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+              <circle cx="12" cy="12" r="3"/>
+            </svg>
+            Page Views
           </a>
           <a routerLink="/admin/settings" routerLinkActive="active">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">

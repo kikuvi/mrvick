@@ -19,6 +19,7 @@ public class ShopfrontDbContext : IdentityDbContext<AppUser>
     public DbSet<ProductRating> ProductRatings => Set<ProductRating>();
     public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
     public DbSet<OrderNote> OrderNotes => Set<OrderNote>();
+    public DbSet<PageView> PageViews => Set<PageView>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -64,6 +65,12 @@ public class ShopfrontDbContext : IdentityDbContext<AppUser>
         builder.Entity<SiteSetting>(e =>
         {
             e.HasIndex(s => s.Key).IsUnique();
+        });
+
+        builder.Entity<PageView>(e =>
+        {
+            e.Property(p => p.Path).HasMaxLength(500);
+            e.HasIndex(p => new { p.Path, p.Date }).IsUnique();
         });
 
         builder.Entity<Page>(e =>

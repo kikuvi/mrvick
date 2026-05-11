@@ -28,6 +28,7 @@ export const routes: Routes = [
       { path: 'vendor-items', loadComponent: () => import('./components/admin/vendor-items/vendor-items').then(m => m.AdminVendorItemsComponent) },
       { path: 'reviews', loadComponent: () => import('./components/admin/reviews/reviews').then(m => m.AdminReviewsComponent) },
       { path: 'audit-logs', loadComponent: () => import('./components/admin/audit-logs/audit-logs').then(m => m.AdminAuditLogsComponent) },
+      { path: 'page-views', loadComponent: () => import('./components/admin/page-views/page-views').then(m => m.AdminPageViewsComponent) },
     ]
   },
   { path: '**', redirectTo: '' }
