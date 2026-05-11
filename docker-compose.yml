@@ -34,6 +34,8 @@ services:
       AfricasTalking__ApiKey: "${AT_API_KEY}"
       App__BaseUrl: "${APP_BASE_URL}"
       App__AdminPhone: "${ADMIN_PHONE}"
+      Facebook__PixelId: "${FACEBOOK_PIXEL_ID}"
+      Facebook__AccessToken: "${FACEBOOK_ACCESS_TOKEN}"
     volumes:
       - uploads:/app/wwwroot/uploads
     restart: unless-stopped
