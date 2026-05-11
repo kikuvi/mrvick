@@ -117,8 +117,9 @@ export class ThankYouComponent implements OnInit {
     });
 
     if (this.trackingToken) {
+      const purchaseEventId = this.route.snapshot.queryParamMap.get('peid') ?? this.pixel.genEventId('purchase');
       this.orderService.track(this.trackingToken).subscribe(order => {
-        this.pixel.trackPurchase(order.priceAtOrder);
+        this.pixel.trackPurchase(order.priceAtOrder, purchaseEventId);
       });
     }
   }

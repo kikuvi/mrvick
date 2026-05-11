@@ -1,10 +1,13 @@
 import { Component, OnInit, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { HttpClient } from '@angular/common/http';
 import { PageViewService, PageViewRow } from '../../../services/page-view.service';
+import { environment } from '../../../../environments/environment';
 
 interface DayTotal { date: string; total: number; }
 interface PathTotal { path: string; total: number; isProduct: boolean; }
+interface CoverageRow { eventName: string; pixelCount: number; capiCount: number; rate: number; }
 
 @Component({
   selector: 'app-admin-page-views',
@@ -34,6 +37,10 @@ interface PathTotal { path: string; total: number; isProduct: boolean; }
     .pagination button:hover:not(:disabled) { background: #f3f4f6; }
     .pagination button:disabled { opacity: .4; cursor: not-allowed; }
     .pagination span { color: #555; }
+    .coverage-bar-wrap { display: flex; align-items: center; gap: .5rem; }
+    .coverage-bar-bg { flex: 1; height: 8px; background: #e5e7eb; border-radius: 4px; overflow: hidden; }
+    .coverage-bar-fill { height: 100%; border-radius: 4px; transition: width .3s; }
+    .coverage-pct { font-size: .8rem; font-weight: 700; min-width: 38px; text-align: right; }
   `],
   template: `
     <div class="admin-section">
@@ -126,6 +133,48 @@ interface PathTotal { path: string; total: number; isProduct: boolean; }
         <span>Page {{ pathPage }} of {{ pathTotalPages }}</span>
         <button (click)="pathPage = pathPage + 1" [disabled]="pathPage === pathTotalPages">Next &#8594;</button>
       </div>
+
+      <!-- CAPI Coverage -->
+      <div class="section-title" style="margin-top:2rem">Conversions API Coverage</div>
+      <p style="font-size:.82rem;color:#888;margin:0 0 .75rem">
+        Rate of browser pixel events also sent via the server-side Conversions API.
+        Higher = better attribution and ad performance.
+      </p>
+      <table class="table" *ngIf="coverage.length">
+        <thead>
+          <tr>
+            <th>Event</th>
+            <th>Pixel</th>
+            <th>CAPI</th>
+            <th style="width:40%">Coverage</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let c of coverage">
+            <td><strong>{{ c.eventName }}</strong></td>
+            <td>{{ c.pixelCount | number }}</td>
+            <td>{{ c.capiCount | number }}</td>
+            <td>
+              <div class="coverage-bar-wrap">
+                <div class="coverage-bar-bg">
+                  <div class="coverage-bar-fill"
+                    [style.width.%]="c.rate"
+                    [style.background]="c.rate >= 80 ? '#16a34a' : c.rate >= 50 ? '#d97706' : '#dc2626'">
+                  </div>
+                </div>
+                <span class="coverage-pct"
+                  [style.color]="c.rate >= 80 ? '#16a34a' : c.rate >= 50 ? '#d97706' : '#dc2626'">
+                  {{ c.rate | number:'1.0-0' }}%
+                </span>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <p *ngIf="!coverage.length && !loading" style="font-size:.85rem;color:#aaa">
+        No pixel event data yet. Coverage will appear once orders are placed.
+      </p>
+
     </div>
   `
 })
@@ -133,6 +182,7 @@ export class AdminPageViewsComponent implements OnInit {
   days = 30;
   loading = false;
   rows: PageViewRow[] = [];
+  coverage: CoverageRow[] = [];
   pathPage = 1;
   readonly pathPageSize = 10;
 
@@ -173,7 +223,11 @@ export class AdminPageViewsComponent implements OnInit {
     return Math.round((total / this.maxDay) * 180);
   }
 
-  constructor(private svc: PageViewService, private cdr: ChangeDetectorRef) {}
+  constructor(
+    private svc: PageViewService,
+    private http: HttpClient,
+    private cdr: ChangeDetectorRef
+  ) {}
 
   ngOnInit() { this.load(); }
 
@@ -188,6 +242,18 @@ export class AdminPageViewsComponent implements OnInit {
         this.cdr.markForCheck();
       },
       error: () => { this.loading = false; this.cdr.markForCheck(); }
+    });
+    this.http.get<any[]>(`${environment.apiUrl}/pixel-events/coverage?days=${this.days}`).subscribe({
+      next: data => {
+        this.coverage = data.map(r => ({
+          eventName: r.eventName,
+          pixelCount: r.pixelCount,
+          capiCount: r.capiCount,
+          rate: r.pixelCount > 0 ? Math.round((r.capiCount / r.pixelCount) * 100) : 0
+        }));
+        this.cdr.markForCheck();
+      },
+      error: () => {}
     });
   }
 }

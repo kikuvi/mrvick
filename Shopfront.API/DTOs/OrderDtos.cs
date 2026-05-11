@@ -9,7 +9,9 @@ public record PlaceOrderDto(
     string? Email,
     string County,
     string DeliveryAddress,
-    string? Variation
+    string? Variation,
+    string? LeadEventId,
+    string? PurchaseEventId
 );
 
 public record UpdateOrderStatusDto(OrderStatus Status);

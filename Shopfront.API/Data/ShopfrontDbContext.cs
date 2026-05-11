@@ -20,6 +20,7 @@ public class ShopfrontDbContext : IdentityDbContext<AppUser>
     public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
     public DbSet<OrderNote> OrderNotes => Set<OrderNote>();
     public DbSet<PageView> PageViews => Set<PageView>();
+    public DbSet<PixelEvent> PixelEvents => Set<PixelEvent>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -71,6 +72,15 @@ public class ShopfrontDbContext : IdentityDbContext<AppUser>
         {
             e.Property(p => p.Path).HasMaxLength(500);
             e.HasIndex(p => new { p.Path, p.Date }).IsUnique();
+        });
+
+        builder.Entity<PixelEvent>(e =>
+        {
+            e.Property(p => p.EventName).HasMaxLength(50);
+            e.Property(p => p.Source).HasMaxLength(10);
+            e.Property(p => p.EventId).HasMaxLength(100);
+            e.Property(p => p.ProductId).HasMaxLength(50);
+            e.Property(p => p.Value).HasColumnType("decimal(18,2)");
         });
 
         builder.Entity<Page>(e =>

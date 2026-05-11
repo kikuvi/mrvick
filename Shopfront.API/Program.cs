@@ -55,8 +55,10 @@ builder.Services.AddCors(options =>
 
 // Services
 builder.Services.AddHttpClient("AfricasTalking");
+builder.Services.AddHttpClient("FacebookCapi");
 builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<AuditService>();
+builder.Services.AddScoped<FacebookCapiService>();
 
 builder.Services.AddControllers()
     .AddJsonOptions(o => o.JsonSerializerOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter()));

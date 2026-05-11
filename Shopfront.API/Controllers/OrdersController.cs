@@ -17,13 +17,15 @@ public class OrdersController : ControllerBase
     private readonly INotificationService _notifications;
     private readonly IConfiguration _config;
     private readonly AuditService _audit;
+    private readonly FacebookCapiService _capi;
 
-    public OrdersController(ShopfrontDbContext db, INotificationService notifications, IConfiguration config, AuditService audit)
+    public OrdersController(ShopfrontDbContext db, INotificationService notifications, IConfiguration config, AuditService audit, FacebookCapiService capi)
     {
         _db = db;
         _notifications = notifications;
         _config = config;
         _audit = audit;
+        _capi = capi;
     }
 
     [HttpPost]
@@ -51,9 +53,12 @@ public class OrdersController : ControllerBase
         var baseUrl = _config["App:BaseUrl"] ?? "https://shopfront.co.ke";
         var trackingUrl = $"{baseUrl}/track/{order.TrackingToken}";
 
-        // Fire notifications in background so they don't block the response
+        // Fire CAPI events + notifications in background so they don't block the response
         _ = Task.Run(async () =>
         {
+        await _capi.SendLeadAsync(order.Id, order.Email ?? "", order.Phone, order.PriceAtOrder, dto.LeadEventId);
+        await _capi.SendPurchaseAsync(order.Id, order.Email ?? "", order.Phone, order.PriceAtOrder, dto.PurchaseEventId);
+
         await _notifications.SendSmsAsync(order.Phone,
             $"Hi {order.CustomerName}, your Shopfront order has been placed! Track it here: {trackingUrl}");
 

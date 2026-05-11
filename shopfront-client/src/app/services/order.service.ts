@@ -10,6 +10,8 @@ export interface PlaceOrder {
   county: string;
   deliveryAddress: string;
   variation?: string;
+  leadEventId?: string;
+  purchaseEventId?: string;
 }
 
 export interface Order {

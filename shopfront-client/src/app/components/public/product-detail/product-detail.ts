@@ -378,17 +378,27 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
     this.cdr.markForCheck();
     if (!this.orderForm.valid) return;
     this.submitting = true;
+
+    // Generate IDs once — same ID goes to both pixel and CAPI for deduplication
+    const leadEventId     = this.pixel.genEventId('lead');
+    const purchaseEventId = this.pixel.genEventId('purchase');
+
     this.pixel.trackInitiateCheckout(this.product.discountPrice || this.product.price);
-    this.pixel.trackLead();
+    this.pixel.trackLead(leadEventId);
+
     this.orderService.place({
       ...this.order,
       productId: this.product.id,
       productTitle: this.product.title,
-      variation: this.selectedVariation || undefined
+      variation: this.selectedVariation || undefined,
+      leadEventId,
+      purchaseEventId
     }).subscribe({
       next: res => {
         this.submitting = false;
-        this.router.navigate(['/order-confirmed', res.trackingToken], { queryParams: { name: this.order.customerName } });
+        this.router.navigate(['/order-confirmed', res.trackingToken], {
+          queryParams: { name: this.order.customerName, peid: purchaseEventId }
+        });
       },
       error: () => { this.submitting = false; this.cdr.markForCheck(); }
     });
