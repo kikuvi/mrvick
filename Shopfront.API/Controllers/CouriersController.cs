@@ -46,6 +46,48 @@ public class CouriersController : ControllerBase
         await _db.SaveChangesAsync();
         return NoContent();
     }
+
+    [HttpGet("offices")]
+    public async Task<IActionResult> GetOffices()
+    {
+        var offices = await _db.CourierOffices
+            .Include(o => o.Courier)
+            .OrderBy(o => o.Courier.Name).ThenBy(o => o.Office)
+            .Select(o => new { o.Id, o.CourierId, CourierName = o.Courier.Name, o.Office, o.Phone, o.CreatedAt })
+            .ToListAsync();
+        return Ok(offices);
+    }
+
+    [HttpPost("offices")]
+    public async Task<IActionResult> CreateOffice([FromBody] CreateOfficeRequest dto)
+    {
+        if (string.IsNullOrWhiteSpace(dto.Office) || string.IsNullOrWhiteSpace(dto.Phone))
+            return BadRequest("Office and phone are required.");
+
+        var courier = await _db.Couriers.FindAsync(dto.CourierId);
+        if (courier is null) return BadRequest("Courier not found.");
+
+        var office = new CourierOffice
+        {
+            CourierId = dto.CourierId,
+            Office    = dto.Office.Trim(),
+            Phone     = dto.Phone.Trim()
+        };
+        _db.CourierOffices.Add(office);
+        await _db.SaveChangesAsync();
+        return Ok(new { office.Id, office.CourierId, CourierName = courier.Name, office.Office, office.Phone, office.CreatedAt });
+    }
+
+    [HttpDelete("offices/{id}")]
+    public async Task<IActionResult> DeleteOffice(Guid id)
+    {
+        var office = await _db.CourierOffices.FindAsync(id);
+        if (office is null) return NotFound();
+        _db.CourierOffices.Remove(office);
+        await _db.SaveChangesAsync();
+        return NoContent();
+    }
 }
 
 public record CreateCourierRequest(string Name);
+public record CreateOfficeRequest(Guid CourierId, string Office, string Phone);

@@ -7,4 +7,5 @@ public class Courier
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     public ICollection<Order> Orders { get; set; } = new List<Order>();
+    public ICollection<CourierOffice> Offices { get; set; } = new List<CourierOffice>();
 }
