@@ -13,6 +13,7 @@ public class ShopfrontDbContext : IdentityDbContext<AppUser>
     public DbSet<ProductVariation> ProductVariations => Set<ProductVariation>();
     public DbSet<Order> Orders => Set<Order>();
     public DbSet<Rider> Riders => Set<Rider>();
+    public DbSet<Courier> Couriers => Set<Courier>();
     public DbSet<Page> Pages => Set<Page>();
     public DbSet<SiteSetting> SiteSettings => Set<SiteSetting>();
     public DbSet<VendorItem> VendorItems => Set<VendorItem>();

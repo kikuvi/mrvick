@@ -10,6 +10,7 @@ const PAGE_TITLES: Record<string, string> = {
   orders: 'Orders',
   products: 'Products',
   riders: 'Riders',
+  couriers: 'Couriers',
   pages: 'Pages',
   'vendor-items': 'Vendors',
   reviews: 'Reviews',
@@ -68,6 +69,14 @@ const PAGE_TITLES: Record<string, string> = {
               <circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/>
             </svg>
             Riders
+          </a>
+          <a routerLink="/admin/couriers" routerLinkActive="active">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="1" y="3" width="15" height="13"/>
+              <polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/>
+              <circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/>
+            </svg>
+            Couriers
           </a>
           <a routerLink="/admin/pages" routerLinkActive="active">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">

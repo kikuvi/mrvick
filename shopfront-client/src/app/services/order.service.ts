@@ -33,6 +33,8 @@ export interface Order {
   productTitle: string;
   riderId?: string;
   riderName?: string;
+  courierId?: string;
+  courierName?: string;
   createdAt: string;
   variation?: string;
   isArchived: boolean;
@@ -69,6 +71,7 @@ export class OrderService {
   archive(id: string) { return this.api.patch<void>(`/orders/${id}/archive`, {}); }
   updateStatus(id: string, status: string) { return this.api.patch<void>(`/orders/${id}/status`, { status }); }
   assignRider(id: string, riderId: string) { return this.api.patch<void>(`/orders/${id}/assign`, { riderId }); }
+  assignCourier(id: string, courierId: string) { return this.api.patch<void>(`/orders/${id}/assign-courier`, { courierId }); }
   updateExpenses(id: string, buyingPrice: number, advertisingCost: number, deliveryFee: number) {
     return this.api.patch<void>(`/orders/${id}/expenses`, { buyingPrice, advertisingCost, deliveryFee });
   }

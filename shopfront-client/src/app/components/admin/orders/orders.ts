@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { OrderService, Order, OrderNote } from '../../../services/order.service';
 import { RiderService, Rider } from '../../../services/rider.service';
+import { CourierService, Courier } from '../../../services/courier.service';
 import { UserService, AdminUser } from '../../../services/user.service';
 
 @Component({
@@ -104,7 +105,7 @@ import { UserService, AdminUser } from '../../../services/user.service';
           <tr>
             <th>Token</th><th>Customer</th><th>Product</th><th>Variation</th><th>County</th>
             <th>Amount</th><th>Buying</th><th>Adv.</th><th>Delivery</th><th>Profit</th>
-            <th>Status</th><th>Rider</th><th>Date</th><th></th>
+            <th>Status</th><th>Rider</th><th>Courier</th><th>Date</th><th></th>
           </tr>
         </thead>
         <tbody>
@@ -142,6 +143,12 @@ import { UserService, AdminUser } from '../../../services/user.service';
                 <option *ngFor="let r of riders" [ngValue]="r.id">{{ r.name }}</option>
               </select>
             </td>
+            <td>
+              <select [(ngModel)]="o.courierId" (change)="assignCourier(o)">
+                <option [ngValue]="null">— None —</option>
+                <option *ngFor="let c of couriers" [ngValue]="c.id">{{ c.name }}</option>
+              </select>
+            </td>
             <td><small>{{ o.createdAt | date:'dd/MM/yy' }}</small></td>
             <td>
               <div style="display:flex;gap:.35rem;flex-direction:column">
@@ -154,7 +161,7 @@ import { UserService, AdminUser } from '../../../services/user.service';
             </td>
           </tr>
           <tr *ngIf="!filtered.length">
-            <td colspan="14" style="text-align:center;color:#999;padding:2rem">No orders found.</td>
+            <td colspan="15" style="text-align:center;color:#999;padding:2rem">No orders found.</td>
           </tr>
         </tbody>
       </table>
@@ -236,6 +243,10 @@ import { UserService, AdminUser } from '../../../services/user.service';
             <span class="detail-label">Rider</span>
             <span class="detail-value">{{ selected.riderName }}</span>
           </div>
+          <div class="detail-row" *ngIf="selected.courierName">
+            <span class="detail-label">Courier</span>
+            <span class="detail-value">{{ selected.courierName }}</span>
+          </div>
           <div class="detail-row">
             <span class="detail-label">Order Date</span>
             <span class="detail-value">{{ selected.createdAt | date:'dd MMM yyyy, HH:mm' }}</span>
@@ -308,6 +319,7 @@ import { UserService, AdminUser } from '../../../services/user.service';
 export class AdminOrdersComponent implements OnInit {
   orders: Order[] = [];
   riders: Rider[] = [];
+  couriers: Courier[] = [];
   statusFilter = '';
   selected: Order | null = null;
 
@@ -420,6 +432,7 @@ export class AdminOrdersComponent implements OnInit {
   constructor(
     private orderService: OrderService,
     private riderService: RiderService,
+    private courierService: CourierService,
     private userService: UserService,
     private cdr: ChangeDetectorRef
   ) {}
@@ -427,6 +440,7 @@ export class AdminOrdersComponent implements OnInit {
   ngOnInit() {
     this.load();
     this.riderService.getAll().subscribe(r => { this.riders = r; this.cdr.markForCheck(); });
+    this.courierService.getAll().subscribe(c => { this.couriers = c; this.cdr.markForCheck(); });
   }
 
   load() {
@@ -446,6 +460,10 @@ export class AdminOrdersComponent implements OnInit {
 
   assignRider(o: Order) {
     if (o.riderId) this.orderService.assignRider(o.id, o.riderId).subscribe();
+  }
+
+  assignCourier(o: Order) {
+    if (o.courierId) this.orderService.assignCourier(o.id, o.courierId).subscribe();
   }
 
   saveExpenses(o: Order) {

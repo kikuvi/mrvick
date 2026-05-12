@@ -30,8 +30,10 @@ public class Order
     public OrderStatus Status { get; set; } = OrderStatus.New;
     public bool IsArchived { get; set; } = false;
     public Guid? RiderId { get; set; }
+    public Guid? CourierId { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     public Product Product { get; set; } = null!;
     public Rider? Rider { get; set; }
+    public Courier? Courier { get; set; }
 }

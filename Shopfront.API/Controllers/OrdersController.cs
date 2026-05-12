@@ -215,6 +215,7 @@ public class OrdersController : ControllerBase
         var orders = await _db.Orders
             .Include(o => o.Product)
             .Include(o => o.Rider)
+            .Include(o => o.Courier)
             .Where(o => o.IsArchived == archived)
             .OrderByDescending(o => o.CreatedAt)
             .Select(o => new OrderDto(
@@ -224,6 +225,7 @@ public class OrdersController : ControllerBase
                 o.PriceAtOrder - (o.BuyingPrice + o.AdvertisingCost + o.DeliveryFee),
                 o.Status.ToString(), o.ProductId, o.Product.Title,
                 o.RiderId, o.Rider != null ? o.Rider.Name : null,
+                o.CourierId, o.Courier != null ? o.Courier.Name : null,
                 o.CreatedAt, o.Variation, o.IsArchived
             ))
             .ToListAsync();
@@ -288,6 +290,21 @@ public class OrdersController : ControllerBase
         await _notifications.SendSmsAsync(order.Phone,
             $"Hi {order.CustomerName}, your Shopfront order has been assigned to rider {rider.Name}.");
 
+        return NoContent();
+    }
+
+    [Authorize]
+    [HttpPatch("{id}/assign-courier")]
+    public async Task<IActionResult> AssignCourier(Guid id, AssignCourierDto dto)
+    {
+        var order = await _db.Orders.FindAsync(id);
+        if (order is null) return NotFound();
+
+        var courier = await _db.Couriers.FindAsync(dto.CourierId);
+        if (courier is null) return BadRequest("Courier not found.");
+
+        order.CourierId = dto.CourierId;
+        await _db.SaveChangesAsync();
         return NoContent();
     }
 

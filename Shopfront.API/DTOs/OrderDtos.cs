@@ -19,6 +19,8 @@ public record UpdateOrderStatusDto(OrderStatus Status);
 
 public record AssignRiderDto(Guid RiderId);
 
+public record AssignCourierDto(Guid CourierId);
+
 public record UpdateExpensesDto(decimal BuyingPrice, decimal AdvertisingCost, decimal DeliveryFee);
 
 public record OrderDto(
@@ -39,6 +41,8 @@ public record OrderDto(
     string ProductTitle,
     Guid? RiderId,
     string? RiderName,
+    Guid? CourierId,
+    string? CourierName,
     DateTime CreatedAt,
     string? Variation,
     bool IsArchived
