@@ -100,7 +100,12 @@ interface PathTotal { path: string; total: number; isProduct: boolean; }
       </table>
 
       <!-- Per-page breakdown -->
-      <div class="section-title">Top Pages</div>
+      <div class="section-title" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.5rem">
+        <span>Top Pages</span>
+        <input type="text" [(ngModel)]="pathFilter" (ngModelChange)="pathPage = 1"
+          placeholder="Filter by path or product ID…"
+          style="padding:.35rem .75rem;border:1px solid #ddd;border-radius:6px;font-size:.85rem;min-width:260px" />
+      </div>
       <table class="table">
         <thead>
           <tr>
@@ -136,6 +141,7 @@ export class AdminPageViewsComponent implements OnInit {
   loading = false;
   rows: PageViewRow[] = [];
   pathPage = 1;
+  pathFilter = '';
   readonly pathPageSize = 10;
 
   get totalVisits(): number { return this.rows.reduce((s, r) => s + r.count, 0); }
@@ -156,9 +162,12 @@ export class AdminPageViewsComponent implements OnInit {
     for (const r of this.rows) {
       map.set(r.path, (map.get(r.path) ?? 0) + r.count);
     }
-    return Array.from(map.entries())
+    const all = Array.from(map.entries())
       .map(([path, total]) => ({ path, total, isProduct: path.startsWith('/products/') }))
       .sort((a, b) => b.total - a.total);
+
+    const q = this.pathFilter.trim().toLowerCase();
+    return q ? all.filter(p => p.path.includes(q)) : all;
   }
 
   get pathTotalPages(): number { return Math.ceil(this.byPath.length / this.pathPageSize) || 1; }

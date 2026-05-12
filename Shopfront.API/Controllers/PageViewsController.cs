@@ -20,6 +20,12 @@ public class PageViewsController : ControllerBase
         if (string.IsNullOrWhiteSpace(dto.Path)) return BadRequest();
 
         var path = dto.Path.Trim().ToLowerInvariant();
+
+        // Strip query string — e.g. ?fbclid=... should not be stored
+        var qIdx = path.IndexOf('?');
+        if (qIdx >= 0) path = path[..qIdx];
+
+        if (string.IsNullOrWhiteSpace(path)) return Ok();
         if (path.Length > 500) path = path[..500];
 
         var today = DateOnly.FromDateTime(DateTime.UtcNow);
