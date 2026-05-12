@@ -36,6 +36,13 @@ public class FacebookCapiService
         string email, string phone,
         decimal value, Guid? orderId, string? sourceUrl = null)
     {
+        var normalizedEmail = email.Trim().ToLowerInvariant();
+        if (normalizedEmail is "joneskikuvi2@gmail.com" or "alexanwambua@gmail.com")
+        {
+            _logger.LogInformation("CAPI {EventName} skipped — test account {Email}", eventName, email);
+            return;
+        }
+
         var token   = _config["Facebook:AccessToken"];
         var pixelId = _config["Facebook:PixelId"];
 
