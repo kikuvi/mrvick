@@ -50,6 +50,7 @@ import { UserService, AdminUser } from '../../../services/user.service';
     .pill-Assigned  { background:#fff3cd; color:#856404; }
     .pill-InTransit { background:#d4edda; color:#155724; }
     .pill-Delivered { background:#d4edda; color:#155724; }
+    .pill-Completed { background:#d1fae5; color:#065f46; }
     .pill-Rejected  { background:#f8d7da; color:#721c24; }
     .modal-footer { padding: .9rem 1.4rem; border-top: 1px solid #eee; text-align: right; }
 
@@ -95,7 +96,8 @@ import { UserService, AdminUser } from '../../../services/user.service';
         <select [(ngModel)]="statusFilter" (change)="onFilterChange()" name="filter">
           <option value="">All Active</option>
           <option>New</option><option>Assigned</option>
-          <option>InTransit</option><option>Delivered</option><option>Rejected</option>
+          <option>InTransit</option><option>Delivered</option>
+          <option>Completed</option><option>Rejected</option>
           <option value="Archived">Archived</option>
         </select>
       </div>
@@ -134,7 +136,8 @@ import { UserService, AdminUser } from '../../../services/user.service';
             <td>
               <select [(ngModel)]="o.status" (change)="updateStatus(o)">
                 <option>New</option><option>Assigned</option>
-                <option>InTransit</option><option>Delivered</option><option>Rejected</option>
+                <option>InTransit</option><option>Delivered</option>
+                <option>Completed</option><option>Rejected</option>
               </select>
             </td>
             <td>

@@ -6,6 +6,7 @@ public enum OrderStatus
     Assigned,
     InTransit,
     Delivered,
+    Completed,
     Rejected
 }
 

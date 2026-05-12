@@ -22,6 +22,7 @@ import { ProductService } from '../../../services/product.service';
     .dot-Assigned   { background: #fef3c7; color: #92400e; }
     .dot-InTransit  { background: #ede9fe; color: #5b21b6; }
     .dot-Delivered  { background: #d1fae5; color: #065f46; }
+    .dot-Completed  { background: #d1fae5; color: #065f46; }
     .dot-Rejected   { background: #fee2e2; color: #991b1b; }
   `],
   template: `
@@ -78,8 +79,8 @@ import { ProductService } from '../../../services/product.service';
             </svg>
           </div>
           <div class="stat-body">
-            <div class="stat-label">Delivered</div>
-            <div class="stat-value">{{ delivered }}</div>
+            <div class="stat-label">Completed</div>
+            <div class="stat-value">{{ completed }}</div>
           </div>
         </div>
 
@@ -147,8 +148,8 @@ export class AdminDashboardComponent implements OnInit {
 
   get newOrders()  { return this.orders.filter(o => o.status === 'New').length; }
   get inTransit()  { return this.orders.filter(o => o.status === 'InTransit').length; }
-  get delivered()  { return this.orders.filter(o => o.status === 'Delivered').length; }
-  get totalProfit(){ return this.orders.reduce((s, o) => s + o.profit, 0); }
+  get completed()  { return this.orders.filter(o => o.status === 'Completed').length; }
+  get totalProfit(){ return this.orders.filter(o => o.status === 'Completed').reduce((s, o) => s + o.profit, 0); }
 
   constructor(
     private orderService: OrderService,
