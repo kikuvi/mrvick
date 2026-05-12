@@ -12,7 +12,9 @@ public record PlaceOrderDto(
     string? Variation,
     string? LeadEventId,
     string? PurchaseEventId,
-    string? EventSourceUrl
+    string? EventSourceUrl,
+    string? Fbp,
+    string? Fbc
 );
 
 public record UpdateOrderStatusDto(OrderStatus Status);

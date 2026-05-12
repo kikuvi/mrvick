@@ -393,7 +393,9 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
       variation: this.selectedVariation || undefined,
       leadEventId,
       purchaseEventId,
-      eventSourceUrl: window.location.href
+      eventSourceUrl: window.location.href,
+      fbp: this.getCookie('_fbp'),
+      fbc: this.getCookie('_fbc')
     }).subscribe({
       next: res => {
         this.submitting = false;
@@ -403,5 +405,10 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
       },
       error: () => { this.submitting = false; this.cdr.markForCheck(); }
     });
+  }
+
+  private getCookie(name: string): string | undefined {
+    const match = document.cookie.match(new RegExp('(?:^|; )' + name + '=([^;]*)'));
+    return match ? decodeURIComponent(match[1]) : undefined;
   }
 }

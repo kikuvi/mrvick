@@ -25,16 +25,19 @@ public class FacebookCapiService
         _logger = logger;
     }
 
-    public async Task SendPurchaseAsync(Guid orderId, string email, string phone, decimal value, string? eventId = null, string? sourceUrl = null)
-        => await SendAsync("Purchase", eventId ?? $"purchase_{orderId}", email, phone, value, orderId, sourceUrl);
+    public async Task SendPurchaseAsync(Guid orderId, string email, string phone, string name, decimal value,
+        string? eventId = null, string? sourceUrl = null, string? fbp = null, string? fbc = null)
+        => await SendAsync("Purchase", eventId ?? $"purchase_{orderId}", email, phone, name, value, orderId, sourceUrl, fbp, fbc);
 
-    public async Task SendLeadAsync(Guid orderId, string email, string phone, decimal value, string? eventId = null, string? sourceUrl = null)
-        => await SendAsync("Lead", eventId ?? $"lead_{orderId}", email, phone, value, orderId, sourceUrl);
+    public async Task SendLeadAsync(Guid orderId, string email, string phone, string name, decimal value,
+        string? eventId = null, string? sourceUrl = null, string? fbp = null, string? fbc = null)
+        => await SendAsync("Lead", eventId ?? $"lead_{orderId}", email, phone, name, value, orderId, sourceUrl, fbp, fbc);
 
     private async Task SendAsync(
         string eventName, string eventId,
-        string email, string phone,
-        decimal value, Guid? orderId, string? sourceUrl = null)
+        string email, string phone, string name,
+        decimal value, Guid? orderId, string? sourceUrl = null,
+        string? fbp = null, string? fbc = null)
     {
         var normalizedEmail = email.Trim().ToLowerInvariant();
         if (normalizedEmail is "joneskikuvi2@gmail.com" or "alexanwambua@gmail.com")
@@ -52,6 +55,23 @@ public class FacebookCapiService
             return;
         }
 
+        // Build user_data — only include fields that have real values
+        var userData = new Dictionary<string, string>();
+
+        if (!string.IsNullOrWhiteSpace(email))
+            userData["em"] = Hash(email.ToLowerInvariant().Trim());
+
+        if (!string.IsNullOrWhiteSpace(phone))
+            userData["ph"] = Hash(NormalizePhone(phone));
+
+        var (fn, ln) = ParseName(name);
+        if (fn is not null) userData["fn"] = Hash(fn.ToLowerInvariant());
+        if (ln is not null) userData["ln"] = Hash(ln.ToLowerInvariant());
+
+        // fbp / fbc are not hashed — passed through as-is
+        if (!string.IsNullOrWhiteSpace(fbp)) userData["fbp"] = fbp;
+        if (!string.IsNullOrWhiteSpace(fbc)) userData["fbc"] = fbc;
+
         var payload = new
         {
             data = new[]
@@ -63,12 +83,8 @@ public class FacebookCapiService
                     event_id         = eventId,
                     action_source    = "website",
                     event_source_url = sourceUrl,
-                    user_data = new
-                    {
-                        em = Hash(email.ToLowerInvariant().Trim()),
-                        ph = Hash(NormalizePhone(phone))
-                    },
-                    custom_data = new { value, currency = "KES" }
+                    user_data        = userData,
+                    custom_data      = new { value, currency = "KES" }
                 }
             }
         };
@@ -105,6 +121,17 @@ public class FacebookCapiService
         {
             _logger.LogError(ex, "CAPI SendAsync failed for {EventName}", eventName);
         }
+    }
+
+    private static (string? firstName, string? lastName) ParseName(string name)
+    {
+        var parts = name.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        return parts.Length switch
+        {
+            0 => (null, null),
+            1 => (parts[0], null),
+            _ => (parts[0], parts[^1])
+        };
     }
 
     private static string Hash(string value)

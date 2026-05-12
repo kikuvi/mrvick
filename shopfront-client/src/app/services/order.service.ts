@@ -13,6 +13,8 @@ export interface PlaceOrder {
   leadEventId?: string;
   purchaseEventId?: string;
   eventSourceUrl?: string;
+  fbp?: string;
+  fbc?: string;
 }
 
 export interface Order {

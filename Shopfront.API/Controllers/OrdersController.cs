@@ -56,8 +56,8 @@ public class OrdersController : ControllerBase
         // Fire CAPI events + notifications in background so they don't block the response
         _ = Task.Run(async () =>
         {
-        await _capi.SendLeadAsync(order.Id, order.Email ?? "", order.Phone, order.PriceAtOrder, dto.LeadEventId, dto.EventSourceUrl);
-        await _capi.SendPurchaseAsync(order.Id, order.Email ?? "", order.Phone, order.PriceAtOrder, dto.PurchaseEventId, dto.EventSourceUrl);
+        await _capi.SendLeadAsync(order.Id, order.Email ?? "", order.Phone, order.CustomerName, order.PriceAtOrder, dto.LeadEventId, dto.EventSourceUrl, dto.Fbp, dto.Fbc);
+        await _capi.SendPurchaseAsync(order.Id, order.Email ?? "", order.Phone, order.CustomerName, order.PriceAtOrder, dto.PurchaseEventId, dto.EventSourceUrl, dto.Fbp, dto.Fbc);
 
         await _notifications.SendSmsAsync(order.Phone,
             $"Hi {order.CustomerName}, your Shopfront order has been placed! Track it here: {trackingUrl}");
