@@ -34,6 +34,16 @@ interface PathTotal { path: string; total: number; isProduct: boolean; }
     .pagination button:hover:not(:disabled) { background: #f3f4f6; }
     .pagination button:disabled { opacity: .4; cursor: not-allowed; }
     .pagination span { color: #555; }
+    .date-filter { display: flex; align-items: center; gap: .4rem; font-size: .85rem; }
+    .date-filter input[type=date] {
+      padding: .3rem .6rem; border: 1px solid #ddd; border-radius: 6px;
+      font-size: .85rem; color: #374151; background: #fff;
+    }
+    .date-filter button {
+      padding: .3rem .6rem; border: 1px solid #ddd; border-radius: 6px;
+      background: #f3f4f6; font-size: .78rem; cursor: pointer; color: #555; white-space: nowrap;
+    }
+    .date-filter button:hover { background: #e5e7eb; }
   `],
   template: `
     <div class="admin-section">
@@ -102,9 +112,19 @@ interface PathTotal { path: string; total: number; isProduct: boolean; }
       <!-- Per-page breakdown -->
       <div class="section-title" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.5rem">
         <span>Top Pages</span>
-        <input type="text" [(ngModel)]="pathFilter" (ngModelChange)="pathPage = 1"
-          placeholder="Filter by path or product ID…"
-          style="padding:.35rem .75rem;border:1px solid #ddd;border-radius:6px;font-size:.85rem;min-width:260px" />
+        <div style="display:flex;align-items:center;gap:.5rem;flex-wrap:wrap">
+          <input type="text" [(ngModel)]="pathFilter" (ngModelChange)="pathPage = 1"
+            placeholder="Filter by path or product ID…"
+            style="padding:.35rem .75rem;border:1px solid #ddd;border-radius:6px;font-size:.85rem;min-width:220px" />
+          <div class="date-filter">
+            <input type="date" [(ngModel)]="dateFrom" (ngModelChange)="pathPage = 1"
+              [max]="dateTo || ''" title="From date" />
+            <span style="color:#aaa">–</span>
+            <input type="date" [(ngModel)]="dateTo" (ngModelChange)="pathPage = 1"
+              [min]="dateFrom || ''" title="To date" />
+            <button *ngIf="dateFrom || dateTo" (click)="clearDateFilter()">✕ Clear</button>
+          </div>
+        </div>
       </div>
       <table class="table">
         <thead>
@@ -142,6 +162,8 @@ export class AdminPageViewsComponent implements OnInit {
   rows: PageViewRow[] = [];
   pathPage = 1;
   pathFilter = '';
+  dateFrom = '';
+  dateTo = '';
   readonly pathPageSize = 10;
 
   get totalVisits(): number { return this.rows.reduce((s, r) => s + r.count, 0); }
@@ -157,9 +179,16 @@ export class AdminPageViewsComponent implements OnInit {
       .sort((a, b) => b.date.localeCompare(a.date));
   }
 
+  private get rowsForPath(): PageViewRow[] {
+    return this.rows.filter(r =>
+      (!this.dateFrom || r.date >= this.dateFrom) &&
+      (!this.dateTo   || r.date <= this.dateTo)
+    );
+  }
+
   get byPath(): PathTotal[] {
     const map = new Map<string, number>();
-    for (const r of this.rows) {
+    for (const r of this.rowsForPath) {
       map.set(r.path, (map.get(r.path) ?? 0) + r.count);
     }
     const all = Array.from(map.entries())
@@ -169,6 +198,8 @@ export class AdminPageViewsComponent implements OnInit {
     const q = this.pathFilter.trim().toLowerCase();
     return q ? all.filter(p => p.path.includes(q)) : all;
   }
+
+  clearDateFilter() { this.dateFrom = ''; this.dateTo = ''; this.pathPage = 1; }
 
   get pathTotalPages(): number { return Math.ceil(this.byPath.length / this.pathPageSize) || 1; }
   get pagedByPath(): PathTotal[] {
