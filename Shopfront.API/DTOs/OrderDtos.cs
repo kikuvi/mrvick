@@ -17,7 +17,7 @@ public record PlaceOrderDto(
     string? Fbc
 );
 
-public record UpdateOrderStatusDto(OrderStatus Status);
+public record UpdateOrderStatusDto(OrderStatus Status, DateTime? DeliveryDate);
 
 public record AssignRiderDto(Guid RiderId);
 
@@ -47,7 +47,8 @@ public record OrderDto(
     string? CourierName,
     DateTime CreatedAt,
     string? Variation,
-    bool IsArchived
+    bool IsArchived,
+    string? DeliveryDate
 );
 
 public record AddNoteDto(string Content);

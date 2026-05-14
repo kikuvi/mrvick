@@ -46,13 +46,23 @@ import { UserService, AdminUser } from '../../../services/user.service';
       display: inline-block; padding: .2rem .65rem; border-radius: 20px;
       font-size: .8rem; font-weight: 700;
     }
-    .pill-New       { background:#cce5ff; color:#004085; }
-    .pill-Assigned  { background:#fff3cd; color:#856404; }
-    .pill-InTransit { background:#d4edda; color:#155724; }
-    .pill-Delivered { background:#d4edda; color:#155724; }
-    .pill-Completed { background:#d1fae5; color:#065f46; }
-    .pill-Rejected  { background:#f8d7da; color:#721c24; }
+    .pill-New          { background:#cce5ff; color:#004085; }
+    .pill-Assigned     { background:#fff3cd; color:#856404; }
+    .pill-InTransit    { background:#d4edda; color:#155724; }
+    .pill-Delivered    { background:#d4edda; color:#155724; }
+    .pill-Completed    { background:#d1fae5; color:#065f46; }
+    .pill-Rejected     { background:#f8d7da; color:#721c24; }
+    .pill-DeliverLater { background:#fef3c7; color:#92400e; }
     .modal-footer { padding: .9rem 1.4rem; border-top: 1px solid #eee; text-align: right; }
+
+    /* ---- Deliver Later banner ---- */
+    .delivery-due-row td { border-top: 2px solid #dc2626 !important; }
+    .delivery-banner-row td { padding: 0 !important; border-bottom: 2px solid #dc2626; }
+    .delivery-due-banner {
+      background: #dc2626; color: #fff;
+      padding: .35rem 1rem; font-size: .8rem; font-weight: 700;
+      display: flex; align-items: center; gap: .4rem;
+    }
 
     /* ---- Notes modal ---- */
     .notes-modal { max-width: 540px; }
@@ -98,6 +108,7 @@ import { UserService, AdminUser } from '../../../services/user.service';
           <option>New</option><option>Assigned</option>
           <option>InTransit</option><option>Delivered</option>
           <option>Completed</option><option>Rejected</option>
+          <option>DeliverLater</option>
           <option value="Archived">Archived</option>
         </select>
       </div>
@@ -111,7 +122,8 @@ import { UserService, AdminUser } from '../../../services/user.service';
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let o of filtered">
+          <ng-container *ngFor="let o of filtered">
+          <tr [class.delivery-due-row]="isDeliveryDueTomorrow(o)">
             <td>{{ o.trackingToken }}</td>
             <td class="customer-cell" (click)="selected = o" title="View customer details">
               <strong>{{ o.customerName }}</strong><br>
@@ -138,7 +150,13 @@ import { UserService, AdminUser } from '../../../services/user.service';
                 <option>New</option><option>Assigned</option>
                 <option>InTransit</option><option>Delivered</option>
                 <option>Completed</option><option>Rejected</option>
+                <option>DeliverLater</option>
               </select>
+              <input *ngIf="o.status === 'DeliverLater'"
+                type="date"
+                [(ngModel)]="o.deliveryDate"
+                (change)="updateStatus(o)"
+                style="margin-top:.35rem;display:block;width:100%;font-size:.8rem;padding:.2rem .4rem;border:1px solid #ddd;border-radius:4px" />
             </td>
             <td>
               <select [(ngModel)]="o.riderId" (change)="assignRider(o)">
@@ -163,6 +181,12 @@ import { UserService, AdminUser } from '../../../services/user.service';
               </div>
             </td>
           </tr>
+          <tr *ngIf="isDeliveryDueTomorrow(o)" class="delivery-banner-row">
+            <td colspan="15">
+              <div class="delivery-due-banner">&#9888; Delivery due tomorrow &mdash; {{ o.deliveryDate | date:'dd MMM yyyy' }}</div>
+            </td>
+          </tr>
+          </ng-container>
           <tr *ngIf="!filtered.length">
             <td colspan="15" style="text-align:center;color:#999;padding:2rem">No orders found.</td>
           </tr>
@@ -240,6 +264,13 @@ import { UserService, AdminUser } from '../../../services/user.service';
             <span class="detail-label">Status</span>
             <span class="detail-value">
               <span class="status-pill pill-{{ selected.status }}">{{ selected.status }}</span>
+            </span>
+          </div>
+          <div class="detail-row" *ngIf="selected.status === 'DeliverLater' && selected.deliveryDate">
+            <span class="detail-label">Deliver By</span>
+            <span class="detail-value" style="color:#dc2626;font-weight:700">
+              {{ selected.deliveryDate | date:'dd MMM yyyy' }}
+              <span *ngIf="isDeliveryDueTomorrow(selected)" style="margin-left:.5rem;background:#dc2626;color:#fff;padding:.1rem .5rem;border-radius:4px;font-size:.75rem">Due Tomorrow</span>
             </span>
           </div>
           <div class="detail-row" *ngIf="selected.riderName">
@@ -458,7 +489,16 @@ export class AdminOrdersComponent implements OnInit {
   }
 
   updateStatus(o: Order) {
-    this.orderService.updateStatus(o.id, o.status).subscribe();
+    this.orderService.updateStatus(o.id, o.status, o.deliveryDate).subscribe();
+  }
+
+  isDeliveryDueTomorrow(o: Order): boolean {
+    if (o.status !== 'DeliverLater' || !o.deliveryDate) return false;
+    const t = new Date();
+    const tomorrow = new Date(t.getFullYear(), t.getMonth(), t.getDate() + 1);
+    const pad = (n: number) => String(n).padStart(2, '0');
+    const tomorrowStr = `${tomorrow.getFullYear()}-${pad(tomorrow.getMonth() + 1)}-${pad(tomorrow.getDate())}`;
+    return o.deliveryDate.startsWith(tomorrowStr);
   }
 
   assignRider(o: Order) {

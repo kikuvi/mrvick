@@ -7,7 +7,8 @@ public enum OrderStatus
     InTransit,
     Delivered,
     Completed,
-    Rejected
+    Rejected,
+    DeliverLater
 }
 
 public class Order
@@ -29,6 +30,7 @@ public class Order
     public decimal DeliveryFee { get; set; }
 
     public OrderStatus Status { get; set; } = OrderStatus.New;
+    public DateTime? DeliveryDate { get; set; }
     public bool IsArchived { get; set; } = false;
     public Guid? RiderId { get; set; }
     public Guid? CourierId { get; set; }

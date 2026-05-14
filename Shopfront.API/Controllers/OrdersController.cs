@@ -226,7 +226,8 @@ public class OrdersController : ControllerBase
                 o.Status.ToString(), o.ProductId, o.Product.Title,
                 o.RiderId, o.Rider != null ? o.Rider.Name : null,
                 o.CourierId, o.Courier != null ? o.Courier.Name : null,
-                o.CreatedAt, o.Variation, o.IsArchived
+                o.CreatedAt, o.Variation, o.IsArchived,
+                o.DeliveryDate.HasValue ? o.DeliveryDate.Value.ToString("yyyy-MM-dd") : null
             ))
             .ToListAsync();
 
@@ -254,6 +255,7 @@ public class OrdersController : ControllerBase
         if (order is null) return NotFound();
 
         order.Status = dto.Status;
+        order.DeliveryDate = dto.DeliveryDate;
         await _db.SaveChangesAsync();
 
         var message = dto.Status switch

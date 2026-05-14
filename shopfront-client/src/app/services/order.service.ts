@@ -40,6 +40,7 @@ export interface Order {
   createdAt: string;
   variation?: string;
   isArchived: boolean;
+  deliveryDate?: string;
 }
 
 export interface OrderNote {
@@ -71,7 +72,11 @@ export class OrderService {
   getAll() { return this.api.get<Order[]>('/orders', true); }
   getArchived() { return this.api.get<Order[]>('/orders?archived=true', true); }
   archive(id: string) { return this.api.patch<void>(`/orders/${id}/archive`, {}); }
-  updateStatus(id: string, status: string) { return this.api.patch<void>(`/orders/${id}/status`, { status }); }
+  updateStatus(id: string, status: string, deliveryDate?: string) {
+    const body: Record<string, unknown> = { status };
+    if (deliveryDate) body['deliveryDate'] = deliveryDate;
+    return this.api.patch<void>(`/orders/${id}/status`, body);
+  }
   assignRider(id: string, riderId: string) { return this.api.patch<void>(`/orders/${id}/assign`, { riderId }); }
   assignCourier(id: string, courierId: string) { return this.api.patch<void>(`/orders/${id}/assign-courier`, { courierId }); }
   updateExpenses(id: string, buyingPrice: number, advertisingCost: number, deliveryFee: number) {
