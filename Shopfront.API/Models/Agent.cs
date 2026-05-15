@@ -10,5 +10,6 @@ public class Agent
     public string TeamLeader { get; set; } = string.Empty;
     public string TeamLeaderContact { get; set; } = string.Empty;
     public string Company { get; set; } = "Standard";
+    public string Region { get; set; } = string.Empty;
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 }

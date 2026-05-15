@@ -10,6 +10,7 @@ export interface Agent {
   teamLeader: string;
   teamLeaderContact: string;
   company: string;
+  region: string;
 }
 
 @Injectable({ providedIn: 'root' })

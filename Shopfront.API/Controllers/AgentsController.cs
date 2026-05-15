@@ -28,7 +28,8 @@ public class AgentsController : ControllerBase
                 a.Contact,
                 a.TeamLeader,
                 a.TeamLeaderContact,
-                a.Company))
+                a.Company,
+                a.Region))
             .ToListAsync();
 
         return Ok(agents);

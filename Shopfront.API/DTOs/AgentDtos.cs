@@ -8,5 +8,6 @@ public record AgentDto(
     string Contact,
     string TeamLeader,
     string TeamLeaderContact,
-    string Company
+    string Company,
+    string Region
 );
