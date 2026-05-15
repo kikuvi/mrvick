@@ -60,6 +60,7 @@ builder.Services.AddHttpClient("AfricasTalking");
 builder.Services.AddHttpClient("FacebookCapi");
 builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<AuditService>();
+builder.Services.AddHostedService<DeliveryDueNotifier>();
 builder.Services.AddScoped<FacebookCapiService>();
 
 builder.Services.AddControllers()
