@@ -23,7 +23,11 @@ import { ProductService } from '../../../services/product.service';
     .dot-InTransit  { background: #ede9fe; color: #5b21b6; }
     .dot-Delivered  { background: #d1fae5; color: #065f46; }
     .dot-Completed  { background: #d1fae5; color: #065f46; }
-    .dot-Rejected   { background: #fee2e2; color: #991b1b; }
+    .dot-Rejected      { background: #fee2e2; color: #991b1b; }
+    .dot-DeliverLater  { background: #fef3c7; color: #92400e; }
+    .pagination { display: flex; align-items: center; gap: .35rem; margin-top: .75rem; justify-content: flex-end; }
+    .page-info  { font-size: .8rem; color: #888; margin-right: .4rem; }
+    .btn-sm.current { background: #1d3557; color: #fff; border-color: #1d3557; }
   `],
   template: `
     <div class="dashboard">
@@ -125,7 +129,7 @@ import { ProductService } from '../../../services/product.service';
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let o of orders.slice(0, 8)">
+          <tr *ngFor="let o of pagedOrders">
             <td style="font-family:monospace;font-size:.8rem;font-weight:700;color:#1d3557">{{ o.trackingToken }}</td>
             <td>{{ o.customerName }}</td>
             <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ o.productTitle }}</td>
@@ -135,6 +139,12 @@ import { ProductService } from '../../../services/product.service';
           </tr>
         </tbody>
       </table>
+      <div class="pagination" *ngIf="dashTotalPages > 1">
+        <span class="page-info">{{ dashPageStart }}–{{ dashPageEnd }} of {{ orders.length }}</span>
+        <button class="btn-sm" [disabled]="dashPage === 1" (click)="dashGoTo(dashPage - 1)">&#8249;</button>
+        <button class="btn-sm" *ngFor="let p of dashPageNumbers" [class.current]="p === dashPage" (click)="dashGoTo(p)">{{ p }}</button>
+        <button class="btn-sm" [disabled]="dashPage === dashTotalPages" (click)="dashGoTo(dashPage + 1)">&#8250;</button>
+      </div>
       <ng-template #noOrders>
         <p class="empty">No orders yet.</p>
       </ng-template>
@@ -145,11 +155,23 @@ import { ProductService } from '../../../services/product.service';
 export class AdminDashboardComponent implements OnInit {
   orders: Order[] = [];
   productCount = 0;
+  dashPage = 1;
+  readonly DASH_SIZE = 8;
 
-  get newOrders()  { return this.orders.filter(o => o.status === 'New').length; }
-  get inTransit()  { return this.orders.filter(o => o.status === 'InTransit').length; }
-  get completed()  { return this.orders.filter(o => o.status === 'Completed').length; }
-  get totalProfit(){ return this.orders.filter(o => o.status === 'Completed').reduce((s, o) => s + o.profit, 0); }
+  get newOrders()   { return this.orders.filter(o => o.status === 'New').length; }
+  get inTransit()   { return this.orders.filter(o => o.status === 'InTransit').length; }
+  get completed()   { return this.orders.filter(o => o.status === 'Completed').length; }
+  get totalProfit() { return this.orders.filter(o => o.status === 'Completed').reduce((s, o) => s + o.profit, 0); }
+
+  get dashTotalPages() { return Math.max(1, Math.ceil(this.orders.length / this.DASH_SIZE)); }
+  get pagedOrders()    { const s = (this.dashPage - 1) * this.DASH_SIZE; return this.orders.slice(s, s + this.DASH_SIZE); }
+  get dashPageStart()  { return (this.dashPage - 1) * this.DASH_SIZE + 1; }
+  get dashPageEnd()    { return Math.min(this.dashPage * this.DASH_SIZE, this.orders.length); }
+  get dashPageNumbers(): number[] {
+    const s = Math.max(1, this.dashPage - 2), e = Math.min(this.dashTotalPages, this.dashPage + 2);
+    return Array.from({ length: e - s + 1 }, (_, i) => s + i);
+  }
+  dashGoTo(p: number) { this.dashPage = Math.max(1, Math.min(p, this.dashTotalPages)); this.cdr.markForCheck(); }
 
   constructor(
     private orderService: OrderService,

@@ -97,6 +97,9 @@ import { UserService, AdminUser } from '../../../services/user.service';
     }
     .mention-name { font-size: .85rem; font-weight: 700; color: #1a1a1a; }
     .mention-email { font-size: .75rem; color: #888; }
+    .pagination { display: flex; align-items: center; gap: .35rem; margin-top: .75rem; justify-content: flex-end; }
+    .page-info  { font-size: .8rem; color: #888; margin-right: .4rem; }
+    .btn-sm.current { background: #1d3557; color: #fff; border-color: #1d3557; }
   `],
   template: `
     <div class="admin-section">
@@ -122,7 +125,7 @@ import { UserService, AdminUser } from '../../../services/user.service';
           </tr>
         </thead>
         <tbody>
-          <ng-container *ngFor="let o of filtered">
+          <ng-container *ngFor="let o of paged">
           <tr [class.delivery-due-row]="isDeliveryDueTomorrow(o)">
             <td>{{ o.trackingToken }}</td>
             <td class="customer-cell" (click)="selected = o" title="View customer details">
@@ -192,6 +195,13 @@ import { UserService, AdminUser } from '../../../services/user.service';
           </tr>
         </tbody>
       </table>
+
+      <div class="pagination" *ngIf="totalPages > 1">
+        <span class="page-info">{{ pageStart }}–{{ pageEnd }} of {{ filtered.length }}</span>
+        <button class="btn-sm" [disabled]="page === 1" (click)="goTo(page - 1)">&#8249;</button>
+        <button class="btn-sm" *ngFor="let p of pageNumbers" [class.current]="p === page" (click)="goTo(p)">{{ p }}</button>
+        <button class="btn-sm" [disabled]="page === totalPages" (click)="goTo(page + 1)">&#8250;</button>
+      </div>
     </div>
 
     <!-- ── Customer Details Modal ── -->
@@ -356,6 +366,8 @@ export class AdminOrdersComponent implements OnInit {
   couriers: Courier[] = [];
   statusFilter = '';
   selected: Order | null = null;
+  page = 1;
+  readonly PAGE_SIZE = 25;
 
   // Notes
   notesOrder: Order | null = null;
@@ -463,6 +475,16 @@ export class AdminOrdersComponent implements OnInit {
     return this.orders;
   }
 
+  get totalPages()  { return Math.max(1, Math.ceil(this.filtered.length / this.PAGE_SIZE)); }
+  get paged()       { const s = (this.page - 1) * this.PAGE_SIZE; return this.filtered.slice(s, s + this.PAGE_SIZE); }
+  get pageStart()   { return (this.page - 1) * this.PAGE_SIZE + 1; }
+  get pageEnd()     { return Math.min(this.page * this.PAGE_SIZE, this.filtered.length); }
+  get pageNumbers(): number[] {
+    const s = Math.max(1, this.page - 2), e = Math.min(this.totalPages, this.page + 2);
+    return Array.from({ length: e - s + 1 }, (_, i) => s + i);
+  }
+  goTo(p: number) { this.page = Math.max(1, Math.min(p, this.totalPages)); this.cdr.markForCheck(); }
+
   constructor(
     private orderService: OrderService,
     private riderService: RiderService,
@@ -481,10 +503,11 @@ export class AdminOrdersComponent implements OnInit {
     const call = this.statusFilter === 'Archived'
       ? this.orderService.getArchived()
       : this.orderService.getAll();
-    call.subscribe(o => { this.orders = o; this.cdr.markForCheck(); });
+    call.subscribe(o => { this.orders = o; this.page = 1; this.cdr.markForCheck(); });
   }
 
   onFilterChange() {
+    this.page = 1;
     this.load();
   }
 
