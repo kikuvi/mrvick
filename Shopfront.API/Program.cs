@@ -96,6 +96,7 @@ using (var scope = app.Services.CreateScope())
     var db = scope.ServiceProvider.GetRequiredService<ShopfrontDbContext>();
     db.Database.Migrate();
     await AdminSeeder.SeedAsync(scope.ServiceProvider);
+    await AgentSeeder.SeedAsync(db);
 }
 
 app.Run();

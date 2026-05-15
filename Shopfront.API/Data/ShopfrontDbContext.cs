@@ -23,6 +23,7 @@ public class ShopfrontDbContext : IdentityDbContext<AppUser>
     public DbSet<OrderNote> OrderNotes => Set<OrderNote>();
     public DbSet<PageView> PageViews => Set<PageView>();
     public DbSet<PixelEvent> PixelEvents => Set<PixelEvent>();
+    public DbSet<Agent> Agents => Set<Agent>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
