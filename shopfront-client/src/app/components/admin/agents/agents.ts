@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { AgentService, Agent } from '../../../services/agent.service';
 
 const REGIONS = ['All', 'Coastal, Mountain & Eastern', 'South & North Rift, Western', 'Nairobi'];
-const PAGE_SIZE = 15;
+const PAGE_SIZE = 10;
 
 @Component({
   selector: 'app-admin-agents',
