@@ -11,6 +11,7 @@ const PAGE_TITLES: Record<string, string> = {
   products: 'Products',
   riders: 'Riders',
   couriers: 'Couriers',
+  agents: 'Agents',
   pages: 'Pages',
   'vendor-items': 'Vendors',
   reviews: 'Reviews',
@@ -77,6 +78,14 @@ const PAGE_TITLES: Record<string, string> = {
               <circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/>
             </svg>
             Couriers
+          </a>
+          <a routerLink="/admin/agents" routerLinkActive="active">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+              <circle cx="9" cy="7" r="4"/>
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+            </svg>
+            Agents
           </a>
           <a routerLink="/admin/pages" routerLinkActive="active">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
