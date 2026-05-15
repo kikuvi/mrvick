@@ -4,6 +4,7 @@ import { Router, RouterLink, RouterLinkActive, RouterOutlet, NavigationEnd } fro
 import { filter } from 'rxjs/operators';
 import { Subscription } from 'rxjs';
 import { AuthService } from '../../../services/auth.service';
+import { NotificationService, AppNotification } from '../../../services/notification.service';
 
 const PAGE_TITLES: Record<string, string> = {
   dashboard: 'Dashboard',
@@ -27,6 +28,29 @@ const PAGE_TITLES: Record<string, string> = {
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CommonModule, RouterLink, RouterLinkActive, RouterOutlet],
+  styles: [`
+    .notif-btn { position: relative; background: none; border: none; cursor: pointer; padding: 6px; border-radius: 8px; color: #555; display: flex; align-items: center; }
+    .notif-btn:hover { background: #f0f0f0; }
+    .notif-badge { position: absolute; top: 2px; right: 2px; background: #e63946; color: #fff; font-size: 10px; font-weight: 800; border-radius: 10px; min-width: 16px; height: 16px; display: flex; align-items: center; justify-content: center; padding: 0 4px; line-height: 1; }
+    .notif-dropdown { position: absolute; top: calc(100% + 8px); right: 0; width: 340px; background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,.14); z-index: 999; overflow: hidden; }
+    .notif-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; border-bottom: 1px solid #f0f0f0; }
+    .notif-header span { font-size: 13px; font-weight: 700; color: #1a1a1a; }
+    .notif-mark-all { font-size: 12px; color: #4f46e5; background: none; border: none; cursor: pointer; padding: 0; }
+    .notif-mark-all:hover { text-decoration: underline; }
+    .notif-list { max-height: 360px; overflow-y: auto; }
+    .notif-item { display: flex; gap: 10px; padding: 12px 16px; border-bottom: 1px solid #f7f7f7; cursor: default; transition: background .1s; }
+    .notif-item:hover { background: #fafafa; }
+    .notif-item.unread { background: #f0f4ff; }
+    .notif-item.unread:hover { background: #e8eeff; }
+    .notif-dot { width: 8px; height: 8px; border-radius: 50%; background: #4f46e5; flex-shrink: 0; margin-top: 5px; }
+    .notif-dot.read { background: transparent; }
+    .notif-body { flex: 1; min-width: 0; }
+    .notif-title { font-size: 13px; font-weight: 600; color: #1a1a1a; margin-bottom: 2px; }
+    .notif-msg { font-size: 12px; color: #666; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .notif-time { font-size: 11px; color: #aaa; margin-top: 3px; }
+    .notif-empty { padding: 28px 16px; text-align: center; font-size: 13px; color: #aaa; }
+    .topbar-right { display: flex; align-items: center; gap: 12px; position: relative; }
+  `],
   template: `
     <div class="admin-layout">
 
@@ -172,6 +196,38 @@ const PAGE_TITLES: Record<string, string> = {
         <header class="topbar">
           <h2 class="topbar-title">{{ pageTitle }}</h2>
           <div class="topbar-right">
+
+            <!-- Notification bell -->
+            <div style="position:relative">
+              <button class="notif-btn" (click)="toggleNotif($event)" title="Notifications">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                  <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+                </svg>
+                <span class="notif-badge" *ngIf="unreadCount > 0">{{ unreadCount > 99 ? '99+' : unreadCount }}</span>
+              </button>
+
+              <div class="notif-dropdown" *ngIf="notifOpen" (click)="$event.stopPropagation()">
+                <div class="notif-header">
+                  <span>Notifications</span>
+                  <button class="notif-mark-all" *ngIf="unreadCount > 0" (click)="markAllRead()">Mark all read</button>
+                </div>
+                <div class="notif-list">
+                  <div *ngIf="notifications.length === 0" class="notif-empty">No notifications yet.</div>
+                  <div *ngFor="let n of notifications"
+                    class="notif-item" [class.unread]="!n.isRead"
+                    (click)="onNotifClick(n)">
+                    <div class="notif-dot" [class.read]="n.isRead"></div>
+                    <div class="notif-body">
+                      <div class="notif-title">{{ n.title }}</div>
+                      <div class="notif-msg">{{ n.message }}</div>
+                      <div class="notif-time">{{ n.createdAt | date:'dd MMM, HH:mm' }}</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <!-- User avatar + name -->
             <div class="topbar-user">
               <div class="topbar-avatar">{{ initials }}</div>
@@ -194,12 +250,18 @@ export class AdminLayoutComponent implements OnInit, OnDestroy {
   fullName = '';
   email = '';
   initials = '';
+  notifOpen = false;
+  unreadCount = 0;
+  notifications: AppNotification[] = [];
   private routerSub!: Subscription;
+  private notifSub!: Subscription;
+  private countSub!: Subscription;
 
   constructor(
     private auth: AuthService,
     private router: Router,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private notifService: NotificationService
   ) {}
 
   ngOnInit() {
@@ -215,9 +277,56 @@ export class AdminLayoutComponent implements OnInit, OnDestroy {
       this.updateTitle(e.urlAfterRedirects ?? e.url);
       this.cdr.markForCheck();
     });
+
+    this.notifService.startPolling();
+
+    this.countSub = this.notifService.unreadCount$.subscribe(n => {
+      this.unreadCount = n;
+      this.cdr.markForCheck();
+    });
+
+    this.notifSub = this.notifService.notifications$.subscribe(items => {
+      this.notifications = items;
+      this.cdr.markForCheck();
+    });
+
+    document.addEventListener('click', this.closeNotif);
   }
 
-  ngOnDestroy() { this.routerSub?.unsubscribe(); }
+  ngOnDestroy() {
+    this.routerSub?.unsubscribe();
+    this.notifSub?.unsubscribe();
+    this.countSub?.unsubscribe();
+    this.notifService.stopPolling();
+    document.removeEventListener('click', this.closeNotif);
+  }
+
+  toggleNotif(e: Event) {
+    e.stopPropagation();
+    this.notifOpen = !this.notifOpen;
+    this.cdr.markForCheck();
+  }
+
+  private closeNotif = () => {
+    if (this.notifOpen) { this.notifOpen = false; this.cdr.markForCheck(); }
+  };
+
+  onNotifClick(n: AppNotification) {
+    if (!n.isRead) {
+      n.isRead = true;
+      this.notifService.markRead(n.id).subscribe();
+      this.unreadCount = Math.max(0, this.unreadCount - 1);
+      this.cdr.markForCheck();
+    }
+  }
+
+  markAllRead() {
+    this.notifService.markAllRead().subscribe(() => {
+      this.notifications.forEach(n => n.isRead = true);
+      this.unreadCount = 0;
+      this.cdr.markForCheck();
+    });
+  }
 
   private updateTitle(url: string) {
     const segment = url.split('/').filter(Boolean).pop() ?? '';

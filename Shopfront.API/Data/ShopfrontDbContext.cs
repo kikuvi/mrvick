@@ -24,6 +24,7 @@ public class ShopfrontDbContext : IdentityDbContext<AppUser>
     public DbSet<PageView> PageViews => Set<PageView>();
     public DbSet<PixelEvent> PixelEvents => Set<PixelEvent>();
     public DbSet<Agent> Agents => Set<Agent>();
+    public DbSet<AppNotification> AppNotifications => Set<AppNotification>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {

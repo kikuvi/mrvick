@@ -367,7 +367,7 @@ export class AdminOrdersComponent implements OnInit {
   statusFilter = '';
   selected: Order | null = null;
   page = 1;
-  readonly PAGE_SIZE = 25;
+  readonly PAGE_SIZE = 10;
 
   // Notes
   notesOrder: Order | null = null;

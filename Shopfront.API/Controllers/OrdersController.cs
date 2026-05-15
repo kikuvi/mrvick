@@ -48,6 +48,14 @@ public class OrdersController : ControllerBase
         };
 
         _db.Orders.Add(order);
+
+        _db.AppNotifications.Add(new Models.AppNotification
+        {
+            Title = $"New order from {order.CustomerName}",
+            Message = $"{product.Title} — {order.County} #{order.TrackingToken}",
+            OrderId = order.TrackingToken
+        });
+
         await _db.SaveChangesAsync();
 
         var baseUrl = _config["App:BaseUrl"] ?? "https://shopfront.co.ke";
