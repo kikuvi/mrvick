@@ -11,6 +11,7 @@ export interface Agent {
   teamLeaderContact: string;
   company: string;
   region: string;
+  confirmed: boolean;
 }
 
 export interface CreateAgentPayload {
@@ -24,10 +25,16 @@ export interface CreateAgentPayload {
   region: string;
 }
 
+export interface UpdateAgentPayload extends CreateAgentPayload {
+  confirmed: boolean;
+}
+
 @Injectable({ providedIn: 'root' })
 export class AgentService {
   constructor(private api: ApiService) {}
 
   getAll() { return this.api.get<Agent[]>('/agents', true); }
   create(payload: CreateAgentPayload) { return this.api.post<Agent>('/agents', payload, true); }
+  update(id: string, payload: UpdateAgentPayload) { return this.api.put<Agent>(`/agents/${id}`, payload); }
+  toggleConfirmed(id: string) { return this.api.patch<{ id: string; confirmed: boolean }>(`/agents/${id}/confirm`, {}); }
 }
