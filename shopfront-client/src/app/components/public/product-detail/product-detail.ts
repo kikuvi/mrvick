@@ -208,7 +208,7 @@ const KENYA_COUNTIES = [
               <span class="field-error" *ngIf="countyField.invalid && countyField.touched">Please select a county</span>
             </label>
             <label class="lp-field-label">Delivery Address
-              <textarea placeholder="e.g. Tom Mboya Street, near KFC" [(ngModel)]="order.deliveryAddress" name="deliveryAddress" rows="3" required #addressField="ngModel"></textarea>
+              <textarea placeholder="e.g. Estate/village, house number or plot number, street/road name, nearest landmark, and any extra directions" [(ngModel)]="order.deliveryAddress" name="deliveryAddress" rows="3" required #addressField="ngModel"></textarea>
               <span class="field-error" *ngIf="addressField.invalid && addressField.touched">Delivery address is required</span>
             </label>
             <button type="submit" class="lp-order-btn" [disabled]="submitting">
