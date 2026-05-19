@@ -307,16 +307,21 @@ export class AdminAgentsComponent implements OnInit {
     this.filtered = this.agents.filter(a => {
       const matchView = this.viewMode === 'all' || a.confirmed;
       const matchRegion = this.activeRegion === 'All' || a.region === this.activeRegion;
-      const matchQuery = !q || (
-        a.bureau.toLowerCase().includes(q) ||
-        a.staff.toLowerCase().includes(q) ||
-        a.physicalLocation.toLowerCase().includes(q) ||
-        a.teamLeader.toLowerCase().includes(q)
-      );
+      const matchQuery = !q || this.matchesQuery(a, q);
       return matchView && matchRegion && matchQuery;
     });
     this.currentPage = 1;
     this.buildPagination();
+    this.cdr.markForCheck();
+  }
+
+  private matchesQuery(a: Agent, q: string): boolean {
+    return a.bureau.toLowerCase().includes(q) ||
+      a.staff.toLowerCase().includes(q) ||
+      a.physicalLocation.toLowerCase().includes(q) ||
+      a.teamLeader.toLowerCase().includes(q) ||
+      a.contact.toLowerCase().includes(q) ||
+      a.teamLeaderContact.toLowerCase().includes(q);
   }
 
   goTo(p: number) {
@@ -342,7 +347,9 @@ export class AdminAgentsComponent implements OnInit {
   }
 
   regionCount(region: string): number {
-    const base = this.viewMode === 'all' ? this.agents : this.agents.filter(a => a.confirmed);
+    const q = this.query.toLowerCase().trim();
+    let base = this.viewMode === 'all' ? this.agents : this.agents.filter(a => a.confirmed);
+    if (q) base = base.filter(a => this.matchesQuery(a, q));
     if (region === 'All') return base.length;
     return base.filter(a => a.region === region).length;
   }
