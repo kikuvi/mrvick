@@ -34,4 +34,28 @@ public class AgentsController : ControllerBase
 
         return Ok(agents);
     }
+
+    [HttpPost]
+    public async Task<IActionResult> Create([FromBody] CreateAgentDto dto)
+    {
+        var agent = new Shopfront.API.Models.Agent
+        {
+            Bureau = dto.Bureau.Trim(),
+            PhysicalLocation = dto.PhysicalLocation.Trim(),
+            Staff = dto.Staff.Trim(),
+            Contact = dto.Contact.Trim(),
+            TeamLeader = dto.TeamLeader.Trim(),
+            TeamLeaderContact = dto.TeamLeaderContact.Trim(),
+            Company = string.IsNullOrWhiteSpace(dto.Company) ? "Standard" : dto.Company.Trim(),
+            Region = dto.Region.Trim()
+        };
+
+        _db.Agents.Add(agent);
+        await _db.SaveChangesAsync();
+
+        var result = new AgentDto(agent.Id, agent.Bureau, agent.PhysicalLocation, agent.Staff,
+            agent.Contact, agent.TeamLeader, agent.TeamLeaderContact, agent.Company, agent.Region);
+
+        return CreatedAtAction(nameof(GetAll), result);
+    }
 }

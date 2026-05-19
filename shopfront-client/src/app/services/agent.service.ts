@@ -13,9 +13,21 @@ export interface Agent {
   region: string;
 }
 
+export interface CreateAgentPayload {
+  bureau: string;
+  physicalLocation: string;
+  staff: string;
+  contact: string;
+  teamLeader: string;
+  teamLeaderContact: string;
+  company: string;
+  region: string;
+}
+
 @Injectable({ providedIn: 'root' })
 export class AgentService {
   constructor(private api: ApiService) {}
 
   getAll() { return this.api.get<Agent[]>('/agents', true); }
+  create(payload: CreateAgentPayload) { return this.api.post<Agent>('/agents', payload, true); }
 }

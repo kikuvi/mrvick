@@ -1,10 +1,16 @@
 import { Component, OnInit, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { AgentService, Agent } from '../../../services/agent.service';
+import { AgentService, Agent, CreateAgentPayload } from '../../../services/agent.service';
 
 const REGIONS = ['All', 'Coastal, Mountain & Eastern', 'South & North Rift, Western', 'Nairobi'];
+const REGION_OPTIONS = ['Coastal, Mountain & Eastern', 'South & North Rift, Western', 'Nairobi'];
 const PAGE_SIZE = 10;
+
+const emptyForm = (): CreateAgentPayload => ({
+  bureau: '', physicalLocation: '', staff: '', contact: '',
+  teamLeader: '', teamLeaderContact: '', company: 'Standard', region: ''
+});
 
 @Component({
   selector: 'app-admin-agents',
@@ -22,6 +28,67 @@ const PAGE_SIZE = 10;
             <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
           </svg>
           <input type="text" placeholder="Search bureau, staff…" [(ngModel)]="query" (ngModelChange)="applyFilters()" />
+        </div>
+        <button class="add-btn" (click)="openModal()">+ Add Agent</button>
+      </div>
+
+      <!-- Add Agent Modal -->
+      <div class="modal-backdrop" *ngIf="showModal" (click)="closeModal()">
+        <div class="modal" (click)="$event.stopPropagation()">
+          <div class="modal-header">
+            <h2>Add Agent</h2>
+            <button class="close-btn" (click)="closeModal()">✕</button>
+          </div>
+          <form class="modal-form" (ngSubmit)="submitAgent()" #agentForm="ngForm">
+            <div class="form-row">
+              <div class="form-group">
+                <label>Bureau <span class="req">*</span></label>
+                <input type="text" [(ngModel)]="form.bureau" name="bureau" required placeholder="e.g. Mombasa Bureau" />
+              </div>
+              <div class="form-group">
+                <label>Region <span class="req">*</span></label>
+                <select [(ngModel)]="form.region" name="region" required>
+                  <option value="">Select region…</option>
+                  <option *ngFor="let r of regionOptions" [value]="r">{{ r }}</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Physical Location</label>
+              <input type="text" [(ngModel)]="form.physicalLocation" name="physicalLocation" placeholder="e.g. Moi Avenue, Mombasa" />
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Staff</label>
+                <input type="text" [(ngModel)]="form.staff" name="staff" placeholder="Staff name" />
+              </div>
+              <div class="form-group">
+                <label>Contact</label>
+                <input type="tel" [(ngModel)]="form.contact" name="contact" placeholder="07xxxxxxxx" />
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Team Leader</label>
+                <input type="text" [(ngModel)]="form.teamLeader" name="teamLeader" placeholder="Team leader name" />
+              </div>
+              <div class="form-group">
+                <label>TL Contact</label>
+                <input type="tel" [(ngModel)]="form.teamLeaderContact" name="teamLeaderContact" placeholder="07xxxxxxxx" />
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Company</label>
+              <input type="text" [(ngModel)]="form.company" name="company" placeholder="Standard" />
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="cancel-btn" (click)="closeModal()">Cancel</button>
+              <button type="submit" class="submit-btn" [disabled]="saving || !form.bureau || !form.region">
+                {{ saving ? 'Saving…' : 'Add Agent' }}
+              </button>
+            </div>
+            <p class="form-error" *ngIf="saveError">{{ saveError }}</p>
+          </form>
         </div>
       </div>
 
@@ -90,7 +157,7 @@ const PAGE_SIZE = 10;
     .section-header { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; margin-bottom: 16px; }
     .section-header h1 { display: flex; align-items: center; gap: 10px; margin: 0; }
     .count-badge { font-size: 13px; font-weight: 600; background: var(--primary, #4f46e5); color: #fff; border-radius: 12px; padding: 2px 10px; }
-    .search-box { display: flex; align-items: center; gap: 8px; background: #f5f5f5; border: 1px solid #e0e0e0; border-radius: 8px; padding: 7px 12px; margin-left: auto; }
+    .search-box { display: flex; align-items: center; gap: 8px; background: #f5f5f5; border: 1px solid #e0e0e0; border-radius: 8px; padding: 7px 12px; }
     .search-box input { border: none; background: transparent; outline: none; font-size: 14px; width: 220px; }
     .tabs { display: flex; gap: 6px; margin-bottom: 20px; flex-wrap: wrap; }
     .tab-btn { display: flex; align-items: center; gap: 6px; padding: 7px 16px; border: 1px solid #e0e0e0; border-radius: 8px; background: #fff; cursor: pointer; font-size: 13px; color: #555; transition: all .15s; }
@@ -111,6 +178,29 @@ const PAGE_SIZE = 10;
     .page-btn.active { background: var(--primary, #4f46e5); color: #fff; border-color: var(--primary, #4f46e5); font-weight: 600; }
     .page-btn:disabled { opacity: .4; cursor: default; }
     .page-info { margin-left: 8px; font-size: 13px; color: #888; }
+    .search-box { flex: 1; max-width: 280px; }
+    .add-btn { margin-left: auto; padding: 8px 18px; background: var(--primary, #4f46e5); color: #fff; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; white-space: nowrap; }
+    .add-btn:hover { opacity: .88; }
+    .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 16px; }
+    .modal { background: #fff; border-radius: 12px; width: 100%; max-width: 560px; box-shadow: 0 8px 40px rgba(0,0,0,.18); }
+    .modal-header { display: flex; align-items: center; justify-content: space-between; padding: 20px 24px 0; }
+    .modal-header h2 { margin: 0; font-size: 18px; }
+    .close-btn { background: none; border: none; font-size: 18px; cursor: pointer; color: #888; line-height: 1; padding: 4px; }
+    .close-btn:hover { color: #333; }
+    .modal-form { padding: 20px 24px 24px; display: flex; flex-direction: column; gap: 14px; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .form-group { display: flex; flex-direction: column; gap: 5px; }
+    .form-group label { font-size: 13px; font-weight: 600; color: #444; }
+    .req { color: #e53e3e; }
+    .form-group input, .form-group select { padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 7px; font-size: 14px; outline: none; background: #fff; }
+    .form-group input:focus, .form-group select:focus { border-color: var(--primary, #4f46e5); box-shadow: 0 0 0 2px rgba(79,70,229,.12); }
+    .modal-footer { display: flex; justify-content: flex-end; gap: 10px; margin-top: 4px; }
+    .cancel-btn { padding: 8px 18px; border: 1px solid #d1d5db; border-radius: 8px; background: #fff; font-size: 14px; cursor: pointer; color: #555; }
+    .cancel-btn:hover { background: #f5f5f5; }
+    .submit-btn { padding: 8px 22px; background: var(--primary, #4f46e5); color: #fff; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; }
+    .submit-btn:disabled { opacity: .55; cursor: default; }
+    .submit-btn:not(:disabled):hover { opacity: .88; }
+    .form-error { color: #e53e3e; font-size: 13px; margin: 0; text-align: right; }
   `]
 })
 export class AdminAgentsComponent implements OnInit {
@@ -121,11 +211,17 @@ export class AdminAgentsComponent implements OnInit {
   activeRegion = 'All';
   loading = true;
   regions = REGIONS;
+  regionOptions = REGION_OPTIONS;
 
   currentPage = 1;
   pageSize = PAGE_SIZE;
   totalPages = 1;
   pageNumbers: number[] = [];
+
+  showModal = false;
+  saving = false;
+  saveError = '';
+  form: CreateAgentPayload = emptyForm();
 
   constructor(private agentService: AgentService, private cdr: ChangeDetectorRef) {}
 
@@ -185,6 +281,37 @@ export class AdminAgentsComponent implements OnInit {
   regionCount(region: string): number {
     if (region === 'All') return this.agents.length;
     return this.agents.filter(a => a.region === region).length;
+  }
+
+  openModal() {
+    this.form = emptyForm();
+    this.saveError = '';
+    this.showModal = true;
+  }
+
+  closeModal() {
+    if (this.saving) return;
+    this.showModal = false;
+  }
+
+  submitAgent() {
+    if (!this.form.bureau.trim() || !this.form.region) return;
+    this.saving = true;
+    this.saveError = '';
+    this.agentService.create(this.form).subscribe({
+      next: agent => {
+        this.agents = [...this.agents, agent].sort((a, b) => a.bureau.localeCompare(b.bureau));
+        this.applyFilters();
+        this.saving = false;
+        this.showModal = false;
+        this.cdr.markForCheck();
+      },
+      error: () => {
+        this.saveError = 'Failed to save agent. Please try again.';
+        this.saving = false;
+        this.cdr.markForCheck();
+      }
+    });
   }
 
   min(a: number, b: number) { return Math.min(a, b); }
