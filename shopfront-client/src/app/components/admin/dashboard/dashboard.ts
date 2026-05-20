@@ -24,7 +24,8 @@ import { ProductService } from '../../../services/product.service';
     .dot-Delivered  { background: #d1fae5; color: #065f46; }
     .dot-Completed  { background: #d1fae5; color: #065f46; }
     .dot-Rejected      { background: #fee2e2; color: #991b1b; }
-    .dot-DeliverLater  { background: #fef3c7; color: #92400e; }
+    .dot-DeliverLater    { background: #fef3c7; color: #92400e; }
+    .dot-DispatchToday   { background: #fed7aa; color: #9a3412; }
     .pagination { display: flex; align-items: center; gap: .35rem; margin-top: .75rem; justify-content: flex-end; }
     .page-info  { font-size: .8rem; color: #888; margin-right: .4rem; }
     .btn-sm.current { background: #1d3557; color: #fff; border-color: #1d3557; }
