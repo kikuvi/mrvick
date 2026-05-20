@@ -125,15 +125,15 @@ import { ProductService } from '../../../services/product.service';
       <table class="table" *ngIf="orders.length; else noOrders">
         <thead>
           <tr>
-            <th>Token</th><th>Customer</th><th>Product</th>
+            <th>Customer</th><th>Product</th><th>Variant</th>
             <th>County</th><th>Address</th><th>Amount</th><th>Status</th><th>Date</th>
           </tr>
         </thead>
         <tbody>
           <tr *ngFor="let o of pagedOrders">
-            <td style="font-family:monospace;font-size:.8rem;font-weight:700;color:#1d3557">{{ o.trackingToken }}</td>
             <td>{{ o.customerName }}</td>
             <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ o.productTitle }}</td>
+            <td>{{ o.variation || '—' }}</td>
             <td>{{ o.county }}</td>
             <td style="max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ o.deliveryAddress }}</td>
             <td style="font-weight:700">KES {{ o.priceAtOrder | number:'1.0-0' }}</td>
