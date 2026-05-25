@@ -32,6 +32,7 @@ export const routes: Routes = [
       { path: 'audit-logs', loadComponent: () => import('./components/admin/audit-logs/audit-logs').then(m => m.AdminAuditLogsComponent) },
       { path: 'page-views', loadComponent: () => import('./components/admin/page-views/page-views').then(m => m.AdminPageViewsComponent) },
       { path: 'conversions', loadComponent: () => import('./components/admin/conversions/conversions').then(m => m.AdminConversionsComponent) },
+      { path: 'expenses', loadComponent: () => import('./components/admin/expenses/expenses').then(m => m.AdminExpensesComponent) },
     ]
   },
   { path: '**', redirectTo: '' }

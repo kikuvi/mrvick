@@ -25,6 +25,7 @@ public class ShopfrontDbContext : IdentityDbContext<AppUser>
     public DbSet<PixelEvent> PixelEvents => Set<PixelEvent>();
     public DbSet<Agent> Agents => Set<Agent>();
     public DbSet<AppNotification> AppNotifications => Set<AppNotification>();
+    public DbSet<Expense> Expenses => Set<Expense>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -85,6 +86,12 @@ public class ShopfrontDbContext : IdentityDbContext<AppUser>
             e.Property(p => p.EventId).HasMaxLength(100);
             e.Property(p => p.ProductId).HasMaxLength(50);
             e.Property(p => p.Value).HasColumnType("decimal(18,2)");
+        });
+
+        builder.Entity<Expense>(e =>
+        {
+            e.Property(x => x.Amount).HasColumnType("decimal(18,2)");
+            e.Property(x => x.Status).HasConversion<string>();
         });
 
         builder.Entity<Page>(e =>
