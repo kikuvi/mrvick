@@ -394,8 +394,8 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
       leadEventId,
       purchaseEventId,
       eventSourceUrl: window.location.href,
-      fbp: this.getCookie('_fbp'),
-      fbc: this.getCookie('_fbc')
+      fbp: this.pixel.getFbp(),
+      fbc: this.pixel.getFbc()
     }).subscribe({
       next: res => {
         this.submitting = false;
@@ -410,8 +410,4 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
     });
   }
 
-  private getCookie(name: string): string | undefined {
-    const match = document.cookie.match(new RegExp('(?:^|; )' + name + '=([^;]*)'));
-    return match ? decodeURIComponent(match[1]) : undefined;
-  }
 }
