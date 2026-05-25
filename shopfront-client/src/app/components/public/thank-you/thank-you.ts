@@ -117,10 +117,19 @@ export class ThankYouComponent implements OnInit {
     });
 
     if (this.trackingToken) {
-      const purchaseEventId = this.route.snapshot.queryParamMap.get('peid') ?? this.pixel.genEventId('purchase');
-      this.orderService.track(this.trackingToken).subscribe(order => {
-        this.pixel.trackPurchase(order.priceAtOrder, purchaseEventId);
-      });
+      // Resolve the purchase event ID for deduplication against the CAPI event.
+      // Priority: URL query param → sessionStorage backup → skip pixel (never
+      // generate a new random ID here — it won't match what the CAPI already sent).
+      const urlPeid     = this.route.snapshot.queryParamMap.get('peid');
+      const storedPeid  = sessionStorage.getItem('sf_peid');
+      if (storedPeid) sessionStorage.removeItem('sf_peid');
+      const purchaseEventId = urlPeid ?? storedPeid;
+
+      if (purchaseEventId) {
+        this.orderService.track(this.trackingToken).subscribe(order => {
+          this.pixel.trackPurchase(order.priceAtOrder, purchaseEventId);
+        });
+      }
     }
   }
 }

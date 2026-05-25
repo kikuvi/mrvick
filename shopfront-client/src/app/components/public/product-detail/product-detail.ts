@@ -399,6 +399,9 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
     }).subscribe({
       next: res => {
         this.submitting = false;
+        // Store in sessionStorage as a backup — some browsers/in-app WebViews strip
+        // arbitrary query params, which would break CAPI deduplication.
+        sessionStorage.setItem('sf_peid', purchaseEventId);
         this.router.navigate(['/order-confirmed', res.trackingToken], {
           queryParams: { name: this.order.customerName, peid: purchaseEventId }
         });
