@@ -2,15 +2,21 @@ import { Component, OnInit, ChangeDetectionStrategy, ChangeDetectorRef } from '@
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ExpenseService, Expense, CreateExpensePayload, UpdateExpensePayload } from '../../../services/expense.service';
+import { UserService, AdminUser } from '../../../services/user.service';
 
 const CATEGORIES = ['All', 'Advertising', 'Delivery', 'Operations', 'Salary', 'Rent', 'Utilities', 'Other'];
 const CATEGORY_OPTIONS = ['Advertising', 'Delivery', 'Operations', 'Salary', 'Rent', 'Utilities', 'Other'];
 const PAGE_SIZE = 15;
 
-const today = () => new Date().toISOString().split('T')[0];
+/** Returns today's date in YYYY-MM-DD using East Africa Time (UTC+3) */
+const todayEAT = (): string => {
+  const now = new Date();
+  const eat = new Date(now.getTime() + 3 * 60 * 60 * 1000);
+  return eat.toISOString().split('T')[0];
+};
 
 const emptyForm = (): UpdateExpensePayload => ({
-  name: '', amount: 0, incurredBy: '', category: '', date: today(), notes: null, status: 'Pending'
+  name: '', amount: 0, incurredBy: '', category: '', date: todayEAT(), notes: null, status: 'Pending'
 });
 
 @Component({
@@ -139,7 +145,7 @@ const emptyForm = (): UpdateExpensePayload => ({
             <h2>{{ editingId ? 'Edit Expense' : 'Add Expense' }}</h2>
             <button class="close-btn" (click)="closeModal()">✕</button>
           </div>
-          <form class="modal-form" (ngSubmit)="submitExpense()">
+          <form class="modal-form" #expenseForm="ngForm" (ngSubmit)="submitExpense(expenseForm)">
             <div class="form-group">
               <label>Name <span class="req">*</span></label>
               <input type="text" [(ngModel)]="form.name" name="name" required placeholder="e.g. Facebook Ads – May" />
@@ -147,7 +153,7 @@ const emptyForm = (): UpdateExpensePayload => ({
             <div class="form-row">
               <div class="form-group">
                 <label>Amount (KES) <span class="req">*</span></label>
-                <input type="number" [(ngModel)]="form.amount" name="amount" required min="0" step="0.01" placeholder="0.00" />
+                <input type="number" [(ngModel)]="form.amount" name="amount" required min="0.01" step="0.01" placeholder="0.00" />
               </div>
               <div class="form-group">
                 <label>Category <span class="req">*</span></label>
@@ -160,7 +166,10 @@ const emptyForm = (): UpdateExpensePayload => ({
             <div class="form-row">
               <div class="form-group">
                 <label>Incurred By <span class="req">*</span></label>
-                <input type="text" [(ngModel)]="form.incurredBy" name="incurredBy" required placeholder="e.g. John" />
+                <select [(ngModel)]="form.incurredBy" name="incurredBy" required [disabled]="usersLoading">
+                  <option value="">{{ usersLoading ? 'Loading…' : 'Select user…' }}</option>
+                  <option *ngFor="let u of users" [value]="u.fullName">{{ u.fullName }}</option>
+                </select>
               </div>
               <div class="form-group">
                 <label>Date <span class="req">*</span></label>
@@ -183,7 +192,7 @@ const emptyForm = (): UpdateExpensePayload => ({
             </div>
             <div class="modal-footer">
               <button type="button" class="cancel-btn" (click)="closeModal()">Cancel</button>
-              <button type="submit" class="submit-btn" [disabled]="saving || !form.name || !form.category || !form.incurredBy || form.amount <= 0">
+              <button type="submit" class="submit-btn" [disabled]="saving || expenseForm.invalid || !form.incurredBy">
                 {{ saving ? 'Saving…' : (editingId ? 'Save Changes' : 'Add Expense') }}
               </button>
             </div>
@@ -292,6 +301,8 @@ const emptyForm = (): UpdateExpensePayload => ({
     .form-group label { font-size: 13px; font-weight: 600; color: #444; }
     .req { color: #e53e3e; }
     .form-group input, .form-group select, .form-group textarea { padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 7px; font-size: 14px; outline: none; background: #fff; font-family: inherit; resize: vertical; }
+    .form-group select { cursor: pointer; }
+    .form-group select:disabled { opacity: .6; cursor: default; }
     .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: var(--primary, #4f46e5); box-shadow: 0 0 0 2px rgba(79,70,229,.12); }
     .modal-footer { display: flex; justify-content: flex-end; gap: 10px; padding: 0 24px 24px; margin-top: 4px; }
     .modal-form .modal-footer { padding: 0; }
@@ -317,6 +328,10 @@ export class AdminExpensesComponent implements OnInit {
   categories = CATEGORIES;
   categoryOptions = CATEGORY_OPTIONS;
 
+  /** Users loaded for the "Incurred By" dropdown */
+  users: AdminUser[] = [];
+  usersLoading = false;
+
   currentPage = 1;
   pageSize = PAGE_SIZE;
   totalPages = 1;
@@ -332,14 +347,39 @@ export class AdminExpensesComponent implements OnInit {
   deleting: string | null = null;
   deleteTarget: Expense | null = null;
 
-  constructor(private expenseService: ExpenseService, private cdr: ChangeDetectorRef) {}
+  constructor(
+    private expenseService: ExpenseService,
+    private userService: UserService,
+    private cdr: ChangeDetectorRef
+  ) {}
 
   ngOnInit() {
-    this.expenseService.getAll().subscribe(expenses => {
-      this.expenses = expenses;
-      this.applyFilters();
-      this.loading = false;
-      this.cdr.markForCheck();
+    // Load expenses
+    this.expenseService.getAll().subscribe({
+      next: expenses => {
+        this.expenses = expenses;
+        this.applyFilters();
+        this.loading = false;
+        this.cdr.markForCheck();
+      },
+      error: () => {
+        this.loading = false;
+        this.cdr.markForCheck();
+      }
+    });
+
+    // Load users for the "Incurred By" dropdown
+    this.usersLoading = true;
+    this.userService.getAll().subscribe({
+      next: users => {
+        this.users = users.filter(u => u.isActive);
+        this.usersLoading = false;
+        this.cdr.markForCheck();
+      },
+      error: () => {
+        this.usersLoading = false;
+        this.cdr.markForCheck();
+      }
     });
   }
 
@@ -450,8 +490,8 @@ export class AdminExpensesComponent implements OnInit {
     this.editingId = null;
   }
 
-  submitExpense() {
-    if (!this.form.name.trim() || !this.form.category || !this.form.incurredBy.trim() || this.form.amount <= 0) return;
+  submitExpense(formRef: any) {
+    if (formRef.invalid || !this.form.incurredBy) return;
     this.saving = true;
     this.saveError = '';
 
@@ -465,8 +505,8 @@ export class AdminExpensesComponent implements OnInit {
           this.editingId = null;
           this.cdr.markForCheck();
         },
-        error: () => {
-          this.saveError = 'Failed to save changes. Please try again.';
+        error: (err) => {
+          this.saveError = `Failed to save changes. (${err?.status ?? 'Network error'})`;
           this.saving = false;
           this.cdr.markForCheck();
         }
@@ -480,8 +520,8 @@ export class AdminExpensesComponent implements OnInit {
           this.showModal = false;
           this.cdr.markForCheck();
         },
-        error: () => {
-          this.saveError = 'Failed to add expense. Please try again.';
+        error: (err) => {
+          this.saveError = `Failed to add expense. (${err?.status ?? 'Network error'})`;
           this.saving = false;
           this.cdr.markForCheck();
         }

@@ -298,6 +298,9 @@ export class AdminLayoutComponent implements OnInit, OnDestroy {
     });
 
     document.addEventListener('click', this.closeNotif);
+
+    // Start 1-hour inactivity auto-logout
+    this.auth.startInactivityWatch();
   }
 
   ngOnDestroy() {
@@ -306,6 +309,7 @@ export class AdminLayoutComponent implements OnInit, OnDestroy {
     this.countSub?.unsubscribe();
     this.notifService.stopPolling();
     document.removeEventListener('click', this.closeNotif);
+    this.auth.stopInactivityWatch();
   }
 
   toggleNotif(e: Event) {

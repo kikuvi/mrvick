@@ -1,11 +1,20 @@
-import { Injectable } from '@angular/core';
+import { Injectable, NgZone } from '@angular/core';
 import { ApiService } from './api.service';
 import { Router } from '@angular/router';
 import { tap } from 'rxjs/operators';
 
+const INACTIVITY_MS = 60 * 60 * 1000; // 1 hour
+
+const ACTIVITY_EVENTS: (keyof DocumentEventMap)[] = [
+  'mousemove', 'mousedown', 'keydown', 'touchstart', 'click', 'scroll', 'wheel'
+];
+
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  constructor(private api: ApiService, private router: Router) {}
+  private inactivityTimer: ReturnType<typeof setTimeout> | null = null;
+  private activityHandler = () => this.resetInactivityTimer();
+
+  constructor(private api: ApiService, private router: Router, private ngZone: NgZone) {}
 
   login(email: string, password: string) {
     return this.api.post<{ token: string; email: string; fullName: string; mustChangePassword: boolean }>(
@@ -32,6 +41,7 @@ export class AuthService {
   }
 
   logout() {
+    this.stopInactivityWatch();
     localStorage.removeItem('token');
     localStorage.removeItem('fullName');
     localStorage.removeItem('email');
@@ -51,5 +61,37 @@ export class AuthService {
 
   resetPassword(email: string, token: string, newPassword: string) {
     return this.api.post<{ message: string }>('/auth/reset-password', { email, token, newPassword });
+  }
+
+  // ── Inactivity watch ──────────────────────────────────────────────────────
+
+  /** Start watching for inactivity. Call from AdminLayoutComponent.ngOnInit(). */
+  startInactivityWatch(): void {
+    // Run outside Angular zone so mouse/scroll events don't trigger change detection
+    this.ngZone.runOutsideAngular(() => {
+      ACTIVITY_EVENTS.forEach(ev =>
+        document.addEventListener(ev, this.activityHandler, { passive: true })
+      );
+    });
+    this.resetInactivityTimer();
+  }
+
+  /** Stop watching. Call from AdminLayoutComponent.ngOnDestroy(). */
+  stopInactivityWatch(): void {
+    if (this.inactivityTimer) {
+      clearTimeout(this.inactivityTimer);
+      this.inactivityTimer = null;
+    }
+    ACTIVITY_EVENTS.forEach(ev =>
+      document.removeEventListener(ev, this.activityHandler)
+    );
+  }
+
+  private resetInactivityTimer(): void {
+    if (this.inactivityTimer) clearTimeout(this.inactivityTimer);
+    // Re-enter Angular zone for the timeout callback so routing works
+    this.inactivityTimer = setTimeout(() => {
+      this.ngZone.run(() => this.logout());
+    }, INACTIVITY_MS);
   }
 }
