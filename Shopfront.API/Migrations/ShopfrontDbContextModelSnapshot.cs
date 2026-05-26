@@ -199,9 +199,6 @@ namespace Shopfront.API.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<bool>("Confirmed")
-                        .HasColumnType("bit");
-
                     b.HasKey("Id");
 
                     b.ToTable("Agents");
