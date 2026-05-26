@@ -934,7 +934,7 @@ namespace Shopfront.API.Migrations
                     b.HasIndex("UserId", "RoleId")
                         .IsUnique();
 
-                    b.ToTable("UserRoles");
+                    b.ToTable("AppUserRoles");
                 });
 
             modelBuilder.Entity("Shopfront.API.Models.VendorItem", b =>

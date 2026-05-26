@@ -118,6 +118,7 @@ public class ShopfrontDbContext : IdentityDbContext<AppUser>
 
         builder.Entity<UserRole>(e =>
         {
+            e.ToTable("AppUserRoles"); // explicit table name to match DB
             e.HasOne(ur => ur.User)
              .WithMany()
              .HasForeignKey(ur => ur.UserId)

@@ -45,7 +45,7 @@ namespace Shopfront.API.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "UserRoles",
+                name: "AppUserRoles",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
@@ -54,15 +54,15 @@ namespace Shopfront.API.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_UserRoles", x => x.Id);
+                    table.PrimaryKey("PK_AppUserRoles", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_UserRoles_AppRoles_RoleId",
+                        name: "FK_AppUserRoles_AppRoles_RoleId",
                         column: x => x.RoleId,
                         principalTable: "AppRoles",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_UserRoles_AspNetUsers_UserId",
+                        name: "FK_AppUserRoles_AspNetUsers_UserId",
                         column: x => x.UserId,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
@@ -82,13 +82,13 @@ namespace Shopfront.API.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_UserRoles_RoleId",
-                table: "UserRoles",
+                name: "IX_AppUserRoles_RoleId",
+                table: "AppUserRoles",
                 column: "RoleId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_UserRoles_UserId_RoleId",
-                table: "UserRoles",
+                name: "IX_AppUserRoles_UserId_RoleId",
+                table: "AppUserRoles",
                 columns: new[] { "UserId", "RoleId" },
                 unique: true);
         }
@@ -100,7 +100,7 @@ namespace Shopfront.API.Migrations
                 name: "RolePermissions");
 
             migrationBuilder.DropTable(
-                name: "UserRoles");
+                name: "AppUserRoles");
 
             migrationBuilder.DropTable(
                 name: "AppRoles");
