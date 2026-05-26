@@ -11,13 +11,7 @@ namespace Shopfront.API.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<bool>(
-                name: "Confirmed",
-                table: "Agents",
-                type: "bit",
-                nullable: false,
-                defaultValue: false);
-
+            // Note: Confirmed column already added by AddAgentConfirmed migration
             migrationBuilder.CreateTable(
                 name: "Expenses",
                 columns: table => new
@@ -43,10 +37,6 @@ namespace Shopfront.API.Migrations
         {
             migrationBuilder.DropTable(
                 name: "Expenses");
-
-            migrationBuilder.DropColumn(
-                name: "Confirmed",
-                table: "Agents");
         }
     }
 }
