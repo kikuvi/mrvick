@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Shopfront.API.Authorization;
 using Shopfront.API.DTOs;
 using Shopfront.API.Models;
 using Shopfront.API.Services;
@@ -25,6 +26,7 @@ public class UsersController : ControllerBase
         _notifications = notifications;
     }
 
+    [Authorize(Policy = Permissions.ViewUsers)]
     [HttpGet]
     public async Task<IActionResult> GetAll()
     {
@@ -36,6 +38,7 @@ public class UsersController : ControllerBase
         return Ok(users);
     }
 
+    [Authorize(Policy = Permissions.ManageUsers)]
     [HttpPost]
     public async Task<IActionResult> Create(CreateUserDto dto)
     {
@@ -113,6 +116,7 @@ public class UsersController : ControllerBase
         return buf[0];
     }
 
+    [Authorize(Policy = Permissions.ManageUsers)]
     [HttpPut("{id}")]
     public async Task<IActionResult> Update(string id, UpdateUserDto dto)
     {
@@ -146,6 +150,7 @@ public class UsersController : ControllerBase
         return Ok(new UserDto(user.Id, user.Email!, user.FullName, user.PhoneNumber, user.EmailConfirmed, user.MustChangePassword, user.IsActive));
     }
 
+    [Authorize(Policy = Permissions.ManageUsers)]
     [HttpPut("{id}/password")]
     public async Task<IActionResult> UpdatePassword(string id, UpdatePasswordDto dto)
     {
@@ -170,6 +175,7 @@ public class UsersController : ControllerBase
         return NoContent();
     }
 
+    [Authorize(Policy = Permissions.ManageUsers)]
     [HttpPatch("{id}/toggle-active")]
     public async Task<IActionResult> ToggleActive(string id)
     {
@@ -187,6 +193,7 @@ public class UsersController : ControllerBase
         return Ok(new UserDto(user.Id, user.Email!, user.FullName, user.PhoneNumber, user.EmailConfirmed, user.MustChangePassword, user.IsActive));
     }
 
+    [Authorize(Policy = Permissions.ManageUsers)]
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(string id)
     {

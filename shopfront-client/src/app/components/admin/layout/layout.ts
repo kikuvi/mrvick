@@ -6,6 +6,26 @@ import { Subscription } from 'rxjs';
 import { AuthService } from '../../../services/auth.service';
 import { NotificationService, AppNotification } from '../../../services/notification.service';
 
+// Permission keys mirrored from backend Authorization/Permissions.cs
+const P = {
+  Dashboard:        'dashboard',
+  ViewOrders:       'orders.view',
+  ViewProducts:     'products.view',
+  ViewRiders:       'riders.view',
+  ViewCouriers:     'couriers.view',
+  ViewAgents:       'agents.view',
+  ViewExpenses:     'expenses.view',
+  ViewUsers:        'users.view',
+  ManagePermissions:'permissions.manage',
+  ManagePages:      'pages.manage',
+  ManageSettings:   'settings.manage',
+  ViewVendors:      'vendors.view',
+  ViewReviews:      'reviews.view',
+  ViewAuditLogs:    'audit_logs.view',
+  ViewPageViews:    'page_views.view',
+  ViewConversions:  'conversions.view',
+};
+
 const PAGE_TITLES: Record<string, string> = {
   dashboard: 'Dashboard',
   orders: 'Orders',
@@ -17,6 +37,7 @@ const PAGE_TITLES: Record<string, string> = {
   'vendor-items': 'Vendors',
   reviews: 'Reviews',
   users: 'Users',
+  roles: 'Roles & Permissions',
   'audit-logs': 'Audit Logs',
   'page-views': 'Page Views',
   'conversions': 'Conversions API',
@@ -67,28 +88,28 @@ const PAGE_TITLES: Record<string, string> = {
         </div>
 
         <nav>
-          <a routerLink="/admin/dashboard" routerLinkActive="active">
+          <a routerLink="/admin/dashboard" routerLinkActive="active" *ngIf="can(P.Dashboard)">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
               <rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/>
             </svg>
             Dashboard
           </a>
-          <a routerLink="/admin/orders" routerLinkActive="active">
+          <a routerLink="/admin/orders" routerLinkActive="active" *ngIf="can(P.ViewOrders)">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
               <line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/>
             </svg>
             Orders
           </a>
-          <a routerLink="/admin/products" routerLinkActive="active">
+          <a routerLink="/admin/products" routerLinkActive="active" *ngIf="can(P.ViewProducts)">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
               <polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/>
             </svg>
             Products
           </a>
-          <a routerLink="/admin/riders" routerLinkActive="active">
+          <a routerLink="/admin/riders" routerLinkActive="active" *ngIf="can(P.ViewRiders)">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <rect x="1" y="3" width="15" height="13"/>
               <polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/>
@@ -96,7 +117,7 @@ const PAGE_TITLES: Record<string, string> = {
             </svg>
             Riders
           </a>
-          <a routerLink="/admin/couriers" routerLinkActive="active">
+          <a routerLink="/admin/couriers" routerLinkActive="active" *ngIf="can(P.ViewCouriers)">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <rect x="1" y="3" width="15" height="13"/>
               <polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/>
@@ -104,7 +125,7 @@ const PAGE_TITLES: Record<string, string> = {
             </svg>
             Couriers
           </a>
-          <a routerLink="/admin/agents" routerLinkActive="active">
+          <a routerLink="/admin/agents" routerLinkActive="active" *ngIf="can(P.ViewAgents)">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
               <circle cx="9" cy="7" r="4"/>
@@ -112,7 +133,7 @@ const PAGE_TITLES: Record<string, string> = {
             </svg>
             Agents
           </a>
-          <a routerLink="/admin/pages" routerLinkActive="active">
+          <a routerLink="/admin/pages" routerLinkActive="active" *ngIf="can(P.ManagePages)">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
               <polyline points="14 2 14 8 20 8"/>
@@ -120,20 +141,20 @@ const PAGE_TITLES: Record<string, string> = {
             </svg>
             Pages
           </a>
-          <a routerLink="/admin/vendor-items" routerLinkActive="active">
+          <a routerLink="/admin/vendor-items" routerLinkActive="active" *ngIf="can(P.ViewVendors)">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
               <polyline points="9 22 9 12 15 12 15 22"/>
             </svg>
             Vendors
           </a>
-          <a routerLink="/admin/reviews" routerLinkActive="active">
+          <a routerLink="/admin/reviews" routerLinkActive="active" *ngIf="can(P.ViewReviews)">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
             </svg>
             Reviews
           </a>
-          <a routerLink="/admin/users" routerLinkActive="active">
+          <a routerLink="/admin/users" routerLinkActive="active" *ngIf="can(P.ViewUsers)">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
               <circle cx="9" cy="7" r="4"/>
@@ -141,33 +162,40 @@ const PAGE_TITLES: Record<string, string> = {
             </svg>
             Users
           </a>
-          <a routerLink="/admin/audit-logs" routerLinkActive="active">
+          <a routerLink="/admin/roles" routerLinkActive="active" *ngIf="can(P.ManagePermissions)">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+            </svg>
+            Roles & Permissions
+          </a>
+          <a routerLink="/admin/audit-logs" routerLinkActive="active" *ngIf="can(P.ViewAuditLogs)">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/>
               <line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
             </svg>
             Audit Logs
           </a>
-          <a routerLink="/admin/page-views" routerLinkActive="active">
+          <a routerLink="/admin/page-views" routerLinkActive="active" *ngIf="can(P.ViewPageViews)">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
               <circle cx="12" cy="12" r="3"/>
             </svg>
             Page Views
           </a>
-          <a routerLink="/admin/conversions" routerLinkActive="active">
+          <a routerLink="/admin/conversions" routerLinkActive="active" *ngIf="can(P.ViewConversions)">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
             </svg>
             Conversions API
           </a>
-          <a routerLink="/admin/expenses" routerLinkActive="active">
+          <a routerLink="/admin/expenses" routerLinkActive="active" *ngIf="can(P.ViewExpenses)">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
             </svg>
             Expenses
           </a>
-          <a routerLink="/admin/settings" routerLinkActive="active">
+          <a routerLink="/admin/settings" routerLinkActive="active" *ngIf="can(P.ManageSettings)">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/>
               <line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/>
@@ -270,6 +298,13 @@ export class AdminLayoutComponent implements OnInit, OnDestroy {
     private cdr: ChangeDetectorRef,
     private notifService: NotificationService
   ) {}
+
+  /** Check if current user has a permission */
+  can(permission: string): boolean {
+    return this.auth.hasPermission(permission);
+  }
+
+  get P() { return P; }
 
   ngOnInit() {
     this.fullName = this.auth.getFullName();

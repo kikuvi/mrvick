@@ -4,7 +4,9 @@ using System.Text;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Shopfront.API.Data;
 using Shopfront.API.DTOs;
 using Shopfront.API.Models;
 using Shopfront.API.Services;
@@ -19,13 +21,15 @@ public class AuthController : ControllerBase
     private readonly IConfiguration _config;
     private readonly INotificationService _notifications;
     private readonly AuditService _audit;
+    private readonly ShopfrontDbContext _db;
 
-    public AuthController(UserManager<AppUser> userManager, IConfiguration config, INotificationService notifications, AuditService audit)
+    public AuthController(UserManager<AppUser> userManager, IConfiguration config, INotificationService notifications, AuditService audit, ShopfrontDbContext db)
     {
         _userManager = userManager;
         _config = config;
         _notifications = notifications;
         _audit = audit;
+        _db = db;
     }
 
     [HttpPost("login")]
@@ -37,9 +41,10 @@ public class AuthController : ControllerBase
         if (!user.IsActive)
             return Unauthorized("This account has been deactivated.");
 
-        var token = GenerateJwtToken(user);
+        var permissions = await GetUserPermissionsAsync(user.Id);
+        var token = GenerateJwtToken(user, permissions);
         await _audit.LogAsync("Login", user.Email, "User", user.Id);
-        return Ok(new AuthResponseDto(token, user.Email!, user.FullName, user.MustChangePassword));
+        return Ok(new AuthResponseDto(token, user.Email!, user.FullName, user.MustChangePassword, permissions));
     }
 
     [Authorize]
@@ -60,8 +65,9 @@ public class AuthController : ControllerBase
         user.MustChangePassword = false;
         await _userManager.UpdateAsync(user);
 
-        var newToken = GenerateJwtToken(user);
-        return Ok(new AuthResponseDto(newToken, user.Email!, user.FullName, false));
+        var permissions = await GetUserPermissionsAsync(userId);
+        var newToken = GenerateJwtToken(user, permissions);
+        return Ok(new AuthResponseDto(newToken, user.Email!, user.FullName, false, permissions));
     }
 
     [HttpPost("forgot-password")]
@@ -105,16 +111,30 @@ public class AuthController : ControllerBase
         return Ok(new { message = "Password reset successfully." });
     }
 
-    private string GenerateJwtToken(AppUser user)
+    // ── Helpers ───────────────────────────────────────────────────────────────
+
+    private async Task<List<string>> GetUserPermissionsAsync(string userId)
+    {
+        return await _db.AppUserRoles
+            .Where(ur => ur.UserId == userId)
+            .SelectMany(ur => ur.Role.Permissions.Select(rp => rp.Permission))
+            .Distinct()
+            .ToListAsync();
+    }
+
+    private string GenerateJwtToken(AppUser user, List<string> permissions)
     {
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]!));
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
-        var claims = new[]
+        var claims = new List<Claim>
         {
-            new Claim(ClaimTypes.NameIdentifier, user.Id),
-            new Claim(ClaimTypes.Email, user.Email!),
+            new(ClaimTypes.NameIdentifier, user.Id),
+            new(ClaimTypes.Email, user.Email!),
         };
+
+        // Add each permission as a "permission" claim
+        claims.AddRange(permissions.Select(p => new Claim("permission", p)));
 
         var token = new JwtSecurityToken(
             issuer: _config["Jwt:Issuer"],

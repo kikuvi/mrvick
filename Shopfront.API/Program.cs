@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Shopfront.API.Authorization;
 using Shopfront.API.Data;
 using Shopfront.API.Models;
 using Shopfront.API.Services;
@@ -62,6 +63,18 @@ builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<AuditService>();
 builder.Services.AddHostedService<DeliveryDueNotifier>();
 builder.Services.AddScoped<FacebookCapiService>();
+
+// Register a policy for every permission key
+builder.Services.AddAuthorization(opts =>
+{
+    foreach (var perm in Permissions.All)
+    {
+        var p = perm; // capture
+        opts.AddPolicy(p, policy => policy
+            .RequireAuthenticatedUser()
+            .RequireClaim("permission", p));
+    }
+});
 
 builder.Services.AddControllers()
     .AddJsonOptions(o => o.JsonSerializerOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter()));

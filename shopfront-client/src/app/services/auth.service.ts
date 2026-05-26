@@ -17,25 +17,27 @@ export class AuthService {
   constructor(private api: ApiService, private router: Router, private ngZone: NgZone) {}
 
   login(email: string, password: string) {
-    return this.api.post<{ token: string; email: string; fullName: string; mustChangePassword: boolean }>(
+    return this.api.post<{ token: string; email: string; fullName: string; mustChangePassword: boolean; permissions: string[] }>(
       '/auth/login', { email, password }
     ).pipe(
       tap(res => {
         localStorage.setItem('token', res.token);
         localStorage.setItem('fullName', res.fullName);
         localStorage.setItem('email', res.email);
+        localStorage.setItem('permissions', JSON.stringify(res.permissions ?? []));
       })
     );
   }
 
   changePassword(currentPassword: string, newPassword: string) {
-    return this.api.post<{ token: string; email: string; fullName: string; mustChangePassword: boolean }>(
+    return this.api.post<{ token: string; email: string; fullName: string; mustChangePassword: boolean; permissions: string[] }>(
       '/auth/change-password', { currentPassword, newPassword }, true
     ).pipe(
       tap(res => {
         localStorage.setItem('token', res.token);
         localStorage.setItem('fullName', res.fullName);
         localStorage.setItem('email', res.email);
+        localStorage.setItem('permissions', JSON.stringify(res.permissions ?? []));
       })
     );
   }
@@ -45,6 +47,7 @@ export class AuthService {
     localStorage.removeItem('token');
     localStorage.removeItem('fullName');
     localStorage.removeItem('email');
+    localStorage.removeItem('permissions');
     this.router.navigate(['/admin/login']);
   }
 
@@ -54,6 +57,15 @@ export class AuthService {
 
   getFullName(): string { return localStorage.getItem('fullName') ?? ''; }
   getEmail(): string { return localStorage.getItem('email') ?? ''; }
+
+  getPermissions(): string[] {
+    try { return JSON.parse(localStorage.getItem('permissions') ?? '[]'); }
+    catch { return []; }
+  }
+
+  hasPermission(permission: string): boolean {
+    return this.getPermissions().includes(permission);
+  }
 
   forgotPassword(email: string) {
     return this.api.post<{ message: string }>('/auth/forgot-password', { email });

@@ -26,6 +26,9 @@ public class ShopfrontDbContext : IdentityDbContext<AppUser>
     public DbSet<Agent> Agents => Set<Agent>();
     public DbSet<AppNotification> AppNotifications => Set<AppNotification>();
     public DbSet<Expense> Expenses => Set<Expense>();
+    public DbSet<AppRole> AppRoles => Set<AppRole>();
+    public DbSet<RolePermission> RolePermissions => Set<RolePermission>();
+    public DbSet<UserRole> AppUserRoles => Set<UserRole>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -97,6 +100,33 @@ public class ShopfrontDbContext : IdentityDbContext<AppUser>
         builder.Entity<Page>(e =>
         {
             e.HasIndex(p => p.Slug).IsUnique();
+        });
+
+        builder.Entity<AppRole>(e =>
+        {
+            e.HasIndex(r => r.Name).IsUnique();
+        });
+
+        builder.Entity<RolePermission>(e =>
+        {
+            e.HasOne(rp => rp.Role)
+             .WithMany(r => r.Permissions)
+             .HasForeignKey(rp => rp.RoleId)
+             .OnDelete(DeleteBehavior.Cascade);
+            e.HasIndex(rp => new { rp.RoleId, rp.Permission }).IsUnique();
+        });
+
+        builder.Entity<UserRole>(e =>
+        {
+            e.HasOne(ur => ur.User)
+             .WithMany()
+             .HasForeignKey(ur => ur.UserId)
+             .OnDelete(DeleteBehavior.Cascade);
+            e.HasOne(ur => ur.Role)
+             .WithMany(r => r.UserRoles)
+             .HasForeignKey(ur => ur.RoleId)
+             .OnDelete(DeleteBehavior.Cascade);
+            e.HasIndex(ur => new { ur.UserId, ur.RoleId }).IsUnique();
         });
 
         // Seed static pages (content is updated by AdminSeeder on startup)

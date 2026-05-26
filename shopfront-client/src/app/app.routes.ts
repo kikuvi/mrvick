@@ -33,6 +33,7 @@ export const routes: Routes = [
       { path: 'page-views', loadComponent: () => import('./components/admin/page-views/page-views').then(m => m.AdminPageViewsComponent) },
       { path: 'conversions', loadComponent: () => import('./components/admin/conversions/conversions').then(m => m.AdminConversionsComponent) },
       { path: 'expenses', loadComponent: () => import('./components/admin/expenses/expenses').then(m => m.AdminExpensesComponent) },
+      { path: 'roles', loadComponent: () => import('./components/admin/roles/roles').then(m => m.AdminRolesComponent) },
     ]
   },
   { path: '**', redirectTo: '' }

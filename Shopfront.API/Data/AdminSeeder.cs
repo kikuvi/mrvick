@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Shopfront.API.Authorization;
 using Shopfront.API.Models;
 
 namespace Shopfront.API.Data;
@@ -57,6 +58,45 @@ public static class AdminSeeder
             // Ensure password is set to new one
             var token = await userManager.GeneratePasswordResetTokenAsync(existing);
             await userManager.ResetPasswordAsync(existing, token, password);
+        }
+
+        // ── Admin Role & Permissions ──────────────────────────────────────────
+        const string adminRoleName = "Admin";
+        var adminRole = await db.AppRoles.FirstOrDefaultAsync(r => r.Name == adminRoleName);
+        if (adminRole is null)
+        {
+            adminRole = new AppRole { Name = adminRoleName, Description = "Full system access" };
+            db.AppRoles.Add(adminRole);
+            await db.SaveChangesAsync();
+        }
+
+        // Ensure all permissions are assigned to the Admin role
+        var existingPerms = await db.RolePermissions
+            .Where(rp => rp.RoleId == adminRole.Id)
+            .Select(rp => rp.Permission)
+            .ToListAsync();
+
+        var missingPerms = Permissions.All.Except(existingPerms).ToList();
+        if (missingPerms.Count > 0)
+        {
+            db.RolePermissions.AddRange(missingPerms.Select(p => new RolePermission
+            {
+                RoleId = adminRole.Id,
+                Permission = p
+            }));
+            await db.SaveChangesAsync();
+        }
+
+        // Assign the Admin role to the admin user if not already assigned
+        var adminUser = await userManager.FindByEmailAsync(email);
+        if (adminUser is not null)
+        {
+            var hasAdminRole = await db.AppUserRoles.AnyAsync(ur => ur.UserId == adminUser.Id && ur.RoleId == adminRole.Id);
+            if (!hasAdminRole)
+            {
+                db.AppUserRoles.Add(new UserRole { UserId = adminUser.Id, RoleId = adminRole.Id });
+                await db.SaveChangesAsync();
+            }
         }
 
         // Also remove old admin account if it still exists

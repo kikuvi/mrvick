@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Shopfront.API.Authorization;
 using Shopfront.API.Data;
 using Shopfront.API.DTOs;
 using Shopfront.API.Models;
@@ -16,6 +17,7 @@ public class ExpensesController : ControllerBase
 
     public ExpensesController(ShopfrontDbContext db) => _db = db;
 
+    [Authorize(Policy = Permissions.ViewExpenses)]
     [HttpGet]
     public async Task<IActionResult> GetAll()
     {
@@ -36,6 +38,7 @@ public class ExpensesController : ControllerBase
         return Ok(expenses);
     }
 
+    [Authorize(Policy = Permissions.ManageExpenses)]
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] CreateExpenseDto dto)
     {
@@ -59,6 +62,7 @@ public class ExpensesController : ControllerBase
         return CreatedAtAction(nameof(GetAll), null, result);
     }
 
+    [Authorize(Policy = Permissions.ManageExpenses)]
     [HttpPut("{id:guid}")]
     public async Task<IActionResult> Update(Guid id, [FromBody] UpdateExpenseDto dto)
     {
@@ -82,6 +86,7 @@ public class ExpensesController : ControllerBase
         return Ok(result);
     }
 
+    [Authorize(Policy = Permissions.ManageExpenses)]
     [HttpPatch("{id:guid}/status")]
     public async Task<IActionResult> UpdateStatus(Guid id, [FromBody] UpdateExpenseStatusDto dto)
     {
@@ -94,6 +99,7 @@ public class ExpensesController : ControllerBase
         return Ok(new { expense.Id, Status = expense.Status.ToString() });
     }
 
+    [Authorize(Policy = Permissions.ManageExpenses)]
     [HttpDelete("{id:guid}")]
     public async Task<IActionResult> Delete(Guid id)
     {
