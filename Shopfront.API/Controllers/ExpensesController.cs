@@ -41,11 +41,12 @@ public class ExpensesController : ControllerBase
     {
         var expense = new Expense
         {
-            Name = dto.Name.Trim(),
+            Name = (dto.Name ?? string.Empty).Trim(),
             Amount = dto.Amount,
-            IncurredBy = dto.IncurredBy.Trim(),
-            Category = dto.Category.Trim(),
-            Date = dto.Date.Date,
+            IncurredBy = (dto.IncurredBy ?? string.Empty).Trim(),
+            Category = (dto.Category ?? string.Empty).Trim(),
+            // DateOnly → DateTime (midnight, stored as datetime2)
+            Date = dto.Date.ToDateTime(TimeOnly.MinValue),
             Notes = string.IsNullOrWhiteSpace(dto.Notes) ? null : dto.Notes.Trim()
         };
 
@@ -55,7 +56,7 @@ public class ExpensesController : ControllerBase
         var result = new ExpenseDto(expense.Id, expense.Name, expense.Amount, expense.IncurredBy,
             expense.Category, expense.Date, expense.Notes, expense.Status.ToString(), expense.CreatedAt);
 
-        return CreatedAtAction(nameof(GetAll), result);
+        return CreatedAtAction(nameof(GetAll), null, result);
     }
 
     [HttpPut("{id:guid}")]
@@ -64,11 +65,12 @@ public class ExpensesController : ControllerBase
         var expense = await _db.Expenses.FindAsync(id);
         if (expense is null) return NotFound();
 
-        expense.Name = dto.Name.Trim();
+        expense.Name = (dto.Name ?? string.Empty).Trim();
         expense.Amount = dto.Amount;
-        expense.IncurredBy = dto.IncurredBy.Trim();
-        expense.Category = dto.Category.Trim();
-        expense.Date = dto.Date.Date;
+        expense.IncurredBy = (dto.IncurredBy ?? string.Empty).Trim();
+        expense.Category = (dto.Category ?? string.Empty).Trim();
+        // DateOnly → DateTime (midnight, stored as datetime2)
+        expense.Date = dto.Date.ToDateTime(TimeOnly.MinValue);
         expense.Notes = string.IsNullOrWhiteSpace(dto.Notes) ? null : dto.Notes.Trim();
         expense.Status = dto.Status;
 

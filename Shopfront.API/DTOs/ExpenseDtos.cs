@@ -19,7 +19,7 @@ public record CreateExpenseDto(
     decimal Amount,
     string IncurredBy,
     string Category,
-    DateTime Date,
+    DateOnly Date,      // accepts "YYYY-MM-DD" from Angular date inputs
     string? Notes
 );
 
@@ -28,7 +28,7 @@ public record UpdateExpenseDto(
     decimal Amount,
     string IncurredBy,
     string Category,
-    DateTime Date,
+    DateOnly Date,      // accepts "YYYY-MM-DD" from Angular date inputs
     string? Notes,
     ExpenseStatus Status
 );
