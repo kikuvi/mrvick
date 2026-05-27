@@ -5,6 +5,7 @@ import { filter } from 'rxjs/operators';
 import { Subscription } from 'rxjs';
 import { AuthService } from '../../../services/auth.service';
 import { NotificationService, AppNotification } from '../../../services/notification.service';
+import { SettingsService } from '../../../services/settings.service';
 
 // Permission keys mirrored from backend Authorization/Permissions.cs
 const P = {
@@ -84,7 +85,7 @@ const PAGE_TITLES: Record<string, string> = {
             <line x1="3" y1="6" x2="21" y2="6"/>
             <path d="M16 10a4 4 0 0 1-8 0"/>
           </svg>
-          Shopfront
+          {{ siteName }}
         </div>
 
         <nav>
@@ -281,6 +282,7 @@ const PAGE_TITLES: Record<string, string> = {
   `
 })
 export class AdminLayoutComponent implements OnInit, OnDestroy {
+  siteName = 'Shopfront';
   pageTitle = 'Dashboard';
   fullName = '';
   email = '';
@@ -296,7 +298,8 @@ export class AdminLayoutComponent implements OnInit, OnDestroy {
     private auth: AuthService,
     private router: Router,
     private cdr: ChangeDetectorRef,
-    private notifService: NotificationService
+    private notifService: NotificationService,
+    private settings: SettingsService
   ) {}
 
   /** Check if current user has a permission */
@@ -307,6 +310,8 @@ export class AdminLayoutComponent implements OnInit, OnDestroy {
   get P() { return P; }
 
   ngOnInit() {
+    this.settings.getAll().subscribe(s => { this.siteName = s['site_name'] || 'Shopfront'; this.cdr.markForCheck(); });
+
     this.fullName = this.auth.getFullName();
     this.email = this.auth.getEmail();
     this.initials = this.toInitials(this.fullName || this.email);

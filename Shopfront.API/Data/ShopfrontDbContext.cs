@@ -130,7 +130,7 @@ public class ShopfrontDbContext : IdentityDbContext<AppUser>
             e.HasIndex(ur => new { ur.UserId, ur.RoleId }).IsUnique();
         });
 
-        // Seed static pages (content is updated by AdminSeeder on startup)
+        // Seed static pages
         builder.Entity<Page>().HasData(
             new Page { Id = new Guid("a0000000-0000-0000-0000-000000000001"), Slug = "home", Title = "Welcome to Shopfront", Content = "<p>Your one-stop shop.</p>", MetaDesc = "Shopfront - Quality products delivered to your door.", UpdatedAt = new DateTime(2026, 1, 1) },
             new Page { Id = new Guid("a0000000-0000-0000-0000-000000000002"), Slug = "about", Title = "About Us", Content = "<p>We are Shopfront, bringing quality products to your doorstep.</p>", MetaDesc = "Learn more about Shopfront.", UpdatedAt = new DateTime(2026, 1, 1) },

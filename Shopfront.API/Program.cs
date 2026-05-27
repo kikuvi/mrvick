@@ -104,13 +104,11 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 
-// Auto-apply migrations and seed admin on startup
+// Auto-apply migrations on startup
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<ShopfrontDbContext>();
     db.Database.Migrate();
-    await AdminSeeder.SeedAsync(scope.ServiceProvider);
-    await AgentSeeder.SeedAsync(db);
 }
 
 app.Run();
