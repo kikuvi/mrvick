@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.HttpOverrides;
@@ -44,6 +45,21 @@ builder.Services.AddAuthentication(options =>
         ValidIssuer = builder.Configuration["Jwt:Issuer"],
         ValidAudience = builder.Configuration["Jwt:Audience"],
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
+    };
+    options.Events = new JwtBearerEvents
+    {
+        OnTokenValidated = async ctx =>
+        {
+            var userManager = ctx.HttpContext.RequestServices
+                .GetRequiredService<UserManager<AppUser>>();
+            var userId = ctx.Principal?.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId is not null)
+            {
+                var user = await userManager.FindByIdAsync(userId);
+                if (user is null || !user.IsActive)
+                    ctx.Fail("Account is deactivated.");
+            }
+        }
     };
 });
 
