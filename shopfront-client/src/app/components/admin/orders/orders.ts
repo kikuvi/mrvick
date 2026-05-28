@@ -124,7 +124,7 @@ import { UserService, AdminUser } from '../../../services/user.service';
         <thead>
           <tr>
             <th>Token</th><th>Customer</th><th>Product</th><th>Variation</th><th>County</th>
-            <th>Amount</th><th>Buying</th><th>Adv.</th><th>Delivery</th><th>Profit</th>
+            <th>Amount</th>
             <th>Status</th><th>Rider</th><th>Courier</th><th>Date</th><th></th>
           </tr>
         </thead>
@@ -141,21 +141,9 @@ import { UserService, AdminUser } from '../../../services/user.service';
             <td>{{ o.county }}</td>
             <td>{{ o.priceAtOrder | number:'1.0-0' }}</td>
             <td>
-              <input type="number" [(ngModel)]="o.buyingPrice" (blur)="saveExpenses(o)" style="width:70px" />
-            </td>
-            <td>
-              <input type="number" [(ngModel)]="o.advertisingCost" (blur)="saveExpenses(o)" style="width:70px" />
-            </td>
-            <td>
-              <input type="number" [(ngModel)]="o.deliveryFee" (blur)="saveExpenses(o)" style="width:70px" />
-            </td>
-            <td [class.positive]="o.profit > 0" [class.negative]="o.profit <= 0">
-              {{ o.profit | number:'1.0-0' }}
-            </td>
-            <td>
               <select [(ngModel)]="o.status" (change)="updateStatus(o)">
                 <option>New</option><option>Assigned</option>
-                <option>InTransit</option><option>Delivered</option>
+                <option>InTransit</option>
                 <option>Completed</option><option>Rejected</option>
                 <option>DeliverLater</option><option>DispatchToday</option>
                 <option>InInventory</option>
