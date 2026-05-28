@@ -28,7 +28,7 @@ import { ExpenseService, Expense } from '../../../services/expense.service';
           <div class="rev-card rev-card--expenses">
             <div class="rev-card-label">Total Expenses</div>
             <div class="rev-card-value">KES {{ totalExpenses | number:'1.0-0' }}</div>
-            <div class="rev-card-sub">Order costs + operational</div>
+            <div class="rev-card-sub">From expenses records</div>
           </div>
           <div class="rev-card" [class.rev-card--profit]="netProfit >= 0" [class.rev-card--loss]="netProfit < 0">
             <div class="rev-card-label">Net Profit</div>
@@ -53,10 +53,6 @@ import { ExpenseService, Expense } from '../../../services/expense.service';
               <th>Variation</th>
               <th>County</th>
               <th>Revenue</th>
-              <th>Buying</th>
-              <th>Adv.</th>
-              <th>Delivery</th>
-              <th>Gross Profit</th>
               <th>Date</th>
             </tr>
           </thead>
@@ -68,12 +64,6 @@ import { ExpenseService, Expense } from '../../../services/expense.service';
               <td>{{ o.variation || '—' }}</td>
               <td>{{ o.county }}</td>
               <td>{{ o.priceAtOrder | number:'1.0-0' }}</td>
-              <td>{{ o.buyingPrice | number:'1.0-0' }}</td>
-              <td>{{ o.advertisingCost | number:'1.0-0' }}</td>
-              <td>{{ o.deliveryFee | number:'1.0-0' }}</td>
-              <td [class.positive]="o.profit >= 0" [class.negative]="o.profit < 0">
-                {{ o.profit | number:'1.0-0' }}
-              </td>
               <td><small>{{ o.createdAt | date:'dd/MM/yy' }}</small></td>
             </tr>
           </tbody>
@@ -81,12 +71,6 @@ import { ExpenseService, Expense } from '../../../services/expense.service';
             <tr class="totals-row">
               <td colspan="5"><strong>Totals</strong></td>
               <td><strong>{{ totalRevenue | number:'1.0-0' }}</strong></td>
-              <td><strong>{{ totalBuying | number:'1.0-0' }}</strong></td>
-              <td><strong>{{ totalAdvertising | number:'1.0-0' }}</strong></td>
-              <td><strong>{{ totalDelivery | number:'1.0-0' }}</strong></td>
-              <td [class.positive]="grossProfit >= 0" [class.negative]="grossProfit < 0">
-                <strong>{{ grossProfit | number:'1.0-0' }}</strong>
-              </td>
               <td></td>
             </tr>
           </tfoot>
@@ -158,12 +142,7 @@ export class AdminRevenueComponent implements OnInit {
     });
   }
 
-  get totalRevenue()    { return this.completedOrders.reduce((s, o) => s + o.priceAtOrder, 0); }
-  get totalBuying()     { return this.completedOrders.reduce((s, o) => s + o.buyingPrice, 0); }
-  get totalAdvertising(){ return this.completedOrders.reduce((s, o) => s + o.advertisingCost, 0); }
-  get totalDelivery()   { return this.completedOrders.reduce((s, o) => s + o.deliveryFee, 0); }
-  get grossProfit()     { return this.completedOrders.reduce((s, o) => s + o.profit, 0); }
-  get operationalExpenses() { return this.expenses.reduce((s, e) => s + e.amount, 0); }
-  get totalExpenses()   { return this.totalBuying + this.totalAdvertising + this.totalDelivery + this.operationalExpenses; }
-  get netProfit()       { return this.grossProfit - this.operationalExpenses; }
+  get totalRevenue()  { return this.completedOrders.reduce((s, o) => s + o.priceAtOrder, 0); }
+  get totalExpenses() { return this.expenses.reduce((s, e) => s + e.amount, 0); }
+  get netProfit()     { return this.totalRevenue - this.totalExpenses; }
 }
