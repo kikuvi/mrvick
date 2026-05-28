@@ -31,6 +31,7 @@ public static class Permissions
     public const string ManageExpenses = "expenses.manage";
 
     // ── Users ─────────────────────────────────────────────────────────
+    public const string UserLookup  = "users.lookup";
     public const string ViewUsers   = "users.view";
     public const string ManageUsers = "users.manage";
 
@@ -68,6 +69,7 @@ public static class Permissions
         ViewCouriers, ManageCouriers,
         ViewAgents,   ManageAgents,
         ViewExpenses, ManageExpenses,
+        UserLookup,
         ViewUsers,    ManageUsers,
         ManagePermissions,
         ManagePages,  ManageSettings,
@@ -93,6 +95,7 @@ public static class Permissions
         ManageAgents     => "Manage Agents",
         ViewExpenses     => "View Expenses",
         ManageExpenses   => "Manage Expenses (create / edit / delete)",
+        UserLookup       => "User Lookup (name list for dropdowns)",
         ViewUsers        => "View Users",
         ManageUsers      => "Manage Users (create / edit / deactivate)",
         ManagePermissions => "Manage User Permissions",
@@ -120,7 +123,7 @@ public static class Permissions
         var p when p.StartsWith("couriers")    => "Couriers",
         var p when p.StartsWith("agents")      => "Agents",
         var p when p.StartsWith("expenses")    => "Expenses",
-        var p when p.StartsWith("users")       => "Users",
+        var p when p.StartsWith("users")        => "Users",
         var p when p.StartsWith("permissions") => "Permissions",
         var p when p.StartsWith("pages")       => "Content",
         var p when p.StartsWith("settings")    => "Content",

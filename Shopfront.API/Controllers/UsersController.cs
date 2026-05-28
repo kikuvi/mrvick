@@ -26,6 +26,7 @@ public class UsersController : ControllerBase
         _notifications = notifications;
     }
 
+    [Authorize(Policy = Permissions.UserLookup)]
     [HttpGet("lookup")]
     public async Task<IActionResult> Lookup()
     {
