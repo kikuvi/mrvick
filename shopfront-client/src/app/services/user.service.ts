@@ -32,7 +32,7 @@ export interface UserLookup {
 export class UserService {
   constructor(private api: ApiService) {}
 
-  lookup() { return this.api.get<UserLookup[]>('/users/lookup'); }
+  lookup() { return this.api.get<UserLookup[]>('/users/lookup', true); }
   getAll() { return this.api.get<AdminUser[]>('/users', true); }
   create(data: CreateUser) { return this.api.post<AdminUser>('/users', data, true); }
   update(id: string, data: UpdateUser) { return this.api.put<AdminUser>(`/users/${id}`, data); }
