@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ExpenseService, Expense, CreateExpensePayload, UpdateExpensePayload } from '../../../services/expense.service';
 import { UserService, UserLookup } from '../../../services/user.service';
+import { ProductService } from '../../../services/product.service';
 
 const CATEGORIES = ['All', 'Advertising', 'Delivery', 'Operations', 'Salary', 'Rent', 'Utilities', 'Other'];
 const CATEGORY_OPTIONS = ['Advertising', 'Delivery', 'Operations', 'Salary', 'Rent', 'Utilities', 'Other'];
@@ -148,7 +149,10 @@ const emptyForm = (): UpdateExpensePayload => ({
           <form class="modal-form" #expenseForm="ngForm" (ngSubmit)="submitExpense(expenseForm)">
             <div class="form-group">
               <label>Name <span class="req">*</span></label>
-              <input type="text" [(ngModel)]="form.name" name="name" required placeholder="e.g. Facebook Ads – May" />
+              <input type="text" [(ngModel)]="form.name" name="name" required placeholder="e.g. Facebook Ads – May" list="product-names-list" autocomplete="off" />
+              <datalist id="product-names-list">
+                <option *ngFor="let p of productNames" [value]="p"></option>
+              </datalist>
             </div>
             <div class="form-row">
               <div class="form-group">
@@ -332,6 +336,9 @@ export class AdminExpensesComponent implements OnInit {
   users: UserLookup[] = [];
   usersLoading = false;
 
+  /** Product titles for the Name autocomplete */
+  productNames: string[] = [];
+
   currentPage = 1;
   pageSize = PAGE_SIZE;
   totalPages = 1;
@@ -350,6 +357,7 @@ export class AdminExpensesComponent implements OnInit {
   constructor(
     private expenseService: ExpenseService,
     private userService: UserService,
+    private productService: ProductService,
     private cdr: ChangeDetectorRef
   ) {}
 
@@ -366,6 +374,15 @@ export class AdminExpensesComponent implements OnInit {
         this.loading = false;
         this.cdr.markForCheck();
       }
+    });
+
+    // Load product titles for the Name autocomplete
+    this.productService.getAllAdmin().subscribe({
+      next: products => {
+        this.productNames = products.map(p => p.title).sort();
+        this.cdr.markForCheck();
+      },
+      error: () => {}
     });
 
     // Load users for the "Incurred By" dropdown

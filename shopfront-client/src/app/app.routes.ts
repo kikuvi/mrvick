@@ -33,6 +33,8 @@ export const routes: Routes = [
       { path: 'page-views', loadComponent: () => import('./components/admin/page-views/page-views').then(m => m.AdminPageViewsComponent) },
       { path: 'conversions', loadComponent: () => import('./components/admin/conversions/conversions').then(m => m.AdminConversionsComponent) },
       { path: 'expenses', loadComponent: () => import('./components/admin/expenses/expenses').then(m => m.AdminExpensesComponent) },
+      { path: 'revenue', loadComponent: () => import('./components/admin/revenue/revenue').then(m => m.AdminRevenueComponent) },
+      { path: 'inventory', loadComponent: () => import('./components/admin/inventory/inventory').then(m => m.AdminInventoryComponent) },
       { path: 'roles', loadComponent: () => import('./components/admin/roles/roles').then(m => m.AdminRolesComponent) },
     ]
   },

@@ -9,7 +9,8 @@ public enum OrderStatus
     Completed,
     Rejected,
     DeliverLater,
-    DispatchToday
+    DispatchToday,
+    InInventory
 }
 
 public class Order

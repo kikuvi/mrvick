@@ -54,6 +54,7 @@ import { UserService, AdminUser } from '../../../services/user.service';
     .pill-Rejected     { background:#f8d7da; color:#721c24; }
     .pill-DeliverLater    { background:#fef3c7; color:#92400e; }
     .pill-DispatchToday   { background:#fed7aa; color:#9a3412; }
+    .pill-InInventory     { background:#ede9fe; color:#5b21b6; }
     .modal-footer { padding: .9rem 1.4rem; border-top: 1px solid #eee; text-align: right; }
 
     /* ---- Deliver Later banner ---- */
@@ -114,6 +115,7 @@ import { UserService, AdminUser } from '../../../services/user.service';
           <option>Completed</option><option>Rejected</option>
           <option>DeliverLater</option>
           <option>DispatchToday</option>
+          <option>InInventory</option>
           <option value="Archived">Archived</option>
         </select>
       </div>
@@ -156,6 +158,7 @@ import { UserService, AdminUser } from '../../../services/user.service';
                 <option>InTransit</option><option>Delivered</option>
                 <option>Completed</option><option>Rejected</option>
                 <option>DeliverLater</option><option>DispatchToday</option>
+                <option>InInventory</option>
               </select>
               <input *ngIf="o.status === 'DeliverLater'"
                 type="date"

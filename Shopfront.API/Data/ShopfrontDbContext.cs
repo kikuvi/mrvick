@@ -26,6 +26,8 @@ public class ShopfrontDbContext : IdentityDbContext<AppUser>
     public DbSet<Agent> Agents => Set<Agent>();
     public DbSet<AppNotification> AppNotifications => Set<AppNotification>();
     public DbSet<Expense> Expenses => Set<Expense>();
+    public DbSet<InventoryItem> InventoryItems => Set<InventoryItem>();
+    public DbSet<InventoryMovement> InventoryMovements => Set<InventoryMovement>();
     public DbSet<AppRole> AppRoles => Set<AppRole>();
     public DbSet<RolePermission> RolePermissions => Set<RolePermission>();
     public DbSet<UserRole> AppUserRoles => Set<UserRole>();
@@ -95,6 +97,19 @@ public class ShopfrontDbContext : IdentityDbContext<AppUser>
         {
             e.Property(x => x.Amount).HasColumnType("decimal(18,2)");
             e.Property(x => x.Status).HasConversion<string>();
+        });
+
+        builder.Entity<InventoryItem>(e =>
+        {
+            e.Property(i => i.BuyingPrice).HasColumnType("decimal(18,2)");
+            e.HasOne(i => i.Order)
+             .WithMany()
+             .HasForeignKey(i => i.OrderId)
+             .OnDelete(DeleteBehavior.Restrict);
+            e.HasOne(i => i.Movement)
+             .WithOne(m => m.Item)
+             .HasForeignKey<InventoryMovement>(m => m.InventoryItemId)
+             .OnDelete(DeleteBehavior.Cascade);
         });
 
         builder.Entity<Page>(e =>

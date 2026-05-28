@@ -264,6 +264,23 @@ public class OrdersController : ControllerBase
 
         order.Status = dto.Status;
         order.DeliveryDate = dto.DeliveryDate;
+
+        if (dto.Status == OrderStatus.InInventory)
+        {
+            var alreadyInInventory = await _db.InventoryItems.AnyAsync(i => i.OrderId == id);
+            if (!alreadyInInventory)
+            {
+                _db.InventoryItems.Add(new Models.InventoryItem
+                {
+                    OrderId = order.Id,
+                    TrackingToken = order.TrackingToken,
+                    ProductTitle = order.Product.Title,
+                    Variation = order.Variation,
+                    BuyingPrice = order.BuyingPrice,
+                });
+            }
+        }
+
         await _db.SaveChangesAsync();
 
         var message = dto.Status switch

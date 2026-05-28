@@ -45,6 +45,13 @@ public static class Permissions
     public const string ViewVendors   = "vendors.view";
     public const string ManageVendors = "vendors.manage";
 
+    // ── Revenue ───────────────────────────────────────────────────────
+    public const string ViewRevenue = "revenue.view";
+
+    // ── Inventory ─────────────────────────────────────────────────────
+    public const string ViewInventory   = "inventory.view";
+    public const string ManageInventory = "inventory.manage";
+
     // ── Reports ───────────────────────────────────────────────────────
     public const string ViewReviews     = "reviews.view";
     public const string ViewAuditLogs   = "audit_logs.view";
@@ -65,6 +72,8 @@ public static class Permissions
         ManagePermissions,
         ManagePages,  ManageSettings,
         ViewVendors,  ManageVendors,
+        ViewRevenue,
+        ViewInventory, ManageInventory,
         ViewReviews,  ViewAuditLogs, ViewPageViews, ViewConversions,
     ];
 
@@ -91,6 +100,9 @@ public static class Permissions
         ManageSettings   => "Manage Site Settings",
         ViewVendors      => "View Vendor Items",
         ManageVendors    => "Manage Vendor Items",
+        ViewRevenue      => "View Revenue",
+        ViewInventory    => "View Inventory",
+        ManageInventory  => "Manage Inventory (move items)",
         ViewReviews      => "View Reviews",
         ViewAuditLogs    => "View Audit Logs",
         ViewPageViews    => "View Page Views",
@@ -113,6 +125,8 @@ public static class Permissions
         var p when p.StartsWith("pages")       => "Content",
         var p when p.StartsWith("settings")    => "Content",
         var p when p.StartsWith("vendors")     => "Vendors",
+        var p when p.StartsWith("revenue")     => "Revenue",
+        var p when p.StartsWith("inventory")   => "Inventory",
         var p when p.StartsWith("reviews")     => "Reports",
         var p when p.StartsWith("audit_logs")  => "Reports",
         var p when p.StartsWith("page_views")  => "Reports",
