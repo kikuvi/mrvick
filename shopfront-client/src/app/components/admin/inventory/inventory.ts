@@ -5,9 +5,7 @@ import { InventoryService, InventoryItem, MoveFromInventoryPayload } from '../..
 
 const emptyMove = (): MoveFromInventoryPayload => ({
   reason: '',
-  fulfillmentNote: null,
-  approverEmail: '',
-  approverPassword: ''
+  fulfillmentNote: null
 });
 
 @Component({
@@ -105,27 +103,8 @@ const emptyMove = (): MoveFromInventoryPayload => ({
                 placeholder="e.g. Order #ABC123 — John Doe, Nairobi" />
             </div>
 
-            <div class="approver-section">
-              <div class="approver-label">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                  <rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-                </svg>
-                Second Approver Required
-              </div>
-              <p class="approver-hint">A second authorised user must verify this movement.</p>
-              <div class="form-group">
-                <label>Approver Email <span class="req">*</span></label>
-                <input type="email" [(ngModel)]="movePayload.approverEmail" name="approverEmail" required
-                  placeholder="approver@example.com" autocomplete="off" />
-              </div>
-              <div class="form-group">
-                <label>Approver Password <span class="req">*</span></label>
-                <input type="password" [(ngModel)]="movePayload.approverPassword" name="approverPassword" required
-                  placeholder="••••••••" autocomplete="new-password" />
-              </div>
-            </div>
 
-            <p class="form-error" *ngIf="moveError">{{ moveError }}</p>
+<p class="form-error" *ngIf="moveError">{{ moveError }}</p>
 
             <div class="modal-footer">
               <button type="button" class="cancel-btn" (click)="closeMove()">Cancel</button>
@@ -169,9 +148,6 @@ const emptyMove = (): MoveFromInventoryPayload => ({
     .form-group input { padding: .6rem .85rem; border: 1px solid #ddd; border-radius: 6px; font-size: .9rem; }
     .form-group input:focus { outline: none; border-color: #1d3557; box-shadow: 0 0 0 3px rgba(29,53,87,.1); }
     .req { color: #e63946; }
-    .approver-section { background: #fffbeb; border: 1px solid #fde68a; border-radius: 8px; padding: 1rem; display: flex; flex-direction: column; gap: .75rem; }
-    .approver-label { display: flex; align-items: center; gap: .45rem; font-size: .85rem; font-weight: 700; color: #92400e; }
-    .approver-hint { margin: 0; font-size: .8rem; color: #a16207; }
     .form-error { color: #e63946; font-size: .85rem; margin: 0; }
     .modal-footer { padding: .9rem 1.4rem; border-top: 1px solid #eee; display: flex; justify-content: flex-end; gap: .75rem; }
     .cancel-btn { background: #f3f4f6; border: 1px solid #e5e7eb; border-radius: 6px; padding: .55rem 1.25rem; font-size: .85rem; font-weight: 600; cursor: pointer; color: #374151; }

@@ -25,7 +25,5 @@ public record InventoryItemDto(
 
 public record MoveFromInventoryDto(
     string Reason,
-    string? FulfillmentNote,
-    string ApproverEmail,
-    string ApproverPassword
+    string? FulfillmentNote
 );

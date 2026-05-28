@@ -1,6 +1,5 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Shopfront.API.Authorization;
@@ -17,13 +16,11 @@ namespace Shopfront.API.Controllers;
 public class InventoryController : ControllerBase
 {
     private readonly ShopfrontDbContext _db;
-    private readonly UserManager<AppUser> _userManager;
     private readonly AuditService _audit;
 
-    public InventoryController(ShopfrontDbContext db, UserManager<AppUser> userManager, AuditService audit)
+    public InventoryController(ShopfrontDbContext db, AuditService audit)
     {
         _db = db;
-        _userManager = userManager;
         _audit = audit;
     }
 
@@ -67,17 +64,7 @@ public class InventoryController : ControllerBase
         if (item is null) return NotFound();
         if (item.IsMoved) return BadRequest(new { error = "This item has already been moved." });
 
-        var approver = await _userManager.FindByEmailAsync(dto.ApproverEmail);
-        if (approver is null)
-            return BadRequest(new { error = "Second approver not found." });
-
-        var passwordValid = await _userManager.CheckPasswordAsync(approver, dto.ApproverPassword);
-        if (!passwordValid)
-            return BadRequest(new { error = "Invalid second approver credentials." });
-
         var actorEmail = User.FindFirstValue(ClaimTypes.Email)!;
-        if (string.Equals(actorEmail, dto.ApproverEmail, StringComparison.OrdinalIgnoreCase))
-            return BadRequest(new { error = "The second approver must be a different user." });
 
         var movement = new InventoryMovement
         {
@@ -85,7 +72,7 @@ public class InventoryController : ControllerBase
             Reason = dto.Reason.Trim(),
             FulfillmentNote = dto.FulfillmentNote?.Trim(),
             MovedByEmail = actorEmail,
-            ApprovedByEmail = approver.Email!,
+            ApprovedByEmail = actorEmail,
             MovedAt = DateTime.UtcNow
         };
 

@@ -27,8 +27,6 @@ export interface InventoryItem {
 export interface MoveFromInventoryPayload {
   reason: string;
   fulfillmentNote: string | null;
-  approverEmail: string;
-  approverPassword: string;
 }
 
 @Injectable({ providedIn: 'root' })
