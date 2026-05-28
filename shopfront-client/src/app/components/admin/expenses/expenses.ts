@@ -51,6 +51,12 @@ const emptyForm = (): UpdateExpensePayload => ({
           </svg>
           <input type="text" placeholder="Search name, incurred by…" [(ngModel)]="query" (ngModelChange)="applyFilters()" />
         </div>
+        <div class="date-filters">
+          <input type="date" [(ngModel)]="dateFrom" (ngModelChange)="applyFilters()" title="From date" />
+          <span class="date-sep">–</span>
+          <input type="date" [(ngModel)]="dateTo" (ngModelChange)="applyFilters()" title="To date" />
+          <button *ngIf="dateFrom || dateTo" class="clear-dates-btn" (click)="clearDates()" title="Clear date filter">✕</button>
+        </div>
         <button class="add-btn" (click)="openAdd()">+ Add Expense</button>
       </div>
 
@@ -243,6 +249,12 @@ const emptyForm = (): UpdateExpensePayload => ({
     .vt-btn.active .pending-count, .vt-btn.active .settled-count { background: rgba(255,255,255,.25); color: #fff; }
     .search-box { display: flex; align-items: center; gap: 8px; background: #f5f5f5; border: 1px solid #e0e0e0; border-radius: 8px; padding: 7px 12px; flex: 1; max-width: 280px; }
     .search-box input { border: none; background: transparent; outline: none; font-size: 14px; width: 100%; }
+    .date-filters { display: flex; align-items: center; gap: 6px; }
+    .date-filters input[type=date] { border: 1px solid #e0e0e0; border-radius: 8px; padding: 6px 10px; font-size: 13px; background: #f5f5f5; color: #333; outline: none; }
+    .date-filters input[type=date]:focus { border-color: #1d3557; background: #fff; }
+    .date-sep { font-size: 13px; color: #aaa; }
+    .clear-dates-btn { background: none; border: none; cursor: pointer; color: #aaa; font-size: 14px; padding: 2px 4px; border-radius: 4px; line-height: 1; }
+    .clear-dates-btn:hover { color: #e63946; background: #fee2e2; }
     .add-btn { margin-left: auto; padding: 8px 18px; background: var(--primary, #4f46e5); color: #fff; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; white-space: nowrap; }
     .add-btn:hover { opacity: .88; }
     .tabs { display: flex; gap: 6px; margin-bottom: 16px; flex-wrap: wrap; }
@@ -326,6 +338,8 @@ export class AdminExpensesComponent implements OnInit {
   filtered: Expense[] = [];
   page: Expense[] = [];
   query = '';
+  dateFrom = '';
+  dateTo = '';
   activeCategory = 'All';
   viewMode: 'all' | 'Pending' | 'Settled' = 'all';
   loading = true;
@@ -425,17 +439,27 @@ export class AdminExpensesComponent implements OnInit {
       const matchView = this.viewMode === 'all' || e.status === this.viewMode;
       const matchCat = this.activeCategory === 'All' || e.category === this.activeCategory;
       const matchQuery = !q || e.name.toLowerCase().includes(q) || e.incurredBy.toLowerCase().includes(q) || e.category.toLowerCase().includes(q);
-      return matchView && matchCat && matchQuery;
+      const matchFrom = !this.dateFrom || e.date.slice(0, 10) >= this.dateFrom;
+      const matchTo   = !this.dateTo   || e.date.slice(0, 10) <= this.dateTo;
+      return matchView && matchCat && matchQuery && matchFrom && matchTo;
     });
     this.currentPage = 1;
     this.buildPagination();
     this.cdr.markForCheck();
   }
 
+  clearDates() {
+    this.dateFrom = '';
+    this.dateTo = '';
+    this.applyFilters();
+  }
+
   categoryCount(cat: string): number {
     const q = this.query.toLowerCase().trim();
     let base = this.viewMode === 'all' ? this.expenses : this.expenses.filter(e => e.status === this.viewMode);
     if (q) base = base.filter(e => e.name.toLowerCase().includes(q) || e.incurredBy.toLowerCase().includes(q));
+    if (this.dateFrom) base = base.filter(e => e.date.slice(0, 10) >= this.dateFrom);
+    if (this.dateTo)   base = base.filter(e => e.date.slice(0, 10) <= this.dateTo);
     if (cat === 'All') return base.length;
     return base.filter(e => e.category === cat).length;
   }
