@@ -18,14 +18,12 @@ public class InventoryController : ControllerBase
 {
     private readonly ShopfrontDbContext _db;
     private readonly UserManager<AppUser> _userManager;
-    private readonly SignInManager<AppUser> _signInManager;
     private readonly AuditService _audit;
 
-    public InventoryController(ShopfrontDbContext db, UserManager<AppUser> userManager, SignInManager<AppUser> signInManager, AuditService audit)
+    public InventoryController(ShopfrontDbContext db, UserManager<AppUser> userManager, AuditService audit)
     {
         _db = db;
         _userManager = userManager;
-        _signInManager = signInManager;
         _audit = audit;
     }
 
@@ -73,8 +71,8 @@ public class InventoryController : ControllerBase
         if (approver is null)
             return BadRequest(new { error = "Second approver not found." });
 
-        var check = await _signInManager.CheckPasswordSignInAsync(approver, dto.ApproverPassword, lockoutOnFailure: false);
-        if (!check.Succeeded)
+        var passwordValid = await _userManager.CheckPasswordAsync(approver, dto.ApproverPassword);
+        if (!passwordValid)
             return BadRequest(new { error = "Invalid second approver credentials." });
 
         var actorEmail = User.FindFirstValue(ClaimTypes.Email)!;

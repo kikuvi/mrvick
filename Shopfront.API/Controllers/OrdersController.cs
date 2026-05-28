@@ -272,6 +272,7 @@ public class OrdersController : ControllerBase
             {
                 _db.InventoryItems.Add(new Models.InventoryItem
                 {
+                    Id = Guid.NewGuid(),
                     OrderId = order.Id,
                     TrackingToken = order.TrackingToken,
                     ProductTitle = order.Product.Title,
