@@ -2,7 +2,7 @@ import { Component, OnInit, ChangeDetectionStrategy, ChangeDetectorRef } from '@
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ExpenseService, Expense, CreateExpensePayload, UpdateExpensePayload } from '../../../services/expense.service';
-import { UserService, AdminUser } from '../../../services/user.service';
+import { UserService, UserLookup } from '../../../services/user.service';
 
 const CATEGORIES = ['All', 'Advertising', 'Delivery', 'Operations', 'Salary', 'Rent', 'Utilities', 'Other'];
 const CATEGORY_OPTIONS = ['Advertising', 'Delivery', 'Operations', 'Salary', 'Rent', 'Utilities', 'Other'];
@@ -329,7 +329,7 @@ export class AdminExpensesComponent implements OnInit {
   categoryOptions = CATEGORY_OPTIONS;
 
   /** Users loaded for the "Incurred By" dropdown */
-  users: AdminUser[] = [];
+  users: UserLookup[] = [];
   usersLoading = false;
 
   currentPage = 1;
@@ -370,9 +370,9 @@ export class AdminExpensesComponent implements OnInit {
 
     // Load users for the "Incurred By" dropdown
     this.usersLoading = true;
-    this.userService.getAll().subscribe({
+    this.userService.lookup().subscribe({
       next: users => {
-        this.users = users.filter(u => u.isActive);
+        this.users = users;
         this.usersLoading = false;
         this.cdr.markForCheck();
       },

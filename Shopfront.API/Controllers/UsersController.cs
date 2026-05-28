@@ -26,6 +26,18 @@ public class UsersController : ControllerBase
         _notifications = notifications;
     }
 
+    [HttpGet("lookup")]
+    public async Task<IActionResult> Lookup()
+    {
+        var users = await _userManager.Users
+            .Where(u => u.IsActive)
+            .OrderBy(u => u.FullName)
+            .Select(u => new { u.Id, u.FullName })
+            .ToListAsync();
+
+        return Ok(users);
+    }
+
     [Authorize(Policy = Permissions.ViewUsers)]
     [HttpGet]
     public async Task<IActionResult> GetAll()
