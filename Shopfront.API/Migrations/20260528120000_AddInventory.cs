@@ -1,11 +1,15 @@
 using System;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
+using Shopfront.API.Data;
 
 #nullable disable
 
 namespace Shopfront.API.Migrations
 {
-    /// <inheritdoc />
+    [DbContext(typeof(ShopfrontDbContext))]
+    [Migration("20260528120000_AddInventory")]
     public partial class AddInventory : Migration
     {
         /// <inheritdoc />
