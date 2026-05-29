@@ -36,7 +36,7 @@ public class Order
     public bool IsArchived { get; set; } = false;
     public Guid? RiderId { get; set; }
     public Guid? CourierId { get; set; }
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime CreatedAt { get; set; } = NairobiClock.Now;
 
     public Product Product { get; set; } = null!;
     public Rider? Rider { get; set; }

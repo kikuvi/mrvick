@@ -7,5 +7,5 @@ public class Page
     public string Title { get; set; } = string.Empty;
     public string Content { get; set; } = string.Empty;
     public string? MetaDesc { get; set; }
-    public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime UpdatedAt { get; set; } = NairobiClock.Now;
 }

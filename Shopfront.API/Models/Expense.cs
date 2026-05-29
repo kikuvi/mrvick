@@ -16,5 +16,5 @@ public class Expense
     public DateTime Date { get; set; }
     public string? Notes { get; set; }
     public ExpenseStatus Status { get; set; } = ExpenseStatus.Pending;
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime CreatedAt { get; set; } = NairobiClock.Now;
 }

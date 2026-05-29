@@ -8,5 +8,5 @@ public class VendorItem
     public string Location { get; set; } = string.Empty;
     public decimal Price { get; set; }
     public string Contacts { get; set; } = string.Empty;
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime CreatedAt { get; set; } = NairobiClock.Now;
 }

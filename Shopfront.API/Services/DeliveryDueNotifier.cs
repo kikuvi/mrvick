@@ -32,7 +32,7 @@ public class DeliveryDueNotifier : BackgroundService
         using var scope = _scopeFactory.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ShopfrontDbContext>();
 
-        var today    = DateTime.UtcNow.Date;
+        var today    = NairobiClock.Now.Date;
         var tomorrow = today.AddDays(1);
 
         // Orders due today or tomorrow that are still DeliverLater

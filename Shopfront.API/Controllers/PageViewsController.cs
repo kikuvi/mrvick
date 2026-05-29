@@ -28,7 +28,7 @@ public class PageViewsController : ControllerBase
         if (string.IsNullOrWhiteSpace(path)) return Ok();
         if (path.Length > 500) path = path[..500];
 
-        var today = DateOnly.FromDateTime(DateTime.UtcNow);
+        var today = NairobiClock.Today;
         var existing = await _db.PageViews
             .FirstOrDefaultAsync(p => p.Path == path && p.Date == today);
 
@@ -45,7 +45,7 @@ public class PageViewsController : ControllerBase
     [Authorize]
     public async Task<IActionResult> GetReport([FromQuery] int days = 30)
     {
-        var since = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(-(days - 1)));
+        var since = NairobiClock.Today.AddDays(-(days - 1));
         var rows = await _db.PageViews
             .Where(p => p.Date >= since)
             .OrderByDescending(p => p.Date)

@@ -31,7 +31,7 @@ public class SettingsController : ControllerBase
             if (setting is not null)
             {
                 setting.Value = value;
-                setting.UpdatedAt = DateTime.UtcNow;
+                setting.UpdatedAt = NairobiClock.Now;
             }
         }
 

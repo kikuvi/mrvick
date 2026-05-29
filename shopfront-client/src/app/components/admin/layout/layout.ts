@@ -44,6 +44,7 @@ const PAGE_TITLES: Record<string, string> = {
   'audit-logs': 'Audit Logs',
   'page-views': 'Page Views',
   'conversions': 'Conversions API',
+  analytics: 'Analytics',
   expenses: 'Expenses',
   revenue: 'Revenue',
   inventory: 'Inventory',
@@ -99,6 +100,12 @@ const PAGE_TITLES: Record<string, string> = {
               <rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/>
             </svg>
             Dashboard
+          </a>
+          <a routerLink="/admin/analytics" routerLinkActive="active" *ngIf="can(P.Dashboard)">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+            </svg>
+            Analytics
           </a>
           <a routerLink="/admin/orders" routerLinkActive="active" *ngIf="can(P.ViewOrders)">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">

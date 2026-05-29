@@ -12,5 +12,5 @@ public class Agent
     public string Company { get; set; } = "Standard";
     public string Region { get; set; } = string.Empty;
     public bool Confirmed { get; set; } = false;
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime CreatedAt { get; set; } = NairobiClock.Now;
 }

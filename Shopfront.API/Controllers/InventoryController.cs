@@ -73,7 +73,7 @@ public class InventoryController : ControllerBase
             FulfillmentNote = dto.FulfillmentNote?.Trim(),
             MovedByEmail = actorEmail,
             ApprovedByEmail = actorEmail,
-            MovedAt = DateTime.UtcNow
+            MovedAt = NairobiClock.Now
         };
 
         item.IsMoved = true;
@@ -83,7 +83,7 @@ public class InventoryController : ControllerBase
         await _db.SaveChangesAsync();
 
         await _audit.LogAsync("InventoryItemMoved", actorEmail, "InventoryItem", item.Id.ToString(),
-            $"{item.ProductTitle} — {dto.Reason} (approved by {approver.Email})");
+            $"{item.ProductTitle} — {dto.Reason}");
 
         return Ok(new InventoryMovementDto(
             movement.Id, movement.Reason, movement.FulfillmentNote,

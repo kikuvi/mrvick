@@ -167,7 +167,7 @@ public class OrdersController : ControllerBase
               Need help? Reply to this email or contact us anytime.
             </p>
             <p style='margin:0;font-size:12px;color:#bbb;'>
-              &copy; {DateTime.UtcNow.Year} Shopfront. All rights reserved.
+              &copy; {NairobiClock.Now.Year} Shopfront. All rights reserved.
             </p>
           </td>
         </tr>
@@ -361,7 +361,7 @@ public class OrdersController : ControllerBase
             OrderId = id,
             Content = dto.Content.Trim(),
             CreatedBy = User.FindFirstValue(ClaimTypes.Email),
-            CreatedAt = DateTime.UtcNow
+            CreatedAt = NairobiClock.Now
         };
 
         _db.OrderNotes.Add(note);
@@ -383,5 +383,64 @@ public class OrdersController : ControllerBase
         await _db.SaveChangesAsync();
 
         return NoContent();
+    }
+
+    [Authorize]
+    [HttpGet("analytics/hourly")]
+    public async Task<IActionResult> HourlyAnalytics()
+    {
+        // Rolling 24-hour window ending at the current full hour
+        var now = NairobiClock.Now;
+        var currentHour = new DateTime(now.Year, now.Month, now.Day, now.Hour, 0, 0);
+        var since = currentHour.AddHours(-23);
+
+        var rows = await _db.Orders
+            .Where(o => !o.IsArchived && o.CreatedAt >= since)
+            .Select(o => new { o.CreatedAt, o.Status })
+            .ToListAsync();
+
+        var labels    = new string[24];
+        var total     = new int[24];
+        var newArr    = new int[24];
+        var assigned  = new int[24];
+        var completed = new int[24];
+        var later     = new int[24];
+        var dispatch  = new int[24];
+
+        for (int i = 0; i < 24; i++)
+        {
+            var slot = since.AddHours(i);
+            labels[i] = slot.ToString("HH:mm");
+
+            foreach (var o in rows)
+            {
+                if (o.CreatedAt.Year  == slot.Year  &&
+                    o.CreatedAt.Month == slot.Month &&
+                    o.CreatedAt.Day   == slot.Day   &&
+                    o.CreatedAt.Hour  == slot.Hour)
+                {
+                    total[i]++;
+                    switch (o.Status)
+                    {
+                        case OrderStatus.New:           newArr[i]++;   break;
+                        case OrderStatus.Assigned:      assigned[i]++; break;
+                        case OrderStatus.Completed:     completed[i]++; break;
+                        case OrderStatus.DeliverLater:  later[i]++;    break;
+                        case OrderStatus.DispatchToday: dispatch[i]++; break;
+                    }
+                }
+            }
+        }
+
+        return Ok(new
+        {
+            labels,
+            total,
+            @new      = newArr,
+            assigned,
+            completed,
+            deliverLater  = later,
+            dispatchToday = dispatch
+        });
     }
 }

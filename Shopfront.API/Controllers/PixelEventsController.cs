@@ -25,7 +25,7 @@ public class PixelEventsController : ControllerBase
             EventId   = dto.EventId,
             ProductId = dto.ProductId,
             Value     = dto.Value,
-            CreatedAt = DateTime.UtcNow
+            CreatedAt = NairobiClock.Now
         });
         await _db.SaveChangesAsync();
         return Ok();
@@ -35,7 +35,7 @@ public class PixelEventsController : ControllerBase
     [HttpGet("coverage")]
     public async Task<IActionResult> Coverage([FromQuery] int days = 30)
     {
-        var since = DateTime.UtcNow.AddDays(-days);
+        var since = NairobiClock.Now.AddDays(-days);
 
         var grouped = await _db.PixelEvents
             .Where(e => e.CreatedAt >= since)

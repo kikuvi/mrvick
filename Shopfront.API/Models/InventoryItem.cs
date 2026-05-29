@@ -9,7 +9,7 @@ public class InventoryItem
     public string? Variation { get; set; }
     public decimal BuyingPrice { get; set; }
     public string? Notes { get; set; }
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime CreatedAt { get; set; } = NairobiClock.Now;
     public bool IsMoved { get; set; } = false;
     public DateTime? MovedAt { get; set; }
 

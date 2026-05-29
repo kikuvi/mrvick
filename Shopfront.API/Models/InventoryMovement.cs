@@ -8,7 +8,7 @@ public class InventoryMovement
     public string? FulfillmentNote { get; set; }
     public string MovedByEmail { get; set; } = string.Empty;
     public string ApprovedByEmail { get; set; } = string.Empty;
-    public DateTime MovedAt { get; set; } = DateTime.UtcNow;
+    public DateTime MovedAt { get; set; } = NairobiClock.Now;
 
     public InventoryItem Item { get; set; } = null!;
 }

@@ -7,7 +7,7 @@ public class Rider
     public string Phone { get; set; } = string.Empty;
     public string County { get; set; } = string.Empty;
     public string LocalTown { get; set; } = string.Empty;
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime CreatedAt { get; set; } = NairobiClock.Now;
 
     public ICollection<Order> Orders { get; set; } = new List<Order>();
 }

@@ -33,7 +33,7 @@ public class PagesController : ControllerBase
         page.Title = dto.Title;
         page.Content = dto.Content;
         page.MetaDesc = dto.MetaDesc;
-        page.UpdatedAt = DateTime.UtcNow;
+        page.UpdatedAt = NairobiClock.Now;
 
         await _db.SaveChangesAsync();
         return NoContent();

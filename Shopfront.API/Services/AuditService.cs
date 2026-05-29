@@ -18,7 +18,7 @@ public class AuditService
             EntityType = entityType,
             EntityId = entityId,
             Details = details,
-            CreatedAt = DateTime.UtcNow
+            CreatedAt = NairobiClock.Now
         });
         await _db.SaveChangesAsync();
     }

@@ -111,7 +111,7 @@ public class FacebookCapiService
                 EventId   = eventId,
                 OrderId   = orderId,
                 Value     = value,
-                CreatedAt = DateTime.UtcNow
+                CreatedAt = NairobiClock.Now
             });
             await _db.SaveChangesAsync();
 

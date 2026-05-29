@@ -6,7 +6,7 @@ public class OrderNote
     public Guid OrderId { get; set; }
     public string Content { get; set; } = string.Empty;
     public string? CreatedBy { get; set; }
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime CreatedAt { get; set; } = NairobiClock.Now;
 
     public Order Order { get; set; } = null!;
 }

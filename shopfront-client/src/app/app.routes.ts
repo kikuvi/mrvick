@@ -36,6 +36,7 @@ export const routes: Routes = [
       { path: 'revenue', loadComponent: () => import('./components/admin/revenue/revenue').then(m => m.AdminRevenueComponent) },
       { path: 'inventory', loadComponent: () => import('./components/admin/inventory/inventory').then(m => m.AdminInventoryComponent) },
       { path: 'roles', loadComponent: () => import('./components/admin/roles/roles').then(m => m.AdminRolesComponent) },
+      { path: 'analytics', loadComponent: () => import('./components/admin/analytics/analytics').then(m => m.AdminAnalyticsComponent) },
     ]
   },
   { path: '**', redirectTo: '' }

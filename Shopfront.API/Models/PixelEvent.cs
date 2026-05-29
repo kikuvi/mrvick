@@ -9,5 +9,5 @@ public class PixelEvent
     public Guid? OrderId { get; set; }
     public string? ProductId { get; set; }
     public decimal? Value { get; set; }
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime CreatedAt { get; set; } = NairobiClock.Now;
 }
