@@ -17,7 +17,7 @@ services:
     restart: unless-stopped
 
   api:
-    image: ghcr.io/kikuvi/shop-api:latest
+    image: ghcr.io/kikuvi/mrvick-api:latest
     depends_on:
       db:
         condition: service_healthy
@@ -41,7 +41,7 @@ services:
     restart: unless-stopped
 
   frontend:
-    image: ghcr.io/kikuvi/shop-frontend:latest
+    image: ghcr.io/kikuvi/mrvick-frontend:latest
     depends_on:
       - api
     restart: unless-stopped
