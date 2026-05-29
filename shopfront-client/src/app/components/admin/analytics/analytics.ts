@@ -4,18 +4,9 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Chart, ChartConfiguration, registerables } from 'chart.js';
-import { AnalyticsService, HourlyAnalytics } from '../../../services/analytics.service';
+import { AnalyticsService, DailyAnalytics } from '../../../services/analytics.service';
 
 Chart.register(...registerables);
-
-const LINES = [
-  { key: 'total',        label: 'All Orders',    color: '#1d3557' },
-  { key: 'new',          label: 'New',            color: '#10b981' },
-  { key: 'assigned',     label: 'Assigned',       color: '#f59e0b' },
-  { key: 'completed',    label: 'Completed',      color: '#3b82f6' },
-  { key: 'deliverLater', label: 'Deliver Later',  color: '#8b5cf6' },
-  { key: 'dispatchToday',label: 'Dispatch Today', color: '#e63946' },
-] as const;
 
 @Component({
   selector: 'app-admin-analytics',
@@ -50,25 +41,6 @@ const LINES = [
       position: relative;
       height: 320px;
     }
-    .legend {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 16px;
-      margin-top: 20px;
-    }
-    .legend-item {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 12px;
-      color: #444;
-    }
-    .legend-dot {
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      flex-shrink: 0;
-    }
     .refresh-btn {
       background: none;
       border: 1px solid #e5e7eb;
@@ -90,8 +62,8 @@ const LINES = [
       <div class="chart-card">
         <div class="chart-header">
           <div>
-            <div class="chart-title">Orders — Last 24 Hours</div>
-            <div class="chart-subtitle">Order count per hour (Nairobi time)</div>
+            <div class="chart-title">Orders Over Time</div>
+            <div class="chart-subtitle">Total orders per day — all time</div>
           </div>
           <button class="refresh-btn" (click)="load()" [disabled]="loading">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -109,12 +81,6 @@ const LINES = [
           <div class="chart-container">
             <canvas #chartCanvas></canvas>
           </div>
-          <div class="legend">
-            <div class="legend-item" *ngFor="let line of lines">
-              <span class="legend-dot" [style.background]="line.color"></span>
-              {{ line.label }}
-            </div>
-          </div>
         </ng-container>
       </div>
     </div>
@@ -125,10 +91,9 @@ export class AdminAnalyticsComponent implements OnInit, OnDestroy {
 
   loading = true;
   error = false;
-  lines = LINES;
 
   private chart: Chart | null = null;
-  private data: HourlyAnalytics | null = null;
+  private data: DailyAnalytics | null = null;
 
   constructor(
     private analyticsService: AnalyticsService,
@@ -144,13 +109,12 @@ export class AdminAnalyticsComponent implements OnInit, OnDestroy {
     this.error = false;
     this.cdr.markForCheck();
 
-    this.analyticsService.getHourly().subscribe({
+    this.analyticsService.getDaily().subscribe({
       next: (data) => {
         this.data = data;
         this.loading = false;
         this.error = false;
         this.cdr.markForCheck();
-        // Give Angular a tick to render the canvas before drawing
         setTimeout(() => this.renderChart(), 0);
       },
       error: () => {
@@ -171,14 +135,17 @@ export class AdminAnalyticsComponent implements OnInit, OnDestroy {
       type: 'line',
       data: {
         labels: d.labels,
-        datasets: [
-          this.dataset('All Orders',    d.total,        '#1d3557'),
-          this.dataset('New',           d.new,          '#10b981'),
-          this.dataset('Assigned',      d.assigned,     '#f59e0b'),
-          this.dataset('Completed',     d.completed,    '#3b82f6'),
-          this.dataset('Deliver Later', d.deliverLater, '#8b5cf6'),
-          this.dataset('Dispatch Today',d.dispatchToday,'#e63946'),
-        ]
+        datasets: [{
+          label: 'Orders',
+          data: d.total,
+          borderColor: '#1d3557',
+          backgroundColor: '#1d355718',
+          borderWidth: 2,
+          pointRadius: d.labels.length > 60 ? 0 : 3,
+          pointHoverRadius: 5,
+          fill: true,
+          tension: 0.3,
+        }]
       },
       options: {
         responsive: true,
@@ -197,13 +164,19 @@ export class AdminAnalyticsComponent implements OnInit, OnDestroy {
         scales: {
           x: {
             grid: { color: '#f0f0f0' },
-            ticks: { font: { size: 11 }, color: '#888', maxRotation: 0 }
+            ticks: {
+              font: { size: 11 },
+              color: '#888',
+              maxRotation: 45,
+              maxTicksLimit: 20,
+            }
           },
           y: {
             beginAtZero: true,
             grid: { color: '#f0f0f0' },
             ticks: {
-              font: { size: 11 }, color: '#888',
+              font: { size: 11 },
+              color: '#888',
               stepSize: 1,
               callback: (v) => Number.isInteger(v) ? v : ''
             }
@@ -213,19 +186,5 @@ export class AdminAnalyticsComponent implements OnInit, OnDestroy {
     };
 
     this.chart = new Chart(this.canvasRef.nativeElement, config);
-  }
-
-  private dataset(label: string, data: number[], color: string) {
-    return {
-      label,
-      data,
-      borderColor: color,
-      backgroundColor: color + '18',
-      borderWidth: 2,
-      pointRadius: 3,
-      pointHoverRadius: 5,
-      fill: false,
-      tension: 0.3,
-    };
   }
 }

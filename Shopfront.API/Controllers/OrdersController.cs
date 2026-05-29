@@ -386,61 +386,36 @@ public class OrdersController : ControllerBase
     }
 
     [Authorize]
-    [HttpGet("analytics/hourly")]
-    public async Task<IActionResult> HourlyAnalytics()
+    [HttpGet("analytics/daily")]
+    public async Task<IActionResult> DailyAnalytics()
     {
-        // Rolling 24-hour window ending at the current full hour
-        var now = NairobiClock.Now;
-        var currentHour = new DateTime(now.Year, now.Month, now.Day, now.Hour, 0, 0);
-        var since = currentHour.AddHours(-23);
-
         var rows = await _db.Orders
-            .Where(o => !o.IsArchived && o.CreatedAt >= since)
+            .Where(o => !o.IsArchived)
             .Select(o => new { o.CreatedAt, o.Status })
             .ToListAsync();
 
-        var labels    = new string[24];
-        var total     = new int[24];
-        var newArr    = new int[24];
-        var assigned  = new int[24];
-        var completed = new int[24];
-        var later     = new int[24];
-        var dispatch  = new int[24];
+        if (rows.Count == 0)
+            return Ok(new { labels = Array.Empty<string>(), total = Array.Empty<int>() });
 
-        for (int i = 0; i < 24; i++)
+        var today = NairobiClock.Now.Date;
+        var firstDay = rows.Min(o => o.CreatedAt.Date);
+        var days = (today - firstDay).Days + 1;
+
+        var labels    = new string[days];
+        var total     = new int[days];
+
+        for (int i = 0; i < days; i++)
         {
-            var slot = since.AddHours(i);
-            labels[i] = slot.ToString("HH:mm");
+            var day = firstDay.AddDays(i);
+            labels[i] = day.ToString("dd MMM");
 
             foreach (var o in rows)
             {
-                if (o.CreatedAt.Year  == slot.Year  &&
-                    o.CreatedAt.Month == slot.Month &&
-                    o.CreatedAt.Day   == slot.Day   &&
-                    o.CreatedAt.Hour  == slot.Hour)
-                {
+                if (o.CreatedAt.Date == day)
                     total[i]++;
-                    switch (o.Status)
-                    {
-                        case OrderStatus.New:           newArr[i]++;   break;
-                        case OrderStatus.Assigned:      assigned[i]++; break;
-                        case OrderStatus.Completed:     completed[i]++; break;
-                        case OrderStatus.DeliverLater:  later[i]++;    break;
-                        case OrderStatus.DispatchToday: dispatch[i]++; break;
-                    }
-                }
             }
         }
 
-        return Ok(new
-        {
-            labels,
-            total,
-            @new      = newArr,
-            assigned,
-            completed,
-            deliverLater  = later,
-            dispatchToday = dispatch
-        });
+        return Ok(new { labels, total });
     }
 }
