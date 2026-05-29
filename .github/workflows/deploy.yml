@@ -7,8 +7,8 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  API_IMAGE: ghcr.io/kikuvi/shop-api
-  FRONTEND_IMAGE: ghcr.io/kikuvi/shop-frontend
+  API_IMAGE: ghcr.io/kikuvi/mrvick-api
+  FRONTEND_IMAGE: ghcr.io/kikuvi/mrvick-frontend
 
 jobs:
   build-and-push:
@@ -82,24 +82,24 @@ jobs:
           DB_PASSWORD=${{ secrets.DB_PASSWORD }}
           JWT_KEY=${{ secrets.JWT_KEY }}
           SENDGRID_API_KEY=${{ secrets.SENDGRID_API_KEY }}
-          SENDGRID_FROM_EMAIL=${{ secrets.SENDGRID_FROM_EMAIL }}
+          SENDGRID_FROM_EMAIL=shop@mrvick.co.ke
           AT_USERNAME=${{ secrets.AT_USERNAME }}
           AT_API_KEY=${{ secrets.AT_API_KEY }}
-          APP_BASE_URL=${{ secrets.APP_BASE_URL }}
-          ADMIN_PHONE=${{ secrets.ADMIN_PHONE }}
+          APP_BASE_URL=https://mrvick.co.ke
+          ADMIN_PHONE=0712523444
           FACEBOOK_PIXEL_ID=1231226488729423
           FACEBOOK_ACCESS_TOKEN=${{ secrets.FACEBOOK_ACCESS_TOKEN }}
           ENVEOF
 
-          ssh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} "sudo mkdir -p /opt/shopfront && sudo chown \$USER /opt/shopfront"
+          ssh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} "sudo mkdir -p /opt/mrvick && sudo chown \$USER /opt/mrvick"
 
           tar czf - docker-compose.yml .env nginx/ scripts/ | \
-            ssh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} "tar xzf - -C /opt/shopfront/"
+            ssh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} "tar xzf - -C /opt/mrvick/"
 
       - name: Deploy
         run: |
           ssh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} \
-            "cd /opt/shopfront \
+            "cd /opt/mrvick \
              && echo '${{ secrets.GITHUB_TOKEN }}' | docker login ghcr.io -u '${{ github.actor }}' --password-stdin \
              && docker compose pull \
              && docker compose up -d --remove-orphans \
