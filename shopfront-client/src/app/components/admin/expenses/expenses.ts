@@ -5,8 +5,8 @@ import { ExpenseService, Expense, CreateExpensePayload, UpdateExpensePayload } f
 import { UserService, UserLookup } from '../../../services/user.service';
 import { ProductService } from '../../../services/product.service';
 
-const CATEGORIES = ['All', 'Advertising', 'Delivery', 'Operations', 'Salary', 'Rent', 'Utilities', 'Other'];
-const CATEGORY_OPTIONS = ['Advertising', 'Delivery', 'Operations', 'Salary', 'Rent', 'Utilities', 'Other'];
+const CATEGORIES = ['All', 'Advertising', 'Delivery', 'Operations', 'Salary', 'Rent', 'Utilities', 'Cash Advance', 'Other'];
+const CATEGORY_OPTIONS = ['Advertising', 'Delivery', 'Operations', 'Salary', 'Rent', 'Utilities', 'Cash Advance', 'Other'];
 const PAGE_SIZE = 15;
 
 /** Returns today's date in YYYY-MM-DD using East Africa Time (UTC+3) */
