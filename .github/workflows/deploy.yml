@@ -91,15 +91,15 @@ jobs:
           FACEBOOK_ACCESS_TOKEN=${{ secrets.FACEBOOK_ACCESS_TOKEN }}
           ENVEOF
 
-          ssh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} "sudo mkdir -p /opt/mrvick && sudo chown \$USER /opt/mrvick"
+          ssh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} "sudo mkdir -p /opt/shopfront && sudo chown \$USER /opt/shopfront"
 
           tar czf - docker-compose.yml .env nginx/ scripts/ | \
-            ssh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} "tar xzf - -C /opt/mrvick/"
+            ssh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} "tar xzf - -C /opt/shopfront/"
 
       - name: Deploy
         run: |
           ssh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} \
-            "cd /opt/mrvick \
+            "cd /opt/shopfront \
              && echo '${{ secrets.GITHUB_TOKEN }}' | docker login ghcr.io -u '${{ github.actor }}' --password-stdin \
              && docker compose pull \
              && docker compose up -d --remove-orphans \
