@@ -10,13 +10,54 @@ import { OrderService } from '../../../services/order.service';
 import { PixelService } from '../../../services/pixel.service';
 import { RatingService, Rating, SubmitRating } from '../../../services/rating.service';
 
-const KENYA_COUNTIES = [
-  'Baringo','Bomet','Bungoma','Busia','Elgeyo-Marakwet','Embu','Garissa','Homa Bay',
-  'Isiolo','Kajiado','Kakamega','Kericho','Kiambu','Kilifi','Kirinyaga','Kisii',
-  'Kisumu','Kitui','Kwale','Laikipia','Lamu','Machakos','Makueni','Mandera',
-  'Marsabit','Meru','Migori','Mombasa','Murang\'a','Nairobi','Nakuru','Nandi',
-  'Narok','Nyamira','Nyandarua','Nyeri','Samburu','Siaya','Taita-Taveta','Tana River',
-  'Tharaka-Nithi','Trans Nzoia','Turkana','Uasin Gishu','Vihiga','Wajir','West Pokot'
+const KENYA_COUNTIES: { code: string; name: string }[] = [
+  { code: '01', name: 'Mombasa' },
+  { code: '02', name: 'Kwale' },
+  { code: '03', name: 'Kilifi' },
+  { code: '04', name: 'Tana River' },
+  { code: '05', name: 'Lamu' },
+  { code: '06', name: 'Taita-Taveta' },
+  { code: '07', name: 'Garissa' },
+  { code: '08', name: 'Wajir' },
+  { code: '09', name: 'Mandera' },
+  { code: '10', name: 'Marsabit' },
+  { code: '11', name: 'Isiolo' },
+  { code: '12', name: 'Meru' },
+  { code: '13', name: 'Tharaka-Nithi' },
+  { code: '14', name: 'Embu' },
+  { code: '15', name: 'Kitui' },
+  { code: '16', name: 'Machakos' },
+  { code: '17', name: 'Makueni' },
+  { code: '18', name: 'Nyandarua' },
+  { code: '19', name: 'Nyeri' },
+  { code: '20', name: 'Kirinyaga' },
+  { code: '21', name: "Murang'a" },
+  { code: '22', name: 'Kiambu' },
+  { code: '23', name: 'Turkana' },
+  { code: '24', name: 'West Pokot' },
+  { code: '25', name: 'Samburu' },
+  { code: '26', name: 'Trans Nzoia' },
+  { code: '27', name: 'Uasin Gishu' },
+  { code: '28', name: 'Elgeyo-Marakwet' },
+  { code: '29', name: 'Nandi' },
+  { code: '30', name: 'Baringo' },
+  { code: '31', name: 'Laikipia' },
+  { code: '32', name: 'Nakuru' },
+  { code: '33', name: 'Narok' },
+  { code: '34', name: 'Kajiado' },
+  { code: '35', name: 'Kericho' },
+  { code: '36', name: 'Bomet' },
+  { code: '37', name: 'Kakamega' },
+  { code: '38', name: 'Vihiga' },
+  { code: '39', name: 'Bungoma' },
+  { code: '40', name: 'Busia' },
+  { code: '41', name: 'Siaya' },
+  { code: '42', name: 'Kisumu' },
+  { code: '43', name: 'Homa Bay' },
+  { code: '44', name: 'Migori' },
+  { code: '45', name: 'Kisii' },
+  { code: '46', name: 'Nyamira' },
+  { code: '47', name: 'Nairobi' },
 ];
 
 @Component({
@@ -203,7 +244,7 @@ const KENYA_COUNTIES = [
             <label class="lp-field-label">Delivery County
               <select [(ngModel)]="order.county" name="county" required #countyField="ngModel">
                 <option value="">Select county</option>
-                <option *ngFor="let c of counties" [value]="c">{{ c }}</option>
+                <option *ngFor="let c of counties" [value]="c.name">{{ c.code }} {{ c.name }}</option>
               </select>
               <span class="field-error" *ngIf="countyField.invalid && countyField.touched">Please select a county</span>
             </label>
