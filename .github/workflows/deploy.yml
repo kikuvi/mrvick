@@ -87,7 +87,7 @@ jobs:
           AT_API_KEY=${{ secrets.AT_API_KEY }}
           APP_BASE_URL=https://mrvick.co.ke
           ADMIN_PHONE=0712523444
-          FACEBOOK_PIXEL_ID=704167875755021
+          FACEBOOK_PIXEL_ID=3281499315368711
           FACEBOOK_ACCESS_TOKEN=${{ secrets.FACEBOOK_ACCESS_TOKEN }}
           ENVEOF
 
