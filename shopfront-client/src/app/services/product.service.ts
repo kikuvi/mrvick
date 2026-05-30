@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { map } from 'rxjs/operators';
 import { ApiService } from './api.service';
 import { environment } from '../../environments/environment';
 
@@ -36,11 +37,21 @@ export interface CreateProduct {
 @Injectable({ providedIn: 'root' })
 export class ProductService {
   private shopfrontBase = environment.shopfrontApiUrl;
+  // Origin of the shopfront server — used to rewrite relative image URLs
+  private shopfrontOrigin = new URL(environment.shopfrontApiUrl).origin;
 
   constructor(private api: ApiService, private http: HttpClient) {}
 
-  getAll() { return this.http.get<Product[]>(`${this.shopfrontBase}/products`); }
-  getById(id: string) { return this.http.get<Product>(`${this.shopfrontBase}/products/${id}`); }
+  private fixUrls(p: Product): Product {
+    return { ...p, imageUrls: p.imageUrls.map(u => u.startsWith('/') ? `${this.shopfrontOrigin}${u}` : u) };
+  }
+
+  getAll() {
+    return this.http.get<Product[]>(`${this.shopfrontBase}/products`).pipe(map(ps => ps.map(p => this.fixUrls(p))));
+  }
+  getById(id: string) {
+    return this.http.get<Product>(`${this.shopfrontBase}/products/${id}`).pipe(map(p => this.fixUrls(p)));
+  }
 
   getAllAdmin() { return this.api.get<Product[]>('/products/all', true); }
   toggleActive(id: string) { return this.api.patch<{ isActive: boolean }>(`/products/${id}/toggle-active`, {}); }
