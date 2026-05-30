@@ -139,6 +139,14 @@ using (var scope = app.Services.CreateScope())
             MustChangePassword = false
         };
         await userManager.CreateAsync(admin, "Muthioni123!@#");
+
+        var adminRole = new AppRole { Name = "Admin", Description = "Full access" };
+        adminRole.Permissions = Permissions.All
+            .Select(p => new RolePermission { RoleId = adminRole.Id, Permission = p })
+            .ToList();
+        db.AppRoles.Add(adminRole);
+        db.AppUserRoles.Add(new UserRole { UserId = admin.Id, RoleId = adminRole.Id });
+        await db.SaveChangesAsync();
     }
 }
 
