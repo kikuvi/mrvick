@@ -57,15 +57,15 @@ import { PageService } from '../../../services/page.service';
   template: `
     <app-navbar />
 
-    <section class="hero" style="padding: 0.5rem 0">
-      <div class="container">
-        <h1>{{ heroTitle }}</h1>
-        <p>{{ heroSubtitle }}</p>
-        <a href="#products" class="btn btn-primary">Shop Now</a>
+    <div style="background:linear-gradient(135deg,#1d3557 0%,#2a4a7f 100%);padding:.6rem 1.5rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.5rem">
+      <div>
+        <span style="font-style:italic;font-size:1.15rem;font-weight:700;color:#fff;letter-spacing:.5px">{{ heroTitle }}</span>
+        <span style="color:rgba(255,255,255,.6);font-size:.82rem;font-style:italic;margin-left:.75rem">{{ heroSubtitle }}</span>
       </div>
-    </section>
+      <a href="#products" style="font-size:.8rem;font-weight:700;color:#e63946;text-decoration:none;letter-spacing:.3px;white-space:nowrap">Shop Now ↓</a>
+    </div>
 
-    <section class="products-section" id="products" style="padding-top:0.5rem;padding-bottom:1rem">
+    <section class="products-section" id="products" style="padding-top:0.75rem;padding-bottom:1rem">
       <div class="container">
         <h2>Our Products</h2>
         <div class="products-grid">
