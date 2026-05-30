@@ -57,7 +57,7 @@ import { PageService } from '../../../services/page.service';
   template: `
     <app-navbar />
 
-    <section class="hero" style="padding: 1.25rem 0">
+    <section class="hero" style="padding: 0.5rem 0">
       <div class="container">
         <h1>{{ heroTitle }}</h1>
         <p>{{ heroSubtitle }}</p>
@@ -65,7 +65,7 @@ import { PageService } from '../../../services/page.service';
       </div>
     </section>
 
-    <section class="products-section" id="products" style="padding-bottom:1rem">
+    <section class="products-section" id="products" style="padding-top:0.5rem;padding-bottom:1rem">
       <div class="container">
         <h2>Our Products</h2>
         <div class="products-grid">
