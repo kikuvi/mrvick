@@ -127,9 +127,24 @@ using (var scope = app.Services.CreateScope())
     db.Database.Migrate();
 
     var userManager = scope.ServiceProvider.GetRequiredService<UserManager<AppUser>>();
-    if (!userManager.Users.Any())
+
+    // Ensure Admin role exists with all permissions
+    var adminRole = await db.AppRoles.FirstOrDefaultAsync(r => r.Name == "Admin");
+    if (adminRole == null)
     {
-        var admin = new AppUser
+        adminRole = new AppRole { Name = "Admin", Description = "Full access" };
+        adminRole.Permissions = Permissions.All
+            .Select(p => new RolePermission { RoleId = adminRole.Id, Permission = p })
+            .ToList();
+        db.AppRoles.Add(adminRole);
+        await db.SaveChangesAsync();
+    }
+
+    // Ensure seed user exists
+    var seedUser = await userManager.FindByEmailAsync("joneskikuvi@gmail.com");
+    if (seedUser == null)
+    {
+        seedUser = new AppUser
         {
             UserName = "joneskikuvi@gmail.com",
             Email = "joneskikuvi@gmail.com",
@@ -138,14 +153,13 @@ using (var scope = app.Services.CreateScope())
             IsActive = true,
             MustChangePassword = false
         };
-        await userManager.CreateAsync(admin, "Muthioni123!@#");
+        await userManager.CreateAsync(seedUser, "Muthioni123!@#");
+    }
 
-        var adminRole = new AppRole { Name = "Admin", Description = "Full access" };
-        adminRole.Permissions = Permissions.All
-            .Select(p => new RolePermission { RoleId = adminRole.Id, Permission = p })
-            .ToList();
-        db.AppRoles.Add(adminRole);
-        db.AppUserRoles.Add(new UserRole { UserId = admin.Id, RoleId = adminRole.Id });
+    // Ensure seed user has Admin role
+    if (!db.AppUserRoles.Any(ur => ur.UserId == seedUser.Id && ur.RoleId == adminRole.Id))
+    {
+        db.AppUserRoles.Add(new UserRole { UserId = seedUser.Id, RoleId = adminRole.Id });
         await db.SaveChangesAsync();
     }
 }
