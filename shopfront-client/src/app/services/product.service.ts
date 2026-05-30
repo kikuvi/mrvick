@@ -1,5 +1,7 @@
 import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 import { ApiService } from './api.service';
+import { environment } from '../../environments/environment';
 
 export interface ProductVariation {
   id: string;
@@ -33,12 +35,15 @@ export interface CreateProduct {
 
 @Injectable({ providedIn: 'root' })
 export class ProductService {
-  constructor(private api: ApiService) {}
+  private shopfrontBase = environment.shopfrontApiUrl;
 
-  getAll() { return this.api.get<Product[]>('/products'); }
+  constructor(private api: ApiService, private http: HttpClient) {}
+
+  getAll() { return this.http.get<Product[]>(`${this.shopfrontBase}/products`); }
+  getById(id: string) { return this.http.get<Product>(`${this.shopfrontBase}/products/${id}`); }
+
   getAllAdmin() { return this.api.get<Product[]>('/products/all', true); }
   toggleActive(id: string) { return this.api.patch<{ isActive: boolean }>(`/products/${id}/toggle-active`, {}); }
-  getById(id: string) { return this.api.get<Product>(`/products/${id}`); }
   create(data: CreateProduct) { return this.api.post<Product>('/products', data, true); }
   update(id: string, data: Partial<CreateProduct>) { return this.api.put<void>(`/products/${id}`, data); }
   delete(id: string) { return this.api.delete<void>(`/products/${id}`); }

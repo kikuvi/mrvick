@@ -1,5 +1,7 @@
 import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 import { ApiService } from './api.service';
+import { environment } from '../../environments/environment';
 
 export interface PlaceOrder {
   productId: string;
@@ -65,10 +67,14 @@ export interface TrackOrder {
 
 @Injectable({ providedIn: 'root' })
 export class OrderService {
-  constructor(private api: ApiService) {}
+  private shopfrontBase = environment.shopfrontApiUrl;
 
-  place(data: PlaceOrder) { return this.api.post<{ trackingToken: string }>('/orders', data); }
-  track(token: string) { return this.api.get<TrackOrder>(`/orders/track/${token}`); }
+  constructor(private api: ApiService, private http: HttpClient) {}
+
+  place(data: PlaceOrder) {
+    return this.http.post<{ trackingToken: string }>(`${this.shopfrontBase}/orders`, { ...data, source: 'mrvick' });
+  }
+  track(token: string) { return this.http.get<TrackOrder>(`${this.shopfrontBase}/orders/track/${token}`); }
   getAll() { return this.api.get<Order[]>('/orders', true); }
   getArchived() { return this.api.get<Order[]>('/orders?archived=true', true); }
   archive(id: string) { return this.api.patch<void>(`/orders/${id}/archive`, {}); }
