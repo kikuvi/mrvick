@@ -57,7 +57,7 @@ import { PageService } from '../../../services/page.service';
   template: `
     <app-navbar />
 
-    <section class="hero">
+    <section class="hero" style="padding: 1.25rem 0">
       <div class="container">
         <h1>{{ heroTitle }}</h1>
         <p>{{ heroSubtitle }}</p>
