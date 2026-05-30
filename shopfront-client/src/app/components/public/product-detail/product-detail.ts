@@ -145,8 +145,8 @@ const KENYA_COUNTIES: { code: string; name: string }[] = [
         <div class="lp-container">
           <div class="lp-desc" [innerHTML]="safeDesc"></div>
           <div class="lp-price-row">
-            <span class="lp-old-price">KES {{ product.price | number:'1.0-0' }}</span>
-            <span class="lp-new-price">KES {{ product.discountPrice | number:'1.0-0' }}</span>
+            <span class="lp-old-price">KES {{ product.price | number:'1.2-2' }}</span>
+            <span class="lp-new-price">KES {{ product.discountPrice | number:'1.2-2' }}</span>
             <span class="lp-free-delivery">+ FREE DELIVERY</span>
           </div>
         </div>
@@ -233,7 +233,7 @@ const KENYA_COUNTIES: { code: string; name: string }[] = [
                     name="variation"
                     required />
                   <span class="radio-dot"></span>
-                  <span>{{ v.label }} — Ksh{{ product.discountPrice | number:'1.0-0' }}</span>
+                  <span>{{ v.label }} — Ksh{{ product.discountPrice | number:'1.2-2' }}</span>
                 </label>
               </div>
               <span class="field-error" *ngIf="orderForm.controls['variation']?.invalid && orderForm.controls['variation']?.touched">
@@ -253,7 +253,7 @@ const KENYA_COUNTIES: { code: string; name: string }[] = [
               <span class="field-error" *ngIf="addressField.invalid && addressField.touched">Delivery address is required</span>
             </label>
             <button type="submit" class="lp-order-btn" [disabled]="submitting">
-              {{ submitting ? 'Placing Order...' : 'Order Now — KES ' + (product.discountPrice | number:'1.0-0') }}
+              {{ submitting ? 'Placing Order...' : 'Order Now — KES ' + (product.discountPrice | number:'1.2-2') }}
             </button>
           </form>
         </div>

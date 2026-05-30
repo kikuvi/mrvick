@@ -88,8 +88,8 @@ import { PageService } from '../../../services/page.service';
             <div class="card-body">
               <h3><a [routerLink]="['/products', p.id]">{{ p.title }}</a></h3>
               <div class="price">
-                <span class="original">KES {{ p.price | number:'1.0-0' }}</span>
-                <span class="discount">KES {{ p.discountPrice | number:'1.0-0' }}</span>
+                <span class="original">KES {{ p.price | number:'1.2-2' }}</span>
+                <span class="discount">KES {{ p.discountPrice | number:'1.2-2' }}</span>
               </div>
               <div class="card-spacer"></div>
               <a class="order-btn" [routerLink]="['/products', p.id]">Order Now</a>
