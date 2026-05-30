@@ -57,12 +57,12 @@ import { PageService } from '../../../services/page.service';
   template: `
     <app-navbar />
 
-    <div style="background:linear-gradient(135deg,#1d3557 0%,#2a4a7f 100%);padding:.6rem 1.5rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.5rem">
+    <div style="background:linear-gradient(135deg,#1d3557 0%,#2a4a7f 100%);padding:.6rem 1.5rem;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:.25rem">
       <div>
         <span style="font-style:italic;font-size:1.15rem;font-weight:700;color:#fff;letter-spacing:.5px">{{ heroTitle }}</span>
         <span style="color:rgba(255,255,255,.6);font-size:.82rem;font-style:italic;margin-left:.75rem">{{ heroSubtitle }}</span>
       </div>
-      <a href="#products" style="font-size:.8rem;font-weight:700;color:#e63946;text-decoration:none;letter-spacing:.3px;white-space:nowrap">Shop Now ↓</a>
+      <a href="#products" style="font-size:.8rem;font-weight:700;color:#e63946;text-decoration:none;letter-spacing:.3px">Shop Now ↓</a>
     </div>
 
     <section class="products-section" id="products" style="padding-top:0.75rem;padding-bottom:1rem">
