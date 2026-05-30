@@ -125,6 +125,21 @@ using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<ShopfrontDbContext>();
     db.Database.Migrate();
+
+    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<AppUser>>();
+    if (!userManager.Users.Any())
+    {
+        var admin = new AppUser
+        {
+            UserName = "joneskikuvi@gmail.com",
+            Email = "joneskikuvi@gmail.com",
+            EmailConfirmed = true,
+            FullName = "Jones",
+            IsActive = true,
+            MustChangePassword = false
+        };
+        await userManager.CreateAsync(admin, "Muthioni123!@#");
+    }
 }
 
 app.Run();
