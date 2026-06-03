@@ -2,9 +2,21 @@ import { Component, OnInit, ChangeDetectionStrategy, ChangeDetectorRef } from '@
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { PageViewService, PageViewRow } from '../../../services/page-view.service';
+import { ProductService, Product } from '../../../services/product.service';
 
 interface DayTotal { date: string; total: number; }
-interface PathTotal { path: string; total: number; isProduct: boolean; }
+interface PathTotal { path: string; label: string; total: number; isProduct: boolean; }
+
+const STATIC_LABELS: Record<string, string> = {
+  '/': 'Home',
+  '/contact': 'Contact',
+  '/about': 'About',
+  '/cart': 'Cart',
+  '/checkout': 'Checkout',
+  '/orders': 'Orders',
+  '/login': 'Login',
+  '/register': 'Register',
+};
 
 @Component({
   selector: 'app-admin-page-views',
@@ -114,7 +126,7 @@ interface PathTotal { path: string; total: number; isProduct: boolean; }
         <span>Top Pages</span>
         <div style="display:flex;align-items:center;gap:.5rem;flex-wrap:wrap">
           <input type="text" [(ngModel)]="pathFilter" (ngModelChange)="pathPage = 1"
-            placeholder="Filter by path or product ID…"
+            placeholder="Filter by path or product name…"
             style="padding:.35rem .75rem;border:1px solid #ddd;border-radius:6px;font-size:.85rem;min-width:220px" />
           <div class="date-filter">
             <input type="date" [(ngModel)]="dateFrom" (ngModelChange)="pathPage = 1"
@@ -136,7 +148,7 @@ interface PathTotal { path: string; total: number; isProduct: boolean; }
         <tbody>
           <tr *ngFor="let p of pagedByPath">
             <td>
-              {{ p.path }}
+              {{ p.label }}
               <span class="product-badge" *ngIf="p.isProduct">product</span>
             </td>
             <td><strong>{{ p.total | number }}</strong></td>
@@ -160,11 +172,27 @@ export class AdminPageViewsComponent implements OnInit {
   days = 30;
   loading = false;
   rows: PageViewRow[] = [];
+  products: Product[] = [];
   pathPage = 1;
   pathFilter = '';
   dateFrom = '';
   dateTo = '';
   readonly pathPageSize = 10;
+
+  private get productMap(): Map<string, string> {
+    const map = new Map<string, string>();
+    for (const p of this.products) map.set(p.id, p.title);
+    return map;
+  }
+
+  labelFor(path: string): string {
+    if (STATIC_LABELS[path]) return STATIC_LABELS[path];
+    if (path.startsWith('/products/')) {
+      const id = path.split('/')[2];
+      return this.productMap.get(id) ?? path;
+    }
+    return path;
+  }
 
   get totalVisits(): number { return this.rows.reduce((s, r) => s + r.count, 0); }
   get productVisits(): number { return this.rows.filter(r => r.path.startsWith('/products/')).reduce((s, r) => s + r.count, 0); }
@@ -192,11 +220,16 @@ export class AdminPageViewsComponent implements OnInit {
       map.set(r.path, (map.get(r.path) ?? 0) + r.count);
     }
     const all = Array.from(map.entries())
-      .map(([path, total]) => ({ path, total, isProduct: path.startsWith('/products/') }))
+      .map(([path, total]) => ({
+        path,
+        label: this.labelFor(path),
+        total,
+        isProduct: path.startsWith('/products/'),
+      }))
       .sort((a, b) => b.total - a.total);
 
     const q = this.pathFilter.trim().toLowerCase();
-    return q ? all.filter(p => p.path.includes(q)) : all;
+    return q ? all.filter(p => p.path.includes(q) || p.label.toLowerCase().includes(q)) : all;
   }
 
   clearDateFilter() { this.dateFrom = ''; this.dateTo = ''; this.pathPage = 1; }
@@ -217,10 +250,16 @@ export class AdminPageViewsComponent implements OnInit {
 
   constructor(
     private svc: PageViewService,
+    private productSvc: ProductService,
     private cdr: ChangeDetectorRef
   ) {}
 
-  ngOnInit() { this.load(); }
+  ngOnInit() {
+    this.productSvc.getAllAdmin().subscribe({
+      next: data => { this.products = data; this.cdr.markForCheck(); }
+    });
+    this.load();
+  }
 
   load() {
     this.pathPage = 1;
